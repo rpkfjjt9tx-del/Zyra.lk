@@ -1,0 +1,971 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zyra.lk | Exclusive Collection</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --wine: #842d40;
+  --cream: #faf7f2;
+  --dark: #292522;
+  --muted: #82766f;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--cream);
+  color: var(--dark);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+header {
+  background: white;
+  padding: 18px 6%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  color: var(--wine);
+  font-family: Georgia, serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  font-weight: bold;
+}
+
+.nav {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--dark);
+  font-size: 13px;
+}
+
+.cart-button {
+  border: 1px solid var(--wine);
+  background: white;
+  color: var(--wine);
+  padding: 10px 16px;
+}
+
+.hero {
+  min-height: 390px;
+  background: #eee4dc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px 20px;
+}
+
+.hero h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(34px, 6vw, 58px);
+  margin-bottom: 15px;
+}
+
+.hero p {
+  color: #655a53;
+  margin-bottom: 25px;
+  line-height: 1.7;
+}
+
+.primary-button {
+  background: var(--wine);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+}
+
+.section {
+  padding: 55px 6%;
+}
+
+.section-title {
+  text-align: center;
+  font-family: Georgia, serif;
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.toolbar input, .toolbar select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  background: white;
+  min-width: 180px;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.product-card {
+  background: white;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+  background: #eee9e4;
+}
+
+.product-info {
+  padding: 16px;
+}
+
+.product-info h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.product-info p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.price {
+  color: var(--wine);
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+
+.add-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: var(--dark);
+  color: white;
+}
+
+.add-button:hover {
+  background: var(--wine);
+}
+
+.empty {
+  text-align: center;
+  padding: 35px;
+  color: var(--muted);
+  grid-column: 1 / -1;
+}
+
+.benefits {
+  background: #eee5dc;
+  padding: 35px 6%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  gap: 20px;
+}
+
+.benefits h3 {
+  font-family: Georgia, serif;
+  margin-bottom: 8px;
+}
+
+.benefits p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+footer {
+  background: var(--dark);
+  color: white;
+  padding: 35px 6%;
+  text-align: center;
+}
+
+footer p {
+  font-size: 13px;
+  margin-top: 10px;
+  color: #ddd;
+}
+
+/* Cart and checkout */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0,0,0,.55);
+  overflow-y: auto;
+  padding: 25px 12px;
+}
+
+.modal-content {
+  background: white;
+  max-width: 560px;
+  margin: 25px auto;
+  padding: 25px;
+  border-radius: 3px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.close {
+  border: none;
+  background: transparent;
+  font-size: 25px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item button {
+  border: none;
+  background: transparent;
+  color: var(--wine);
+}
+
+.cart-total {
+  font-weight: bold;
+  text-align: right;
+  margin: 20px 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 13px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  background: white;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.checkout-button {
+  width: 100%;
+  background: var(--wine);
+  color: white;
+  border: none;
+  padding: 14px;
+}
+
+.message {
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media(max-width: 900px) {
+  .products {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media(max-width: 600px) {
+  .products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .product-image {
+    height: 190px;
+  }
+
+  .product-info {
+    padding: 11px;
+  }
+
+  .nav {
+    gap: 10px;
+  }
+
+  .nav a {
+    display: none;
+  }
+
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 40px 4%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">ZYRA.LK</div>
+
+  <nav class="nav">
+    <a href="#home">HOME</a>
+    <a href="#products">COLLECTION</a>
+    <button class="cart-button" onclick="openCart()">
+      BAG (<span id="cartCount">0</span>)
+    </button>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <div>
+    <h1>Elegance in Every Detail</h1>
+    <p>
+      Discover exclusive designs created to make
+      every detail feel special.
+    </p>
+    <a href="#products">
+      <button class="primary-button">EXPLORE COLLECTION</button>
+    </a>
+  </div>
+</section>
+
+<section class="section" id="products">
+
+  <h2 class="section-title">Our Collection</h2>
+  <p class="section-subtitle">
+    Carefully selected pieces, exclusively for you.
+  </p>
+
+  <div class="toolbar">
+    <input
+      type="search"
+      id="searchInput"
+      placeholder="Search products..."
+      oninput="filterProducts()"
+    >
+
+    <select id="categoryFilter" onchange="filterProducts()">
+      <option value="">All Collections</option>
+    </select>
+  </div>
+
+  <div class="products" id="productList">
+    <div class="empty">Loading collection...</div>
+  </div>
+
+</section>
+
+<section class="benefits">
+  <div>
+    <h3>Exclusive Designs</h3>
+    <p>Thoughtfully selected collections.</p>
+  </div>
+
+  <div>
+    <h3>Islandwide Delivery</h3>
+    <p>Delivering across Sri Lanka.</p>
+  </div>
+
+  <div>
+    <h3>Personalised Orders</h3>
+    <p>Special pieces made meaningful.</p>
+  </div>
+</section>
+
+<footer>
+  <h2 class="logo">ZYRA.LK</h2>
+  <p>Exclusive Collection</p>
+  <p>Islandwide Delivery</p>
+  <p>© 2026 Zyra.lk. All rights reserved.</p>
+</footer>
+
+<!-- CART MODAL -->
+
+<div class="modal" id="cartModal">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>Your Shopping Bag</h2>
+      <button class="close" onclick="closeCart()">×</button>
+    </div>
+
+    <div id="cartItems"></div>
+
+    <div class="cart-total" id="cartTotal">
+      Total: LKR 0
+    </div>
+
+    <button class="checkout-button" onclick="showCheckout()">
+      PROCEED TO CHECKOUT
+    </button>
+
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+
+<div class="modal" id="checkoutModal">
+  <div class="modal-content">
+
+    <div class="modal-header">
+      <h2>Checkout</h2>
+      <button class="close" onclick="closeCheckout()">×</button>
+    </div>
+
+    <form id="checkoutForm">
+
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input name="customer_name" required>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input name="customer_email" type="email">
+      </div>
+
+      <div class="form-group">
+        <label>WhatsApp / Phone Number *</label>
+        <input name="customer_phone" type="tel" required>
+      </div>
+
+      <div class="form-group">
+        <label>Delivery Address *</label>
+        <textarea name="delivery_address" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>District *</label>
+        <input name="district" required>
+      </div>
+
+      <div class="form-group">
+        <label>Payment Method *</label>
+        <select name="payment_method" required>
+          <option value="">Select payment method</option>
+          <option value="Cash on Delivery">Cash on Delivery</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Customization / Special Instructions</label>
+        <textarea name="customization_details"></textarea>
+      </div>
+
+      <div class="cart-total" id="checkoutTotal"></div>
+
+      <button class="checkout-button" type="submit" id="placeOrderButton">
+        PLACE ORDER
+      </button>
+
+      <p class="message" id="checkoutMessage"></p>
+
+    </form>
+  </div>
+</div>
+
+<!-- ORDER SUCCESS MODAL -->
+
+<div class="modal" id="successModal">
+  <div class="modal-content" style="text-align:center">
+
+    <h2>Thank You!</h2>
+    <p style="margin:20px 0">
+      Your order has been submitted successfully.
+    </p>
+
+    <p id="trackingNumber" style="font-weight:bold;color:#842d40"></p>
+
+    <button class="primary-button" onclick="finishOrder()">
+      CONTINUE SHOPPING
+    </button>
+
+  </div>
+</div>
+
+<script>
+// ======================================
+// SUPABASE CONFIGURATION
+// ======================================
+
+const SUPABASE_URL =
+  "https://rouysaipjmzmvoegtign.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+// ======================================
+// CONFIGURATION
+// ======================================
+
+// Change these only if your actual database
+// uses different table or column names.
+
+const PRODUCT_TABLE = "products";
+
+// If image_url contains a Storage object path
+// rather than a complete URL, set your bucket name.
+const STORAGE_BUCKET = "product-images";
+
+let products = [];
+let cart = [];
+
+// ======================================
+// HELPERS
+// ======================================
+
+function formatPrice(value) {
+  return Number(value || 0).toLocaleString("en-LK");
+}
+
+function getImageURL(image) {
+  if (!image) return "";
+
+  if (
+    image.startsWith("https://") ||
+    image.startsWith("http://") ||
+    image.startsWith("data:")
+  ) {
+    return image;
+  }
+
+  const { data } = supabaseClient.storage
+    .from(STORAGE_BUCKET)
+    .getPublicUrl(image);
+
+  return data.publicUrl;
+}
+
+// ======================================
+// LOAD PRODUCTS
+// ======================================
+
+async function loadProducts() {
+  const list = document.getElementById("productList");
+
+  list.innerHTML = '<div class="empty">Loading products...</div>';
+
+  const { data, error } = await supabaseClient
+    .from(PRODUCT_TABLE)
+    .select("*");
+
+  if (error) {
+    console.error("Product loading error:", error);
+    list.innerHTML =
+      '<div class="empty">Unable to load products. Please check your database settings.</div>';
+    return;
+  }
+
+  products = (data || []).filter(product =>
+    product.is_active !== false
+  );
+
+  displayCategories();
+  displayProducts(products);
+}
+
+// ======================================
+// DISPLAY CATEGORIES
+// ======================================
+
+function displayCategories() {
+  const select = document.getElementById("categoryFilter");
+
+  const categories = [
+    ...new Set(
+      products
+        .map(product => product.category)
+        .filter(Boolean)
+    )
+  ];
+
+  select.innerHTML = '<option value="">All Collections</option>';
+
+  categories.forEach(category => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    select.appendChild(option);
+  });
+}
+
+// ======================================
+// DISPLAY PRODUCTS
+// ======================================
+
+function displayProducts(items) {
+  const list = document.getElementById("productList");
+
+  list.replaceChildren();
+
+  if (!items.length) {
+    list.innerHTML =
+      '<div class="empty">No products found.</div>';
+    return;
+  }
+
+  items.forEach(product => {
+    const card = document.createElement("article");
+    card.className = "product-card";
+
+    const img = document.createElement("img");
+    img.className = "product-image";
+    img.alt = product.name || "Zyra product";
+    img.src = getImageURL(product.image_url);
+
+    img.onerror = () => {
+      img.alt = "Product image unavailable";
+      img.removeAttribute("src");
+    };
+
+    const info = document.createElement("div");
+    info.className = "product-info";
+
+    const name = document.createElement("h3");
+    name.textContent = product.name || "Untitled Product";
+
+    const description = document.createElement("p");
+    description.textContent = product.description || "";
+
+    const price = document.createElement("div");
+    price.className = "price";
+    price.textContent =
+      "LKR " + formatPrice(product.price);
+
+    const button = document.createElement("button");
+    button.className = "add-button";
+    button.textContent = "ADD TO BAG";
+
+    button.addEventListener("click", () => {
+      addToCart(product.id);
+    });
+
+    info.append(name, description, price, button);
+    card.append(img, info);
+    list.appendChild(card);
+  });
+}
+
+// ======================================
+// SEARCH AND FILTER
+// ======================================
+
+function filterProducts() {
+  const search = document
+    .getElementById("searchInput")
+    .value.toLowerCase();
+
+  const category =
+    document.getElementById("categoryFilter").value;
+
+  const filtered = products.filter(product => {
+    const matchesSearch =
+      (product.name || "").toLowerCase().includes(search);
+
+    const matchesCategory =
+      !category || product.category === category;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  displayProducts(filtered);
+}
+
+// ======================================
+// SHOPPING CART
+// ======================================
+
+function addToCart(productId) {
+  const product = products.find(
+    item => String(item.id) === String(productId)
+  );
+
+  if (!product) return;
+
+  const existing = cart.find(
+    item => String(item.id) === String(productId)
+  );
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      quantity: 1
+    });
+  }
+
+  updateCart();
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(
+    item => String(item.id) !== String(productId)
+  );
+
+  updateCart();
+}
+
+function updateQuantity(productId, amount) {
+  const item = cart.find(
+    item => String(item.id) === String(productId)
+  );
+
+  if (!item) return;
+
+  item.quantity += amount;
+
+  if (item.quantity <= 0) {
+    removeFromCart(productId);
+  } else {
+    updateCart();
+  }
+}
+
+function getTotal() {
+  return cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+}
+
+function updateCart() {
+  document.getElementById("cartCount").textContent =
+    cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const container = document.getElementById("cartItems");
+
+  container.replaceChildren();
+
+  if (!cart.length) {
+    container.textContent = "Your shopping bag is empty.";
+  }
+
+  cart.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "cart-item";
+
+    const details = document.createElement("div");
+    details.textContent =
+      `${item.name} × ${item.quantity} — LKR ${formatPrice(item.price * item.quantity)}`;
+
+    const controls = document.createElement("div");
+
+    const minus = document.createElement("button");
+    minus.textContent = "−";
+    minus.onclick = () => updateQuantity(item.id, -1);
+
+    const plus = document.createElement("button");
+    plus.textContent = " + ";
+    plus.onclick = () => updateQuantity(item.id, 1);
+
+    const remove = document.createElement("button");
+    remove.textContent = "Remove";
+    remove.onclick = () => removeFromCart(item.id);
+
+    controls.append(minus, plus, remove);
+    row.append(details, controls);
+    container.appendChild(row);
+  });
+
+  document.getElementById("cartTotal").textContent =
+    "Total: LKR " + formatPrice(getTotal());
+}
+
+// ======================================
+// MODALS
+// ======================================
+
+function openCart() {
+  document.getElementById("cartModal").style.display = "block";
+}
+
+function closeCart() {
+  document.getElementById("cartModal").style.display = "none";
+}
+
+function showCheckout() {
+  if (!cart.length) {
+    alert("Please add a product to your bag first.");
+    return;
+  }
+
+  closeCart();
+
+  document.getElementById("checkoutTotal").textContent =
+    "Order Total: LKR " + formatPrice(getTotal());
+
+  document.getElementById("checkoutModal").style.display = "block";
+}
+
+function closeCheckout() {
+  document.getElementById("checkoutModal").style.display = "none";
+}
+
+function finishOrder() {
+  cart = [];
+  updateCart();
+
+  document.getElementById("successModal").style.display = "none";
+}
+
+// ======================================
+// SUBMIT CUSTOMER ORDER
+// ======================================
+
+document.getElementById("checkoutForm")
+  .addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    if (!cart.length) {
+      alert("Your shopping bag is empty.");
+      return;
+    }
+
+    const button = document.getElementById("placeOrderButton");
+    const message = document.getElementById("checkoutMessage");
+
+    button.disabled = true;
+    button.textContent = "SUBMITTING ORDER...";
+    message.textContent = "";
+
+    try {
+      const form = new FormData(this);
+
+      const trackingId =
+        "ZYR-" + crypto.randomUUID().replace(/-/g, "")
+          .substring(0, 10).toUpperCase();
+
+      const orderItems = cart.map(item => ({
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        subtotal: item.price * item.quantity
+      }));
+
+      const order = {
+        tracking_id: trackingId,
+        customer_name: form.get("customer_name"),
+        customer_phone: form.get("customer_phone"),
+        customer_whatsapp: form.get("customer_phone"),
+        delivery_address: form.get("delivery_address"),
+        district: form.get("district"),
+        order_items: orderItems,
+        total_amount: getTotal(),
+        payment_method: form.get("payment_method"),
+        payment_status: "Pending",
+        customization_details: {
+          instructions: form.get("customization_details"),
+          customer_email: form.get("customer_email")
+        },
+        status: "Order Confirmed"
+      };
+
+      const { data, error } = await supabaseClient
+        .from("zyra_orders")
+        .insert(order)
+        .select("tracking_id")
+        .single();
+
+      if (error) throw error;
+
+      document.getElementById("checkoutModal").style.display = "none";
+
+      document.getElementById("trackingNumber").textContent =
+        "Your tracking number: " + data.tracking_id;
+
+      document.getElementById("successModal").style.display = "block";
+
+      this.reset();
+
+    } catch (error) {
+      console.error("Order submission error:", error);
+
+      message.textContent =
+        "We couldn't submit your order. Please check the details or contact Zyra.lk.";
+
+    } finally {
+      button.disabled = false;
+      button.textContent = "PLACE ORDER";
+    }
+});
+
+// ======================================
+// INITIALIZE
+// ======================================
+
+loadProducts();
+updateCart();
+
+</script>
+
+</body>
+</html>
