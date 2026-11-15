@@ -5,7 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zyra.lk | Exclusive Collection</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -69,6 +71,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -91,14 +94,16 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 <section class="section" id="products">
 <h2 class="section-title">Our Collection</h2>
 <p class="section-subtitle">Carefully selected pieces, exclusively for you.</p>
+
 <div class="toolbar">
 <input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
 <select id="categoryFilter" onchange="filterProducts()">
 <option value="">All Collections</option>
 </select>
 </div>
+
 <div class="products" id="productList">
-<div class="empty">Loading collection...</div>
+<div class="empty">Connecting to Zyra collection...</div>
 </div>
 </section>
 
@@ -133,27 +138,33 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 <h2>Checkout</h2>
 <button class="close" onclick="closeCheckout()">×</button>
 </div>
+
 <form id="checkoutForm">
 <div class="form-group">
 <label>Full Name *</label>
 <input name="customer_name" required maxlength="150">
 </div>
+
 <div class="form-group">
 <label>Email Address</label>
 <input name="email" type="email" maxlength="254">
 </div>
+
 <div class="form-group">
 <label>WhatsApp / Phone Number *</label>
 <input name="phone" type="tel" required maxlength="40">
 </div>
+
 <div class="form-group">
 <label>Delivery Address *</label>
 <textarea name="delivery_address" required maxlength="1000"></textarea>
 </div>
+
 <div class="form-group">
 <label>City / District *</label>
 <input name="city" required maxlength="120">
 </div>
+
 <div class="form-group">
 <label>Payment Method *</label>
 <select name="payment_method" required>
@@ -162,10 +173,12 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 <option value="Bank Transfer">Bank Transfer</option>
 </select>
 </div>
+
 <div class="form-group">
 <label>Order Notes (optional)</label>
 <textarea name="customer_notes" maxlength="1500" placeholder="Any delivery or order instructions..."></textarea>
 </div>
+
 <div class="cart-total" id="checkoutTotal"></div>
 <button class="checkout-button" type="submit" id="placeOrderButton">PLACE ORDER</button>
 <p class="message" id="checkoutMessage" role="status"></p>
@@ -184,10 +197,27 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 </div>
 
 <script>
+/* =====================================
+   ZYRA SUPABASE CONFIGURATION
+===================================== */
+
 const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
-const SUPABASE_ANON_KEY = "PASTE_YOUR_EXISTING_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+const SUPABASE_ANON_KEY = "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
+
 const PRODUCT_TABLE = "store_products";
 const STORAGE_BUCKET = "product-images";
+
+/* Check Supabase library */
+
+const productListElement = document.getElementById("productList");
+
+if (!window.supabase) {
+  productListElement.textContent =
+    "Connection library could not load. Please refresh the website.";
+  throw new Error("Supabase JavaScript library is unavailable.");
+}
+
+/* Create Supabase connection */
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -197,18 +227,31 @@ const supabaseClient = window.supabase.createClient(
 let products = [];
 let cart = [];
 
+/* =====================================
+   PRICE FORMAT
+===================================== */
+
 function formatPrice(value) {
   return Number(value || 0).toLocaleString("en-LK");
 }
 
+/* =====================================
+   PRODUCT IMAGE URL
+===================================== */
+
 function getImageURL(image) {
   if (!image) return "";
+
   if (/^https?:\/\//i.test(image)) return image;
 
   return supabaseClient.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(image).data.publicUrl;
 }
+
+/* =====================================
+   LOAD PRODUCTS FROM SUPABASE
+===================================== */
 
 async function loadProducts() {
   const list = document.getElementById("productList");
@@ -221,15 +264,20 @@ async function loadProducts() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
-    list.textContent = "Unable to load products. Please try again later.";
+    console.error("Product loading error:", error);
+    list.textContent = "Unable to load products: " + error.message;
     return;
   }
 
   products = data || [];
+
   displayCategories();
   displayProducts(products);
 }
+
+/* =====================================
+   DISPLAY CATEGORIES
+===================================== */
 
 function displayCategories() {
   const select = document.getElementById("categoryFilter");
@@ -248,6 +296,10 @@ function displayCategories() {
 
   select.value = selected;
 }
+
+/* =====================================
+   DISPLAY PRODUCTS
+===================================== */
 
 function displayProducts(items) {
   const list = document.getElementById("productList");
@@ -269,8 +321,18 @@ function displayProducts(items) {
     img.className = "product-image";
     img.alt = product.name;
     img.loading = "lazy";
-    img.src = getImageURL(product.image_url);
-    img.onerror = () => img.removeAttribute("src");
+
+    const imageURL = getImageURL(product.image_url);
+
+    if (imageURL) {
+      img.src = imageURL;
+      img.onerror = () => {
+        img.alt = "Product image unavailable";
+        img.removeAttribute("src");
+      };
+    } else {
+      img.alt = "No product image available";
+    }
 
     const info = document.createElement("div");
     info.className = "product-info";
@@ -305,6 +367,10 @@ function displayProducts(items) {
   });
 }
 
+/* =====================================
+   SEARCH AND FILTER
+===================================== */
+
 function filterProducts() {
   const search = document.getElementById("searchInput").value.toLowerCase();
   const category = document.getElementById("categoryFilter").value;
@@ -314,6 +380,10 @@ function filterProducts() {
     (!category || p.category === category)
   ));
 }
+
+/* =====================================
+   SHOPPING BAG
+===================================== */
 
 function addToCart(id) {
   const product = products.find(x => x.id === id);
@@ -449,6 +519,10 @@ function finishOrder() {
   document.getElementById("successModal").style.display = "none";
 }
 
+/* =====================================
+   SUBMIT STORE ORDER
+===================================== */
+
 document.getElementById("checkoutForm").addEventListener(
   "submit",
   async function(event) {
@@ -496,10 +570,13 @@ document.getElementById("checkoutForm").addEventListener(
       if (error) throw error;
 
       if (!data || !data.order_number) {
-        throw new Error(data?.error || "The server did not return an order number.");
+        throw new Error(
+          data?.error || "The server did not return an order number."
+        );
       }
 
       document.getElementById("checkoutModal").style.display = "none";
+
       document.getElementById("trackingNumber").textContent =
         "Your store order number: " + data.order_number;
 
@@ -517,8 +594,13 @@ document.getElementById("checkoutForm").addEventListener(
   }
 );
 
+/* =====================================
+   START WEBSITE
+===================================== */
+
 loadProducts();
 updateCart();
+
 </script>
 </body>
 </html>
