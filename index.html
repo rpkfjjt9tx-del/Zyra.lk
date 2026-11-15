@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,516 +16,126 @@
   --muted:#82766f;
   --line:#e9e1dc;
 }
-
 *{box-sizing:border-box}
-
 body{
-  margin:0;
-  background:var(--cream);
-  color:var(--dark);
+  margin:0;background:var(--cream);color:var(--dark);
   font-family:Arial,sans-serif;
 }
-
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-
-/* HEADER */
-
 .zyra-header{
-  background:#fff;
-  min-height:76px;
-  padding:12px 6%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-  position:sticky;
-  top:0;
-  z-index:100;
+  background:#fff;min-height:76px;padding:12px 6%;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:20px;position:sticky;top:0;z-index:100;
   border-bottom:1px solid var(--line);
   box-shadow:0 2px 12px rgba(40,25,25,.035);
 }
-
-.zyra-brand{
-  display:flex;
-  align-items:center;
-  text-decoration:none;
-  flex-shrink:0;
-}
-
-.zyra-brand img{
-  display:block;
-  max-width:175px;
-  max-height:48px;
-  object-fit:contain;
-}
-
+.zyra-brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
+.zyra-brand img{display:block;max-width:175px;max-height:48px;object-fit:contain}
 .zyra-brand-fallback{
-  display:none;
-  color:var(--wine);
-  font:bold 26px Georgia,serif;
-  letter-spacing:3px;
+  display:none;color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:3px;
 }
-
-.zyra-nav{
-  display:flex;
-  align-items:center;
-  gap:25px;
-}
-
+.zyra-nav{display:flex;align-items:center;gap:25px}
 .zyra-nav a{
-  color:var(--dark);
-  text-decoration:none;
-  font-size:11px;
-  letter-spacing:1.2px;
-  font-weight:600;
-  transition:color .2s;
+  color:var(--dark);text-decoration:none;font-size:11px;
+  letter-spacing:1.2px;font-weight:600;transition:color .2s;
 }
-
 .zyra-nav a:hover{color:var(--wine)}
-
 .zyra-cart{
-  background:var(--wine);
-  color:#fff;
-  border:1px solid var(--wine);
-  padding:12px 18px;
-  font-size:11px;
-  letter-spacing:1px;
+  background:var(--wine);color:#fff;border:1px solid var(--wine);
+  padding:12px 18px;font-size:11px;letter-spacing:1px;
 }
-
 .zyra-cart:hover{background:#682132}
-
-/* HERO */
-
-.btn,.checkout-button{
-  background:var(--wine);
-  color:#fff;
-  border:0;
-  padding:12px 18px;
-}
-
+.btn,.checkout-button{background:var(--wine);color:#fff;border:0;padding:12px 18px}
 .hero{
-  min-height:390px;
-  background:#eee4dc;
-  display:grid;
-  place-items:center;
-  text-align:center;
-  padding:50px 20px;
+  min-height:390px;background:#eee4dc;display:grid;place-items:center;
+  text-align:center;padding:50px 20px;
 }
-
-.hero h1{
-  font:clamp(36px,6vw,60px) Georgia,serif;
-  margin:0 0 14px;
-}
-
-.hero p{
-  color:#655a53;
-  margin:0 auto 24px;
-  line-height:1.8;
-  max-width:580px;
-}
-
+.hero h1{font:clamp(36px,6vw,60px) Georgia,serif;margin:0 0 14px}
+.hero p{color:#655a53;margin:0 auto 24px;line-height:1.8;max-width:580px}
 .section{padding:55px 6%}
-
-.section-title{
-  text-align:center;
-  font:32px Georgia,serif;
-  margin-bottom:10px;
-}
-
-.section-subtitle{
-  text-align:center;
-  color:var(--muted);
-  margin-bottom:28px;
-  font-size:14px;
-}
-
-.toolbar{
-  display:flex;
-  gap:12px;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  margin-bottom:25px;
-}
-
-.toolbar input,.toolbar select{
-  padding:12px;
-  border:1px solid #ddd;
-  background:#fff;
-  min-width:180px;
-}
-
-.products{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:20px;
-}
-
-.product-card{
-  background:#fff;
-  border:1px solid var(--line);
-}
-
+.section-title{text-align:center;font:32px Georgia,serif;margin-bottom:10px}
+.section-subtitle{text-align:center;color:var(--muted);margin-bottom:28px;font-size:14px}
+.toolbar{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:25px}
+.toolbar input,.toolbar select{padding:12px;border:1px solid #ddd;background:#fff;min-width:180px}
+.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.product-card{background:#fff;border:1px solid var(--line)}
 .product-image{
-  width:100%;
-  height:250px;
-  object-fit:cover;
-  display:block;
-  background:#eee9e4;
+  width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4;
 }
-
 .product-info{padding:15px}
-
-.product-info h3{
-  font-size:15px;
-  margin:0 0 8px;
-}
-
-.product-info p{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.5;
-  margin:0 0 10px;
-}
-
-.price{
-  color:var(--wine);
-  font-weight:bold;
-  margin:0 0 13px;
-}
-
-.add-button{
-  width:100%;
-  padding:12px;
-  border:0;
-  background:var(--dark);
-  color:#fff;
-}
-
-.empty{
-  text-align:center;
-  padding:35px;
-  color:var(--muted);
-  grid-column:1/-1;
-}
-
+.product-info h3{font-size:15px;margin:0 0 8px}
+.product-info p{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 10px}
+.price{color:var(--wine);font-weight:bold;margin:0 0 13px}
+.add-button{width:100%;padding:12px;border:0;background:var(--dark);color:#fff}
+.empty{text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
 .benefits{
-  background:#eee5dc;
-  padding:35px 6%;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  text-align:center;
-  gap:20px;
+  background:#eee5dc;padding:35px 6%;display:grid;
+  grid-template-columns:repeat(3,1fr);text-align:center;gap:20px;
 }
-
-.benefits h3{
-  font:20px Georgia,serif;
-  margin-bottom:8px;
-}
-
-.benefits p{
-  font-size:13px;
-  color:var(--muted);
-}
-
-footer{
-  background:var(--dark);
-  color:#fff;
-  padding:35px 6%;
-  text-align:center;
-}
-
-footer p{
-  font-size:13px;
-  margin-top:10px;
-  color:#ddd;
-}
-
-.footer-brand{
-  font:bold 27px Georgia,serif;
-  letter-spacing:3px;
-}
-
-/* MODALS */
-
+.benefits h3{font:20px Georgia,serif;margin-bottom:8px}
+.benefits p{font-size:13px;color:var(--muted)}
+footer{background:var(--dark);color:#fff;padding:35px 6%;text-align:center}
+footer p{font-size:13px;margin-top:10px;color:#ddd}
+.footer-brand{font:bold 27px Georgia,serif;letter-spacing:3px}
 .modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:300;
-  background:#0009;
-  overflow-y:auto;
-  padding:22px 12px;
+  display:none;position:fixed;inset:0;z-index:300;
+  background:#0009;overflow-y:auto;padding:22px 12px;
 }
-
-.modal-content{
-  background:#fff;
-  max-width:680px;
-  margin:20px auto;
-  padding:24px;
-  border-radius:3px;
-}
-
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.close{
-  border:0;
-  background:transparent;
-  font-size:26px;
-}
-
-.cart-item{
-  padding:14px 0;
-  border-bottom:1px solid var(--line);
-}
-
-.cart-row{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:center;
-}
-
-.cart-row button{
-  border:0;
-  background:transparent;
-  color:var(--wine);
-  padding:5px;
-}
-
-.custom-fields{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-  margin-top:10px;
-}
-
-.custom-fields input,.custom-fields textarea{
-  width:100%;
-  padding:10px;
-  border:1px solid #ddd;
-}
-
+.modal-content{background:#fff;max-width:680px;margin:20px auto;padding:24px;border-radius:3px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.close{border:0;background:transparent;font-size:26px}
+.cart-item{padding:14px 0;border-bottom:1px solid var(--line)}
+.cart-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cart-row button{border:0;background:transparent;color:var(--wine);padding:5px}
+.custom-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.custom-fields input,.custom-fields textarea{width:100%;padding:10px;border:1px solid #ddd}
 .custom-fields .wide{grid-column:1/-1}
-
-.cart-total{
-  font-weight:bold;
-  text-align:right;
-  margin:18px 0;
-}
-
-.form-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:0 14px;
-}
-
+.cart-total{font-weight:bold;text-align:right;margin:18px 0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
 .form-group{margin-bottom:14px}
 .form-group.full{grid-column:1/-1}
-
-.form-group label{
-  display:block;
-  margin-bottom:6px;
-  font-size:13px;
+.form-group label{display:block;margin-bottom:6px;font-size:13px}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;padding:11px;border:1px solid #ddd;background:#fff;
 }
-
-.form-group input,
-.form-group textarea,
-.form-group select{
-  width:100%;
-  padding:11px;
-  border:1px solid #ddd;
-  background:#fff;
-}
-
-.form-group textarea{
-  min-height:70px;
-  resize:vertical;
-}
-
+.form-group textarea{min-height:70px;resize:vertical}
 .checkout-button{width:100%}
-
-.checkout-button:disabled{
-  opacity:.6;
-  cursor:wait;
-}
-
-.message{
-  margin-top:12px;
-  font-size:13px;
-  line-height:1.6;
-  white-space:pre-wrap;
-}
-
-.muted{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.bank-box{
-  display:none;
-  background:#f7f1ec;
-  padding:14px;
-  margin:8px 0 16px;
-  font-size:13px;
-  line-height:1.7;
-}
-
+.checkout-button:disabled{opacity:.6;cursor:wait}
+.message{margin-top:12px;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.muted{color:var(--muted);font-size:12px}
+.bank-box{display:none;background:#f7f1ec;padding:14px;margin:8px 0 16px;font-size:13px;line-height:1.7}
 .bank-box strong{color:var(--wine)}
-
-.copy-account{
-  margin-top:10px;
-  background:var(--wine);
-  color:#fff;
-  border:0;
-  padding:9px 13px;
-  border-radius:2px;
-  font-size:12px;
-}
-
-.tracking{
-  max-width:600px;
-  margin:0 auto;
-}
-
-.tracking input{
-  width:100%;
-  padding:12px;
-  border:1px solid #ddd;
-  margin:8px 0;
-}
-
-.tracking-result{
-  background:#fff;
-  padding:15px;
-  margin-top:12px;
-  white-space:pre-wrap;
-}
-
-.fine{
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.6;
-}
-
-.photo-upload{
-  grid-column:1/-1;
-  border:1px dashed #cbb8ae;
-  background:#fcfaf8;
-  padding:12px;
-  margin-top:8px;
-}
-
-.photo-upload label{
-  display:block;
-  font-size:13px;
-  font-weight:bold;
-  margin-bottom:7px;
-}
-
-.photo-upload input{
-  width:100%;
-  font-size:13px;
-}
-
-.photo-help{
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.5;
-  margin-top:7px;
-}
-
-.image-placeholder{
-  height:250px;
-  display:grid;
-  place-items:center;
-  background:#eee9e4;
-  color:#82766f;
-  font-size:12px;
-  letter-spacing:.5px;
-}
-
-/* PAYMENT SLIP UPLOAD */
-
-.payment-slip-upload{
-  border:1px dashed #cbb8ae;
-  background:#fcfaf8;
-  padding:13px;
-  margin-top:8px;
-}
-
-.payment-slip-upload label{
-  display:block;
-  font-size:13px;
-  font-weight:bold;
-  margin-bottom:8px;
-}
-
-.payment-slip-upload input{
-  width:100%;
-  font-size:13px;
-}
-
-.payment-slip-help{
-  font-size:11px;
-  color:var(--muted);
-  line-height:1.6;
-  margin-top:7px;
-}
-
-/* MOBILE */
-
-@media(max-width:900px){
-  .products{grid-template-columns:repeat(3,1fr)}
-}
-
+.copy-account{margin-top:10px;background:var(--wine);color:#fff;border:0;padding:9px 13px;border-radius:2px;font-size:12px}
+.tracking{max-width:600px;margin:0 auto}
+.tracking input{width:100%;padding:12px;border:1px solid #ddd;margin:8px 0}
+.tracking-result{background:#fff;padding:15px;margin-top:12px;white-space:pre-wrap}
+.fine{font-size:11px;color:var(--muted);line-height:1.6}
+.photo-upload{grid-column:1/-1;border:1px dashed #cbb8ae;background:#fcfaf8;padding:12px;margin-top:8px}
+.photo-upload label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.photo-upload input{width:100%;font-size:13px}
+.photo-help{font-size:11px;color:var(--muted);line-height:1.5;margin-top:7px}
+.image-placeholder{height:250px;display:grid;place-items:center;background:#eee9e4;color:#82766f;font-size:12px;letter-spacing:.5px}
+.payment-slip-upload{border:1px dashed #cbb8ae;background:#fcfaf8;padding:13px;margin-top:8px}
+.payment-slip-upload label{display:block;font-size:13px;font-weight:bold;margin-bottom:8px}
+.payment-slip-upload input{width:100%;font-size:13px}
+.payment-slip-help{font-size:11px;color:var(--muted);line-height:1.6;margin-top:7px}
+@media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:650px){
-  .zyra-header{
-    padding:12px 4%;
-    min-height:68px;
-    gap:8px;
-  }
-
-  .zyra-brand img{
-    max-width:125px;
-    max-height:40px;
-  }
-
+  .zyra-header{padding:12px 4%;min-height:68px;gap:8px}
+  .zyra-brand img{max-width:125px;max-height:40px}
   .zyra-brand-fallback{font-size:21px}
-
   .zyra-nav{gap:10px}
-
   .zyra-nav a{display:none}
-
-  .zyra-cart{
-    padding:10px 12px;
-    font-size:10px;
-  }
-
-  .products{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:11px;
-  }
-
+  .zyra-cart{padding:10px 12px;font-size:10px}
+  .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
   .product-image,.image-placeholder{height:185px}
-
   .product-info{padding:10px}
-
   .benefits{grid-template-columns:1fr}
-
   .section{padding:40px 4%}
-
   .form-grid,.custom-fields{grid-template-columns:1fr}
-
   .form-group.full,.custom-fields .wide{grid-column:auto}
-
   .modal-content{padding:17px}
-
   .hero{min-height:330px}
 }
 </style>
@@ -532,25 +143,17 @@ footer p{
 
 <body>
 
-<!-- ZYRA HEADER -->
-
 <header class="zyra-header">
   <a class="zyra-brand" href="#home" aria-label="Zyra.lk Home">
-    <img
-      src="ZYRA-LOGO.PNG"
-      alt="Zyra.lk"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-    >
+    <img src="ZYRA-LOGO.PNG" alt="Zyra.lk"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span class="zyra-brand-fallback">ZYRA.LK</span>
   </a>
-
   <nav class="zyra-nav">
     <a href="#home">HOME</a>
     <a href="#products">COLLECTION</a>
     <a href="#tracking">TRACK ORDER</a>
-    <button class="zyra-cart" onclick="openCart()">
-      BAG (<span id="cartCount">0</span>)
-    </button>
+    <button class="zyra-cart" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button>
   </nav>
 </header>
 
@@ -558,68 +161,36 @@ footer p{
   <div>
     <h1>Elegance in Every Detail</h1>
     <p>Discover exclusive designs and personalised pieces created to make every detail feel special.</p>
-    <a href="#products">
-      <button class="btn">EXPLORE COLLECTION</button>
-    </a>
+    <a href="#products"><button class="btn">EXPLORE COLLECTION</button></a>
   </div>
 </section>
 
 <section class="section" id="products">
   <h2 class="section-title">Our Collection</h2>
   <p class="section-subtitle">Thoughtfully selected pieces, exclusively for you.</p>
-
   <div class="toolbar">
-    <input
-      type="search"
-      id="searchInput"
-      placeholder="Search products..."
-      oninput="filterProducts()"
-    >
-
+    <input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
     <select id="categoryFilter" onchange="filterProducts()">
       <option value="">All Collections</option>
     </select>
   </div>
-
-  <div class="products" id="productList">
-    <div class="empty">Loading collection...</div>
-  </div>
+  <div class="products" id="productList"><div class="empty">Loading collection...</div></div>
 </section>
 
 <section class="section" id="tracking">
   <h2 class="section-title">Track Your Delivery</h2>
   <p class="section-subtitle">Enter the tracking ID provided by Zyra.</p>
-
   <div class="tracking">
     <input id="trackingId" placeholder="Enter tracking ID">
-
-    <button
-      class="btn"
-      style="width:100%"
-      onclick="trackDelivery()"
-    >
-      TRACK ORDER
-    </button>
-
+    <button class="btn" style="width:100%" onclick="trackDelivery()">TRACK ORDER</button>
     <div id="trackingResult" class="tracking-result" hidden></div>
   </div>
 </section>
 
 <section class="benefits">
-  <div>
-    <h3>Exclusive Designs</h3>
-    <p>Thoughtfully selected collections.</p>
-  </div>
-
-  <div>
-    <h3>Islandwide Delivery</h3>
-    <p>Delivering across Sri Lanka.</p>
-  </div>
-
-  <div>
-    <h3>Personalised Orders</h3>
-    <p>Special pieces made meaningful.</p>
-  </div>
+  <div><h3>Exclusive Designs</h3><p>Thoughtfully selected collections.</p></div>
+  <div><h3>Islandwide Delivery</h3><p>Delivering across Sri Lanka.</p></div>
+  <div><h3>Personalised Orders</h3><p>Special pieces made meaningful.</p></div>
 </section>
 
 <footer>
@@ -628,26 +199,17 @@ footer p{
   <p>© 2026 Zyra.lk. All rights reserved.</p>
 </footer>
 
-<!-- SHOPPING BAG -->
-
 <div class="modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header">
       <h2>Your Shopping Bag</h2>
       <button class="close" onclick="closeModal('cartModal')">×</button>
     </div>
-
     <div id="cartItems"></div>
-
     <div class="cart-total" id="cartTotal">Total: LKR 0</div>
-
-    <button class="checkout-button" onclick="showCheckout()">
-      PROCEED TO CHECKOUT
-    </button>
+    <button class="checkout-button" onclick="showCheckout()">PROCEED TO CHECKOUT</button>
   </div>
 </div>
-
-<!-- CHECKOUT -->
 
 <div class="modal" id="checkoutModal">
   <div class="modal-content">
@@ -658,88 +220,49 @@ footer p{
 
     <form id="checkoutForm">
       <div class="form-grid">
-
         <div class="form-group">
           <label>Full Name *</label>
           <input name="customer_name" required maxlength="150" autocomplete="name">
         </div>
-
         <div class="form-group">
           <label>Email Address</label>
           <input name="email" type="email" maxlength="254" autocomplete="email">
         </div>
-
         <div class="form-group full">
           <label>Mobile Number *</label>
-          <input
-            name="phone"
-            type="tel"
-            required
-            maxlength="10"
-            minlength="10"
-            pattern="07[0-9]{8}"
-            inputmode="numeric"
-            autocomplete="tel-national"
-            placeholder="0771234567"
-          >
+          <input name="phone" type="tel" required maxlength="10" minlength="10"
+            pattern="07[0-9]{8}" inputmode="numeric" autocomplete="tel-national"
+            placeholder="0771234567">
           <small class="fine">Enter exactly 10 digits, including the first 0. Example: 0771234567</small>
         </div>
-
         <div class="form-group full">
           <label>Delivery Address *</label>
           <textarea name="delivery_address" required maxlength="1000" autocomplete="street-address"></textarea>
         </div>
-
         <div class="form-group">
           <label>District *</label>
           <select name="district" required>
             <option value="">Select district</option>
-            <option>Ampara</option>
-            <option>Anuradhapura</option>
-            <option>Badulla</option>
-            <option>Batticaloa</option>
-            <option>Colombo</option>
-            <option>Galle</option>
-            <option>Gampaha</option>
-            <option>Hambantota</option>
-            <option>Jaffna</option>
-            <option>Kalutara</option>
-            <option>Kandy</option>
-            <option>Kegalle</option>
-            <option>Kilinochchi</option>
-            <option>Kurunegala</option>
-            <option>Mannar</option>
-            <option>Matale</option>
-            <option>Matara</option>
-            <option>Monaragala</option>
-            <option>Mullaitivu</option>
-            <option>Nuwara Eliya</option>
-            <option>Polonnaruwa</option>
-            <option>Puttalam</option>
-            <option>Ratnapura</option>
-            <option>Trincomalee</option>
+            <option>Ampara</option><option>Anuradhapura</option><option>Badulla</option>
+            <option>Batticaloa</option><option>Colombo</option><option>Galle</option>
+            <option>Gampaha</option><option>Hambantota</option><option>Jaffna</option>
+            <option>Kalutara</option><option>Kandy</option><option>Kegalle</option>
+            <option>Kilinochchi</option><option>Kurunegala</option><option>Mannar</option>
+            <option>Matale</option><option>Matara</option><option>Monaragala</option>
+            <option>Mullaitivu</option><option>Nuwara Eliya</option><option>Polonnaruwa</option>
+            <option>Puttalam</option><option>Ratnapura</option><option>Trincomalee</option>
             <option>Vavuniya</option>
           </select>
         </div>
-
         <div class="form-group">
           <label>City / Town *</label>
           <input name="city" required maxlength="120" autocomplete="address-level2">
         </div>
-
         <div class="form-group">
           <label>Postal Code *</label>
-          <input
-            name="postal_code"
-            required
-            maxlength="5"
-            minlength="5"
-            pattern="[0-9]{5}"
-            inputmode="numeric"
-            placeholder="5-digit postal code"
-          >
+          <input name="postal_code" required maxlength="5" minlength="5"
+            pattern="[0-9]{5}" inputmode="numeric" placeholder="5-digit postal code">
         </div>
-
         <div class="form-group">
           <label>Payment Method *</label>
           <select name="payment_method" id="paymentMethod" required>
@@ -747,14 +270,9 @@ footer p{
             <option value="Cash on Delivery">Cash on Delivery</option>
             <option value="Bank Transfer">Bank Transfer</option>
           </select>
-
-          <p
-            id="paymentRestrictionMessage"
-            class="fine"
-            style="display:none;color:#842d40;margin-top:8px"
-          ></p>
+          <p id="paymentRestrictionMessage" class="fine"
+            style="display:none;color:#842d40;margin-top:8px"></p>
         </div>
-
         <div class="form-group full" id="bankGroup" style="display:none">
           <label>Select Bank *</label>
           <select name="selected_bank" id="selectedBank">
@@ -766,30 +284,17 @@ footer p{
           </select>
           <div class="bank-box" id="bankDetails"></div>
         </div>
-
         <div class="form-group full" id="referenceGroup" style="display:none">
           <label>Bank Transaction Reference *</label>
-          <input
-            name="bank_transaction_reference"
-            id="bankTransactionReference"
-            maxlength="150"
-            placeholder="Enter your bank transaction reference"
-          >
+          <input name="bank_transaction_reference" id="bankTransactionReference"
+            maxlength="150" placeholder="Enter your bank transaction reference">
           <small class="fine">Enter the transaction reference for your bank transfer.</small>
         </div>
-
-        <!-- NEW PAYMENT SLIP UPLOAD -->
-
         <div class="form-group full" id="paymentSlipGroup" style="display:none">
           <div class="payment-slip-upload">
             <label for="paymentSlip">Upload Bank Payment Slip *</label>
-
-            <input
-              type="file"
-              id="paymentSlip"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-            >
-
+            <input type="file" id="paymentSlip"
+              accept="image/jpeg,image/png,image/webp,application/pdf">
             <div class="payment-slip-help">
               Accepted formats: JPG, PNG, WEBP and PDF.
               Maximum file size: 5MB.
@@ -797,53 +302,31 @@ footer p{
             </div>
           </div>
         </div>
-
         <div class="form-group full">
           <label>Order Notes (optional)</label>
-          <textarea
-            name="customer_notes"
-            maxlength="1500"
-            placeholder="Any delivery or order instructions..."
-          ></textarea>
+          <textarea name="customer_notes" maxlength="1500"
+            placeholder="Any delivery or order instructions..."></textarea>
         </div>
-
       </div>
 
       <p class="fine">
         For bank transfers, payment remains pending until Zyra verifies your payment.
         Please upload your payment slip and enter your transaction reference.
       </p>
-
       <div class="cart-total" id="checkoutTotal"></div>
-
-      <button class="checkout-button" type="submit" id="placeOrderButton">
-        PLACE ORDER
-      </button>
-
+      <button class="checkout-button" type="submit" id="placeOrderButton">PLACE ORDER</button>
       <p class="message" id="checkoutMessage" role="status"></p>
     </form>
   </div>
 </div>
 
-<!-- SUCCESS -->
-
 <div class="modal" id="successModal">
   <div class="modal-content" style="text-align:center">
     <h2>Thank You!</h2>
-
-    <p style="margin:20px 0">
-      Your order has been submitted successfully.
-    </p>
-
+    <p style="margin:20px 0">Your order has been submitted successfully.</p>
     <p id="trackingNumber" style="font-weight:bold;color:#842d40"></p>
-
-    <p class="muted" style="margin:12px 0">
-      Please keep your order number for reference.
-    </p>
-
-    <button class="btn" onclick="finishOrder()">
-      CONTINUE SHOPPING
-    </button>
+    <p class="muted" style="margin:12px 0">Please keep your order number for reference.</p>
+    <button class="btn" onclick="finishOrder()">CONTINUE SHOPPING</button>
   </div>
 </div>
 
@@ -855,44 +338,25 @@ const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 
 const PRODUCT_TABLE="store_products";
 const STORAGE_BUCKET="Product -image";
-
-const PAYMENT_SLIP_BUCKET="payment-slips";
 const PAYMENT_SLIP_MAX_BYTES=5*1024*1024;
-
 const ALLOWED_PAYMENT_SLIP_TYPES=[
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf"
+  "image/jpeg","image/png","image/webp","application/pdf"
 ];
 
-const db=window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 const BANK_INFO={
-  "Commercial Bank":
-    "Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
-
-  "Nations Trust Bank":
-    "Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
-
-  "Amana Bank PLC":
-    "Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
-
-  "HNB":
-    "Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH"
+  "Commercial Bank":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
+  "Nations Trust Bank":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
+  "Amana Bank PLC":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
+  "HNB":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH"
 };
 
 let products=[];
 let cart=[];
 
 const $=id=>document.getElementById(id);
-
-const money=n=>Number(n||0).toLocaleString("en-LK",{
-  maximumFractionDigits:2
-});
+const money=n=>Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
 
 const CUSTOMER_PHOTO_BUCKET="customer-photos";
 const PHOTO_MAX_BYTES=5*1024*1024;
@@ -900,137 +364,79 @@ const PHOTO_MAX_BYTES=5*1024*1024;
 /* PRODUCT HELPERS */
 
 function isPhotoProduct(name){
-  const n=String(name||"")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g," ")
-    .trim();
-
-  const engravedEye=
-    n.includes("engraved eye")||
-    n.includes("eye engraved");
-
-  return n.includes("photo roll")||
-    n.includes("photo projection")||
-    engravedEye||
-    n.includes("i engraved")||
-    n.includes("iron grade");
+  const n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  const engravedEye=n.includes("engraved eye")||n.includes("eye engraved");
+  return n.includes("photo roll")||n.includes("photo projection")||
+    engravedEye||n.includes("i engraved")||n.includes("iron grade");
 }
 
 function photoCountFor(name){
-  return String(name||"").toLowerCase().includes("photo roll")
-    ?10
-    :(isPhotoProduct(name)?1:0);
+  return String(name||"").toLowerCase().includes("photo roll")?10:(isPhotoProduct(name)?1:0);
 }
 
 function normaliseProductName(name){
-  return String(name||"")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g," ")
-    .trim();
+  return String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 }
 
 function isRegularNoPersonalisationProduct(name){
   const n=normaliseProductName(name);
-
-  return n.includes("rapunzel 360 necklace")||
-    n.includes("heart necklace");
+  return n.includes("rapunzel 360 necklace")||n.includes("heart necklace");
 }
 
-/* BANK TRANSFER ONLY PRODUCT LIST */
-
-const BANK_TRANSFER_ONLY_PRODUCTS = new Set([
-  "english name necklace",
-  "different font style name necklace",
-  "arabic name necklace",
-  "alternative design name necklace",
-  "double name couple necklace",
-  "name necklace with design",
-  "name bracelet english",
-  "name bracelet arabic",
-  "name bracelet and bracelet",
-  "name bracelet with bst",
-  "photo projection bracelet rope",
-  "photo projection bracelet",
-  "initial couple ring",
-  "customised ring",
-  "double layered name necklace",
-  "customise photo roll",
-  "engraved eye bracelet",
-  "engraved eye necklace",
+const BANK_TRANSFER_ONLY_PRODUCTS=new Set([
+  "english name necklace","different font style name necklace",
+  "arabic name necklace","alternative design name necklace",
+  "double name couple necklace","name necklace with design",
+  "name bracelet english","name bracelet arabic",
+  "name bracelet and bracelet","name bracelet with bst",
+  "photo projection bracelet rope","photo projection bracelet",
+  "initial couple ring","customised ring","double layered name necklace",
+  "customise photo roll","engraved eye bracelet","engraved eye necklace",
   "customised phone case"
 ]);
 
 function getProductPaymentOption(product){
   const saved=String(product.payment_option||"").toLowerCase();
-
-  if(saved==="bank_transfer_only"){
-    return "bank_transfer_only";
-  }
-
-  if(saved==="both"){
-    return "both";
-  }
-
-  return BANK_TRANSFER_ONLY_PRODUCTS.has(
-    normaliseProductName(product.name)
-  ) ? "bank_transfer_only" : "both";
+  if(saved==="bank_transfer_only")return "bank_transfer_only";
+  if(saved==="both")return "both";
+  return BANK_TRANSFER_ONLY_PRODUCTS.has(normaliseProductName(product.name))
+    ?"bank_transfer_only":"both";
 }
-
-/*
-  Customised products also require Bank Transfer.
-  Regular no-personalisation products are excluded
-  to match the Edge Function.
-*/
 
 function cartRequiresBankTransfer(){
   return cart.some(item=>
     item.payment_option==="bank_transfer_only"||
-    (
-      item.is_customisable&&
-      !isRegularNoPersonalisationProduct(item.name)
-    )
+    (item.is_customisable&&!isRegularNoPersonalisationProduct(item.name))
   );
 }
 
 function updatePaymentOptions(){
   const payment=$("paymentMethod");
-
   if(!payment)return;
 
   const codOption=Array.from(payment.options).find(
     option=>option.value==="Cash on Delivery"
   );
-
   const restricted=cartRequiresBankTransfer();
 
-  if(codOption){
-    codOption.disabled=restricted;
-  }
-
-  if(restricted && payment.value==="Cash on Delivery"){
-    payment.value="Bank Transfer";
-  }
+  if(codOption)codOption.disabled=restricted;
+  if(restricted&&payment.value==="Cash on Delivery")payment.value="Bank Transfer";
 
   const existing=$("paymentRestrictionMessage");
-
   if(existing){
     existing.textContent=restricted
-      ? "Your bag contains a customised or Bank Transfer Only product. Cash on Delivery is unavailable for this order."
-      : "";
-
+      ?"Your bag contains a customised or Bank Transfer Only product. Cash on Delivery is unavailable for this order."
+      :"";
     existing.style.display=restricted?"block":"none";
   }
-
   updatePaymentFields();
 }
 
 function updatePaymentFields(){
   const isBank=$("paymentMethod").value==="Bank Transfer";
-
   $("bankGroup").style.display=isBank?"block":"none";
   $("referenceGroup").style.display=isBank?"block":"none";
   $("paymentSlipGroup").style.display=isBank?"block":"none";
-
   $("selectedBank").required=isBank;
   $("bankTransactionReference").required=isBank;
   $("paymentSlip").required=isBank;
@@ -1046,21 +452,14 @@ function updatePaymentFields(){
 
 function imageUrlForProduct(p){
   const raw=p.image_url||p.image_path||p.image||"";
-
   if(!raw)return "";
-
   if(/^https?:\/\//i.test(raw))return raw;
-
-  return db.storage.from(STORAGE_BUCKET)
-    .getPublicUrl(raw).data.publicUrl;
+  return db.storage.from(STORAGE_BUCKET).getPublicUrl(raw).data.publicUrl;
 }
 
 function safeFileExt(file){
   const ext=(file.name.split(".").pop()||"").toLowerCase();
-
-  return ["jpg","jpeg","png","webp","pdf"].includes(ext)
-    ?ext
-    :"jpg";
+  return ["jpg","jpeg","png","webp","pdf"].includes(ext)?ext:"jpg";
 }
 
 /* LOAD PRODUCTS */
@@ -1069,48 +468,33 @@ async function loadProducts(){
   const root=$("productList");
   root.textContent="Loading collection...";
 
-  let result=await db.from(PRODUCT_TABLE)
-    .select("*")
-    .eq("is_active",true)
-    .order("created_at",{ascending:false});
+  let result=await db.from(PRODUCT_TABLE).select("*")
+    .eq("is_active",true).order("created_at",{ascending:false});
 
   if(result.error){
     console.error("Product query with sorting failed:",result.error);
-
-    result=await db.from(PRODUCT_TABLE)
-      .select("*")
-      .eq("is_active",true);
+    result=await db.from(PRODUCT_TABLE).select("*").eq("is_active",true);
   }
 
   if(result.error){
     console.error("Product loading failed:",result.error);
-
-    root.textContent=
-      "Unable to load products: "+result.error.message+
+    root.textContent="Unable to load products: "+result.error.message+
       " ("+(result.error.code||"no code")+
       "). Check the store_products SELECT permission and column/table names.";
-
     return;
   }
 
   products=result.data||[];
-
   const cat=$("categoryFilter");
   const old=cat.value;
-
   cat.innerHTML='<option value="">All Collections</option>';
 
-  [...new Set(products.map(p=>p.category).filter(Boolean))]
-    .sort()
-    .forEach(c=>{
-      const o=document.createElement("option");
-      o.value=c;
-      o.textContent=c;
-      cat.append(o);
-    });
+  [...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{
+    const o=document.createElement("option");
+    o.value=c;o.textContent=c;cat.append(o);
+  });
 
   cat.value=old;
-
   renderProducts(products);
 }
 
@@ -1128,24 +512,20 @@ function renderProducts(items){
   items.forEach(p=>{
     const card=document.createElement("article");
     card.className="product-card";
-
     const src=imageUrlForProduct(p);
 
     if(src){
       const img=document.createElement("img");
-
       img.className="product-image";
       img.alt=p.name||"Zyra product";
       img.loading="lazy";
       img.src=src;
-
       img.onerror=()=>{
         const ph=document.createElement("div");
         ph.className="image-placeholder";
         ph.textContent="IMAGE UNAVAILABLE";
         img.replaceWith(ph);
       };
-
       card.append(img);
     }else{
       const ph=document.createElement("div");
@@ -1176,11 +556,7 @@ function renderProducts(items){
 
     if(p.is_customisable||isPhotoProduct(p.name)){
       const c=document.createElement("p");
-
-      c.textContent=isPhotoProduct(p.name)
-        ?"Photo upload required"
-        :"Customisable";
-
+      c.textContent=isPhotoProduct(p.name)?"Photo upload required":"Customisable";
       c.style.color="var(--wine)";
       info.append(c);
     }
@@ -1194,10 +570,8 @@ function renderProducts(items){
 function filterProducts(){
   const q=$("searchInput").value.toLowerCase();
   const c=$("categoryFilter").value;
-
   renderProducts(products.filter(p=>
-    (p.name||"").toLowerCase().includes(q)&&
-    (!c||p.category===c)
+    (p.name||"").toLowerCase().includes(q)&&(!c||p.category===c)
   ));
 }
 
@@ -1205,23 +579,17 @@ function filterProducts(){
 
 function addToCart(id){
   const p=products.find(x=>x.id===id);
-
   if(!p)return;
 
   const found=cart.find(x=>x.id===id);
-
   if(found){
     found.quantity++;
   }else{
     cart.push({
-      id:p.id,
-      name:p.name,
-      price:Number(p.price),
-      quantity:1,
+      id:p.id,name:p.name,price:Number(p.price),quantity:1,
       payment_option:getProductPaymentOption(p),
       is_customisable:!!p.is_customisable||isPhotoProduct(p.name),
-      details:{},
-      photoFiles:[]
+      details:{},photoFiles:[]
     });
   }
 
@@ -1236,16 +604,10 @@ function removeItem(id){
 
 function changeQty(id,delta){
   const x=cart.find(i=>i.id===id);
-
   if(!x)return;
-
   x.quantity+=delta;
-
-  if(x.quantity<1){
-    removeItem(id);
-  }else{
-    renderCart();
-  }
+  if(x.quantity<1)removeItem(id);
+  else renderCart();
 }
 
 function total(){
@@ -1256,22 +618,16 @@ function total(){
 
 function customField(item,key,label,placeholder,max=120,wide=false){
   const wrap=document.createElement("div");
-
   if(wide)wrap.className="wide";
 
   const input=document.createElement("input");
-
   input.placeholder=placeholder||label;
   input.maxLength=max;
   input.value=item.details[key]||"";
   input.setAttribute("aria-label",label);
-
-  input.oninput=()=>{
-    item.details[key]=input.value;
-  };
+  input.oninput=()=>{item.details[key]=input.value;};
 
   wrap.append(input);
-
   return wrap;
 }
 
@@ -1279,20 +635,15 @@ function customField(item,key,label,placeholder,max=120,wide=false){
 
 function photoUploadControl(item){
   const count=photoCountFor(item.name);
-
   if(!count)return null;
 
   const wrap=document.createElement("div");
   wrap.className="photo-upload";
 
   const label=document.createElement("label");
-
-  label.textContent=count===10
-    ?"Upload exactly 10 photos *"
-    :"Upload your photo *";
+  label.textContent=count===10?"Upload exactly 10 photos *":"Upload your photo *";
 
   const input=document.createElement("input");
-
   input.type="file";
   input.accept="image/jpeg,image/png,image/webp";
   input.multiple=count>1;
@@ -1301,22 +652,17 @@ function photoUploadControl(item){
 
   input.onchange=()=>{
     const files=Array.from(input.files||[]);
-
     if(files.length!==count){
       alert("Please select exactly "+count+" photo(s) for "+item.name+".");
-
       input.value="";
       item.photoFiles=[];
-
       return;
     }
-
     item.photoFiles=files;
   };
 
   const help=document.createElement("div");
   help.className="photo-help";
-
   help.textContent=count===10
     ?"Select 10 photos for your Photo Roll. JPG, PNG or WEBP; maximum 5MB per photo."
     :"Select 1 clear photo. JPG, PNG or WEBP; maximum 5MB.";
@@ -1325,18 +671,13 @@ function photoUploadControl(item){
 
   if(count===10){
     const msg=document.createElement("input");
-
     msg.type="text";
     msg.maxLength=200;
     msg.placeholder="Birthday message (optional)";
     msg.value=item.details.birthday_message||"";
     msg.style.width="100%";
     msg.style.marginTop="10px";
-
-    msg.oninput=()=>{
-      item.details.birthday_message=msg.value;
-    };
-
+    msg.oninput=()=>{item.details.birthday_message=msg.value;};
     wrap.append(msg);
   }
 
@@ -1346,16 +687,11 @@ function photoUploadControl(item){
 /* RENDER CART */
 
 function renderCart(){
-  $("cartCount").textContent=cart.reduce(
-    (s,x)=>s+x.quantity,0
-  );
-
+  $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0);
   const root=$("cartItems");
   root.replaceChildren();
 
-  if(!cart.length){
-    root.textContent="Your shopping bag is empty.";
-  }
+  if(!cart.length)root.textContent="Your shopping bag is empty.";
 
   cart.forEach(item=>{
     const box=document.createElement("div");
@@ -1365,7 +701,6 @@ function renderCart(){
     row.className="cart-row";
 
     const label=document.createElement("strong");
-
     label.textContent=
       `${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
 
@@ -1377,11 +712,7 @@ function renderCart(){
       ["Remove",()=>removeItem(item.id)]
     ].forEach(([t,fn])=>{
       const b=document.createElement("button");
-
-      b.textContent=t;
-      b.onclick=fn;
-
-      controls.append(b);
+      b.textContent=t;b.onclick=fn;controls.append(b);
     });
 
     row.append(label,controls);
@@ -1390,197 +721,72 @@ function renderCart(){
     if(item.is_customisable||isPhotoProduct(item.name)){
       const fields=document.createElement("div");
       fields.className="custom-fields";
-
       const n=item.name.toLowerCase();
 
       if(n.includes("initial couple ring")){
         fields.append(
-          customField(
-            item,
-            "first_box_initial",
-            "First box initial",
-            "First box — 1 character",
-            1
-          ),
-          customField(
-            item,
-            "second_box_initial",
-            "Second box initial",
-            "Second box — 1 character",
-            1
-          )
+          customField(item,"first_box_initial","First box initial","First box — 1 character",1),
+          customField(item,"second_box_initial","Second box initial","Second box — 1 character",1)
         );
       }
-
       else if(n.includes("customised ring")){
-        fields.append(
-          customField(
-            item,
-            "name",
-            "Ring name",
-            "Enter name — max 6 characters",
-            6,
-            true
-          )
-        );
+        fields.append(customField(item,"name","Ring name","Enter name — max 6 characters",6,true));
       }
-
       else if(n.includes("double layered name necklace")){
         fields.append(
-          customField(
-            item,
-            "first_layer_name",
-            "First layer name",
-            "First layer — max 8 characters",
-            8
-          ),
-          customField(
-            item,
-            "second_layer_name",
-            "Second layer name",
-            "Second layer — max 8 characters",
-            8
-          )
+          customField(item,"first_layer_name","First layer name","First layer — max 8 characters",8),
+          customField(item,"second_layer_name","Second layer name","Second layer — max 8 characters",8)
         );
       }
-
       else if(n.includes("name necklace with bst")){
-        fields.append(
-          customField(
-            item,
-            "name",
-            "Name",
-            "Name — max 12 characters",
-            12,
-            true
-          )
-        );
-
+        fields.append(customField(item,"name","Name","Name — max 12 characters",12,true));
         const wrap=document.createElement("div");
         wrap.className="wide";
-
         const sel=document.createElement("select");
-
         sel.setAttribute("aria-label","Birthstone month");
-
-        sel.innerHTML=
-          '<option value="">Select birthstone month</option>'+
-          [
-            "January","February","March","April",
-            "May","June","July","August",
-            "September","October","November","December"
-          ].map(m=>`<option value="${m}">${m}</option>`).join("");
-
+        sel.innerHTML='<option value="">Select birthstone month</option>'+
+          ["January","February","March","April","May","June","July","August",
+           "September","October","November","December"]
+            .map(m=>`<option value="${m}">${m}</option>`).join("");
         sel.value=item.details.birthstone_month||"";
-
-        sel.onchange=()=>{
-          item.details.birthstone_month=sel.value;
-        };
-
-        wrap.append(sel);
-        fields.append(wrap);
+        sel.onchange=()=>{item.details.birthstone_month=sel.value;};
+        wrap.append(sel);fields.append(wrap);
       }
-
       else if(n.includes("name necklace with design")||n.includes("infinity")){
         fields.append(
-          customField(
-            item,
-            "name_one",
-            "First name",
-            "First name — max 6 characters",
-            6
-          ),
-          customField(
-            item,
-            "name_two",
-            "Second name",
-            "Second name — max 6 characters",
-            6
-          ),
-          customField(
-            item,
-            "special_date",
-            "Special date",
-            "DDMMYY — 6 digits",
-            6,
-            true
-          )
+          customField(item,"name_one","First name","First name — max 6 characters",6),
+          customField(item,"name_two","Second name","Second name — max 6 characters",6),
+          customField(item,"special_date","Special date","DDMMYY — 6 digits",6,true)
         );
       }
-
       else if(n.includes("couple name necklace")){
         fields.append(
-          customField(
-            item,
-            "first_name",
-            "First name",
-            "First name — max 6 characters",
-            6
-          ),
-          customField(
-            item,
-            "second_name",
-            "Second name",
-            "Second name — max 6 characters",
-            6
-          )
+          customField(item,"first_name","First name","First name — max 6 characters",6),
+          customField(item,"second_name","Second name","Second name — max 6 characters",6)
         );
       }
-
-      else if(
-        n.includes("name bracelet & necklace combo")||
-        n.includes("name bracelet and necklace combo")
-      ){
+      else if(n.includes("name bracelet & necklace combo")||
+              n.includes("name bracelet and necklace combo")){
         fields.append(
-          customField(
-            item,
-            "bracelet_name",
-            "Bracelet name",
-            "Bracelet name — max 8 characters",
-            8
-          ),
-          customField(
-            item,
-            "necklace_name",
-            "Necklace name",
-            "Necklace name — max 8 characters",
-            8
-          )
+          customField(item,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),
+          customField(item,"necklace_name","Necklace name","Necklace name — max 8 characters",8)
         );
       }
-
       else if(n.includes("name necklace")||n.includes("name bracelet")){
-        fields.append(
-          customField(
-            item,
-            "name",
-            "Name to customise",
-            "Enter name — max 8 characters",
-            8,
-            true
-          )
-        );
+        fields.append(customField(item,"name","Name to customise","Enter name — max 8 characters",8,true));
       }
-
       else if(!isPhotoProduct(item.name)){
         const t=document.createElement("textarea");
-
         t.className="wide";
         t.placeholder="Enter customisation details";
         t.value=item.details.instructions||"";
         t.maxLength=1000;
-
-        t.oninput=()=>{
-          item.details.instructions=t.value;
-        };
-
+        t.oninput=()=>{item.details.instructions=t.value;};
         fields.append(t);
       }
 
       const photoControl=photoUploadControl(item);
-
       if(photoControl)fields.append(photoControl);
-
       box.append(fields);
     }
 
@@ -1588,53 +794,34 @@ function renderCart(){
   });
 
   $("cartTotal").textContent="Total: LKR "+money(total());
-
   updatePaymentOptions();
 }
 
 /* MODALS */
 
-function openCart(){
-  $("cartModal").style.display="block";
-}
-
-function closeModal(id){
-  $(id).style.display="none";
-}
+function openCart(){$("cartModal").style.display="block";}
+function closeModal(id){$(id).style.display="none";}
 
 function showCheckout(){
-  if(!cart.length){
-    alert("Please add a product first.");
-    return;
-  }
-
+  if(!cart.length){alert("Please add a product first.");return;}
   updatePaymentOptions();
-
   closeModal("cartModal");
-
-  $("checkoutTotal").textContent=
-    "Order Total: LKR "+money(total());
-
+  $("checkoutTotal").textContent="Order Total: LKR "+money(total());
   $("checkoutModal").style.display="block";
 }
 
 function finishOrder(){
   cart=[];
   renderCart();
-
   closeModal("successModal");
 }
 
 /* PAYMENT METHOD */
 
 $("paymentMethod").addEventListener("change",()=>{
-  if(
-    cartRequiresBankTransfer() &&
-    $("paymentMethod").value==="Cash on Delivery"
-  ){
+  if(cartRequiresBankTransfer()&&$("paymentMethod").value==="Cash on Delivery"){
     $("paymentMethod").value="Bank Transfer";
   }
-
   updatePaymentFields();
 });
 
@@ -1643,10 +830,7 @@ $("selectedBank").addEventListener("change",()=>{
   const box=$("bankDetails");
 
   if(v&&BANK_INFO[v]){
-    box.innerHTML=
-      "<strong>Transfer details — "+v+"</strong><br>"+
-      BANK_INFO[v];
-
+    box.innerHTML="<strong>Transfer details — "+v+"</strong><br>"+BANK_INFO[v];
     box.style.display="block";
   }else{
     box.style.display="none";
@@ -1657,65 +841,52 @@ $("selectedBank").addEventListener("change",()=>{
 /* VALIDATE PAYMENT SLIP */
 
 function validatePaymentSlip(file){
-  if(!file){
-    throw new Error("Please upload your bank payment slip.");
-  }
-
+  if(!file)throw new Error("Please upload your bank payment slip.");
   if(!ALLOWED_PAYMENT_SLIP_TYPES.includes(file.type)){
     throw new Error("Only JPG, PNG, WEBP and PDF payment slips are accepted.");
   }
-
   if(file.size<=0||file.size>PAYMENT_SLIP_MAX_BYTES){
     throw new Error("Your payment slip must be a valid file of 5MB or smaller.");
   }
 }
 
-/* UPLOAD PAYMENT SLIP */
+/*
+  NEW PAYMENT SLIP HANDLING
 
-async function uploadPaymentSlip(file){
+  The browser no longer uploads the payment slip directly
+  to Supabase Storage. It converts the file to Base64 and
+  sends it to the place-order Edge Function.
+*/
+
+async function paymentSlipToBase64(file){
   validatePaymentSlip(file);
 
-  const ext=safeFileExt(file);
+  const buffer=await file.arrayBuffer();
+  const bytes=new Uint8Array(buffer);
 
-  const folderId=crypto.randomUUID();
+  let binary="";
+  const chunkSize=0x8000;
 
-  const path=
-    `customer-payment-slips/${folderId}/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
-
-  const {data,error}=await db.storage
-    .from(PAYMENT_SLIP_BUCKET)
-    .upload(path,file,{
-      contentType:file.type,
-      upsert:false
-    });
-
-  if(error){
-    throw new Error(
-      "Payment slip upload failed: "+error.message+
-      ". Please check that the payment-slips storage bucket exists and allows uploads."
-    );
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    binary+=String.fromCharCode(...bytes.subarray(i,i+chunkSize));
   }
 
   return {
-    path:data.path,
     file_name:file.name,
-    content_type:file.type
+    content_type:file.type,
+    data_base64:btoa(binary)
   };
 }
 
-/* UPLOAD CUSTOMER PHOTOS */
+/* UPLOAD CUSTOMER PHOTOS — EXISTING FLOW PRESERVED */
 
 async function uploadItemPhotos(item){
   const required=photoCountFor(item.name);
-
   if(!required)return null;
 
   const files=item.photoFiles||[];
-
   if(files.length!==required){
-    throw new Error(
-      item.name+": please upload exactly "+required+" photo(s)."
-    );
+    throw new Error(item.name+": please upload exactly "+required+" photo(s).");
   }
 
   const paths=[];
@@ -1727,27 +898,19 @@ async function uploadItemPhotos(item){
     if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
       throw new Error("Only JPG, PNG or WEBP photos are accepted.");
     }
-
-    if(file.size>PHOTO_MAX_BYTES){
+    if(file.size<=0||file.size>PHOTO_MAX_BYTES){
       throw new Error("Each photo must be 5MB or smaller.");
     }
 
     const ext=safeFileExt(file);
+    const path=`customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-${i+1}.${ext}`;
 
-    const path=
-      `customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-${i+1}.${ext}`;
-
-    const {error}=await db.storage
-      .from(CUSTOMER_PHOTO_BUCKET)
-      .upload(path,file,{
-        contentType:file.type,
-        upsert:false
-      });
+    const {error}=await db.storage.from(CUSTOMER_PHOTO_BUCKET).upload(path,file,{
+      contentType:file.type,upsert:false
+    });
 
     if(error){
-      throw new Error(
-        "Photo upload failed for "+file.name+": "+error.message
-      );
+      throw new Error("Photo upload failed for "+file.name+": "+error.message);
     }
 
     paths.push(path);
@@ -1766,18 +929,14 @@ async function uploadItemPhotos(item){
 
 $("checkoutForm").addEventListener("submit",async function(e){
   e.preventDefault();
-
   if(!cart.length)return;
 
   const form=new FormData(this);
-
   const phone=String(form.get("phone")||"").trim();
   const postal=String(form.get("postal_code")||"").trim();
 
   if(!/^07[0-9]{8}$/.test(phone)){
-    alert(
-      "Enter a valid 10-digit Sri Lankan mobile number starting with 07. Example: 0771234567"
-    );
+    alert("Enter a valid 10-digit Sri Lankan mobile number starting with 07. Example: 0771234567");
     return;
   }
 
@@ -1792,25 +951,14 @@ $("checkoutForm").addEventListener("submit",async function(e){
     const n=item.name.toLowerCase();
     const d=item.details;
 
-    if(
-      n.includes("initial couple ring")&&
-      (
-        !d.first_box_initial||
-        !d.second_box_initial||
-        d.first_box_initial.length!==1||
-        d.second_box_initial.length!==1
-      )
-    ){
-      alert(
-        "Initial Couple Ring requires one character in each of its two boxes."
-      );
+    if(n.includes("initial couple ring")&&
+       (!d.first_box_initial||!d.second_box_initial||
+        d.first_box_initial.length!==1||d.second_box_initial.length!==1)){
+      alert("Initial Couple Ring requires one character in each of its two boxes.");
       return;
     }
 
-    if(
-      n.includes("customised ring")&&
-      (!d.name||d.name.trim().length>6)
-    ){
+    if(n.includes("customised ring")&&(!d.name||d.name.trim().length>6)){
       alert("Customised Ring name must contain 1 to 6 characters.");
       return;
     }
@@ -1821,74 +969,51 @@ $("checkoutForm").addEventListener("submit",async function(e){
       if(n.includes("initial couple ring")){
         required=["first_box_initial","second_box_initial"];
       }
-
       else if(n.includes("double layered name necklace")){
         required=["first_layer_name","second_layer_name"];
       }
-
       else if(n.includes("name necklace with design")||n.includes("infinity")){
         required=["name_one","name_two","special_date"];
       }
-
       else if(n.includes("couple name necklace")){
         required=["first_name","second_name"];
       }
-
-      else if(
-        n.includes("name bracelet & necklace combo")||
-        n.includes("name bracelet and necklace combo")
-      ){
+      else if(n.includes("name bracelet & necklace combo")||
+              n.includes("name bracelet and necklace combo")){
         required=["bracelet_name","necklace_name"];
       }
-
       else if(n.includes("name necklace with bst")){
         required=["name","birthstone_month"];
       }
-
-      else if(
-        n.includes("name necklace")||
-        n.includes("name bracelet")||
-        n.includes("customised ring")
-      ){
+      else if(n.includes("name necklace")||n.includes("name bracelet")||
+              n.includes("customised ring")){
         required=["name"];
       }
-
       else{
         required=["instructions"];
       }
 
       if(required.some(k=>!String(d[k]||"").trim())){
-        alert(
-          "Please complete all customisation fields for "+item.name+"."
-        );
+        alert("Please complete all customisation fields for "+item.name+".");
         return;
       }
 
-      if(
-        (n.includes("name necklace with design")||n.includes("infinity"))&&
-        !/^[0-9]{6}$/.test(d.special_date)
-      ){
-        alert(
-          "Enter the special date as six digits in DDMMYY format."
-        );
+      if((n.includes("name necklace with design")||n.includes("infinity"))&&
+         !/^[0-9]{6}$/.test(d.special_date)){
+        alert("Enter the special date as six digits in DDMMYY format.");
         return;
       }
 
       if(n.includes("customised ring")&&d.name.length>6){
-        alert(
-          "Customised Ring name must be 6 characters or fewer."
-        );
+        alert("Customised Ring name must be 6 characters or fewer.");
         return;
       }
     }
 
     if(isPhotoProduct(item.name)){
       const needed=photoCountFor(item.name);
-
       if((item.photoFiles||[]).length!==needed){
-        alert(
-          item.name+": please upload exactly "+needed+" photo(s) before checkout."
-        );
+        alert(item.name+": please upload exactly "+needed+" photo(s) before checkout.");
         return;
       }
     }
@@ -1896,100 +1021,58 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
   const button=$("placeOrderButton");
   const msg=$("checkoutMessage");
-
   button.disabled=true;
   button.textContent="PREPARING ORDER...";
   msg.textContent="";
 
   try{
-    const selectedPayment=String(
-      form.get("payment_method")||""
-    );
+    const selectedPayment=String(form.get("payment_method")||"");
 
-    /* PAYMENT VALIDATION */
-
-    if(
-      cartRequiresBankTransfer() &&
-      selectedPayment!=="Bank Transfer"
-    ){
-      throw new Error(
-        "This order contains a customised or Bank Transfer Only product. Please select Bank Transfer."
-      );
+    if(cartRequiresBankTransfer()&&selectedPayment!=="Bank Transfer"){
+      throw new Error("This order contains a customised or Bank Transfer Only product. Please select Bank Transfer.");
     }
 
-    if(
-      selectedPayment!=="Bank Transfer" &&
-      selectedPayment!=="Cash on Delivery"
-    ){
+    if(selectedPayment!=="Bank Transfer"&&selectedPayment!=="Cash on Delivery"){
       throw new Error("Please select a valid payment method.");
     }
 
     let paymentSlip=null;
 
     if(selectedPayment==="Bank Transfer"){
-      const selectedBank=String(
-        form.get("selected_bank")||""
-      ).trim();
+      const selectedBank=String(form.get("selected_bank")||"").trim();
+      const reference=String(form.get("bank_transaction_reference")||"").trim();
 
-      const reference=String(
-        form.get("bank_transaction_reference")||""
-      ).trim();
+      if(!selectedBank)throw new Error("Please select your bank.");
 
-      if(!selectedBank){
-        throw new Error("Please select your bank.");
-      }
-
-      if(
-        ![
-          "Commercial Bank",
-          "Nations Trust Bank",
-          "Amana Bank PLC",
-          "HNB"
-        ].includes(selectedBank)
-      ){
+      if(!["Commercial Bank","Nations Trust Bank","Amana Bank PLC","HNB"].includes(selectedBank)){
         throw new Error("Please select a valid bank.");
       }
 
-      if(!reference){
-        throw new Error("Please enter your bank transaction reference.");
-      }
-
-      if(reference.length>150){
-        throw new Error("Bank transaction reference must be 150 characters or fewer.");
-      }
+      if(!reference)throw new Error("Please enter your bank transaction reference.");
+      if(reference.length>150)throw new Error("Bank transaction reference must be 150 characters or fewer.");
 
       const slipFile=$("paymentSlip").files[0];
-
       validatePaymentSlip(slipFile);
 
-      button.textContent="UPLOADING PAYMENT SLIP...";
+      button.textContent="PREPARING PAYMENT SLIP...";
 
-      paymentSlip=await uploadPaymentSlip(slipFile);
+      /* CHANGED: no direct browser Storage upload */
+      paymentSlip=await paymentSlipToBase64(slipFile);
     }
 
     const orderItems=[];
 
     for(const item of cart){
-      let details=item.is_customisable
-        ?{...item.details}
-        :null;
+      let details=item.is_customisable?{...item.details}:null;
 
       if(isPhotoProduct(item.name)){
         button.textContent="UPLOADING CUSTOMER PHOTOS...";
-
         const photoMeta=await uploadItemPhotos(item);
 
-        details={
-          ...(details||{}),
-          ...photoMeta
-        };
+        details={...(details||{}),...photoMeta};
 
-        if(
-          item.name.toLowerCase().includes("photo roll")&&
-          item.details.birthday_message
-        ){
-          details.birthday_message=
-            item.details.birthday_message;
+        if(item.name.toLowerCase().includes("photo roll")&&item.details.birthday_message){
+          details.birthday_message=item.details.birthday_message;
         }
       }
 
@@ -2003,89 +1086,45 @@ $("checkoutForm").addEventListener("submit",async function(e){
     button.textContent="SUBMITTING ORDER...";
 
     const payload={
-      customer_name:String(
-        form.get("customer_name")||""
-      ).trim(),
-
-      email:String(
-        form.get("email")||""
-      ).trim()||null,
-
+      customer_name:String(form.get("customer_name")||"").trim(),
+      email:String(form.get("email")||"").trim()||null,
       phone,
-
-      delivery_address:String(
-        form.get("delivery_address")||""
-      ).trim(),
-
-      city:String(
-        form.get("city")||""
-      ).trim(),
-
-      district:String(
-        form.get("district")||""
-      ).trim(),
-
+      delivery_address:String(form.get("delivery_address")||"").trim(),
+      city:String(form.get("city")||"").trim(),
+      district:String(form.get("district")||"").trim(),
       postal_code:postal,
-
-      payment_method:
-        selectedPayment==="Cash on Delivery"
-          ?"COD"
-          :"Bank Transfer",
-
+      payment_method:selectedPayment==="Cash on Delivery"?"COD":"Bank Transfer",
       selected_bank:selectedPayment==="Bank Transfer"
-        ?String(form.get("selected_bank")||"").trim()
-        :null,
-
+        ?String(form.get("selected_bank")||"").trim():null,
       bank_transaction_reference:selectedPayment==="Bank Transfer"
-        ?String(form.get("bank_transaction_reference")||"").trim()
-        :null,
-
+        ?String(form.get("bank_transaction_reference")||"").trim():null,
       payment_slip:paymentSlip,
-
-      customer_notes:String(
-        form.get("customer_notes")||""
-      ).trim()||null,
-
+      customer_notes:String(form.get("customer_notes")||"").trim()||null,
       items:orderItems
     };
 
-    const {data,error}=await db.functions.invoke(
-      "place-order",
-      {body:payload}
-    );
+    const {data,error}=await db.functions.invoke("place-order",{body:payload});
 
     if(error){
       let serverMessage="";
-
       try{
         serverMessage=error.context
           ?await error.context.json().then(x=>x.error||x.message||"")
           :"";
       }catch{}
 
-      throw new Error(
-        serverMessage||
-        error.message||
-        "The order request failed."
-      );
+      throw new Error(serverMessage||error.message||"The order request failed.");
     }
 
     if(!data||!data.order_number){
-      throw new Error(
-        data?.error||
-        "The server did not return an order number."
-      );
+      throw new Error(data?.error||"The server did not return an order number.");
     }
 
     closeModal("checkoutModal");
-
-    $("trackingNumber").textContent=
-      "Your store order number: "+data.order_number;
-
+    $("trackingNumber").textContent="Your store order number: "+data.order_number;
     $("successModal").style.display="block";
 
     this.reset();
-
     $("bankGroup").style.display="none";
     $("referenceGroup").style.display="none";
     $("paymentSlipGroup").style.display="none";
@@ -2093,11 +1132,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
   }catch(err){
     console.error("Zyra order submission failed:",err);
-
-    msg.textContent=
-      err.message||
-      "We couldn't submit your order. Please try again.";
-
+    msg.textContent=err.message||"We couldn't submit your order. Please try again.";
   }finally{
     button.disabled=false;
     button.textContent="PLACE ORDER";
@@ -2109,7 +1144,6 @@ $("checkoutForm").addEventListener("submit",async function(e){
 async function trackDelivery(){
   const id=$("trackingId").value.trim();
   const box=$("trackingResult");
-
   box.hidden=false;
   box.textContent="Checking...";
 
@@ -2118,22 +1152,17 @@ async function trackDelivery(){
     return;
   }
 
-  const {data,error}=await db.rpc(
-    "track_zyra_order",
-    {p_tracking_id:id}
-  );
+  const {data,error}=await db.rpc("track_zyra_order",{p_tracking_id:id});
 
   if(error){
-    box.textContent=
-      "Unable to check tracking: "+error.message;
+    box.textContent="Unable to check tracking: "+error.message;
     return;
   }
 
   const o=Array.isArray(data)?data[0]:data;
 
   if(!o||o.found===false||!o.tracking_id){
-    box.textContent=
-      "No tracking record found. Please check your tracking ID.";
+    box.textContent="No tracking record found. Please check your tracking ID.";
     return;
   }
 
@@ -2150,7 +1179,6 @@ ${o.note||""}`;
 
 loadProducts();
 renderCart();
-
 </script>
 </body>
 </html>
