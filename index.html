@@ -719,6 +719,12 @@ footer p{
             <option value="Cash on Delivery">Cash on Delivery</option>
             <option value="Bank Transfer">Bank Transfer</option>
           </select>
+
+          <p
+            id="paymentRestrictionMessage"
+            class="fine"
+            style="display:none;color:#842d40;margin-top:8px"
+          ></p>
         </div>
 
         <div class="form-group full" id="bankGroup" style="display:none">
@@ -855,6 +861,95 @@ function photoCountFor(name){
   return String(name||"").toLowerCase().includes("photo roll")
     ?10
     :(isPhotoProduct(name)?1:0);
+}
+
+function normaliseProductName(name){
+  return String(name||"")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g," ")
+    .trim();
+}
+
+/* BANK TRANSFER ONLY PRODUCT LIST */
+
+const BANK_TRANSFER_ONLY_PRODUCTS = new Set([
+  "english name necklace",
+  "different font style name necklace",
+  "arabic name necklace",
+  "alternative design name necklace",
+  "double name couple necklace",
+  "name necklace with design",
+  "name bracelet english",
+  "name bracelet arabic",
+  "name bracelet and bracelet",
+  "name bracelet with bst",
+  "photo projection bracelet rope",
+  "photo projection bracelet",
+  "initial couple ring",
+  "customised ring",
+  "double layered name necklace",
+  "customise photo roll",
+  "engraved eye bracelet",
+  "engraved eye necklace",
+  "customised phone case"
+]);
+
+function getProductPaymentOption(product){
+  const saved=String(product.payment_option||"").toLowerCase();
+
+  if(saved==="bank_transfer_only"){
+    return "bank_transfer_only";
+  }
+
+  if(saved==="both"){
+    return "both";
+  }
+
+  return BANK_TRANSFER_ONLY_PRODUCTS.has(
+    normaliseProductName(product.name)
+  ) ? "bank_transfer_only" : "both";
+}
+
+function cartRequiresBankTransfer(){
+  return cart.some(item=>
+    item.payment_option==="bank_transfer_only"
+  );
+}
+
+function updatePaymentOptions(){
+  const payment=$("paymentMethod");
+
+  if(!payment)return;
+
+  const codOption=Array.from(payment.options).find(
+    option=>option.value==="Cash on Delivery"
+  );
+
+  const restricted=cartRequiresBankTransfer();
+
+  if(codOption){
+    codOption.disabled=restricted;
+  }
+
+  if(restricted && payment.value==="Cash on Delivery"){
+    payment.value="Bank Transfer";
+  }
+
+  const existing=$("paymentRestrictionMessage");
+
+  if(existing){
+    existing.textContent=restricted
+      ? "Your bag contains a Bank Transfer Only product. Cash on Delivery is unavailable for this order."
+      : "";
+
+    existing.style.display=restricted?"block":"none";
+  }
+
+  const isBank=payment.value==="Bank Transfer";
+
+  $("bankGroup").style.display=isBank?"block":"none";
+  $("referenceGroup").style.display=isBank?"block":"none";
+  $("selectedBank").required=isBank;
 }
 
 function imageUrlForProduct(p){
@@ -1031,6 +1126,7 @@ function addToCart(id){
       name:p.name,
       price:Number(p.price),
       quantity:1,
+      payment_option:getProductPaymentOption(p),
       is_customisable:!!p.is_customisable||isPhotoProduct(p.name),
       details:{},
       photoFiles:[]
@@ -1114,7 +1210,7 @@ function photoUploadControl(item){
   input.onchange=()=>{
     const files=Array.from(input.files||[]);
 
-    if(files.length>count){
+    if(files.length!==count){
       alert("Please select exactly "+count+" photo(s) for "+item.name+".");
 
       input.value="";
@@ -1400,6 +1496,8 @@ function renderCart(){
   });
 
   $("cartTotal").textContent="Total: LKR "+money(total());
+
+  updatePaymentOptions();
 }
 
 /* MODALS */
@@ -1417,6 +1515,8 @@ function showCheckout(){
     alert("Please add a product first.");
     return;
   }
+
+  updatePaymentOptions();
 
   closeModal("cartModal");
 
@@ -1436,6 +1536,13 @@ function finishOrder(){
 /* PAYMENT METHOD */
 
 $("paymentMethod").addEventListener("change",()=>{
+  if(
+    cartRequiresBankTransfer() &&
+    $("paymentMethod").value==="Cash on Delivery"
+  ){
+    $("paymentMethod").value="Bank Transfer";
+  }
+
   const bank=$("paymentMethod").value==="Bank Transfer";
 
   $("bankGroup").style.display=bank?"block":"none";
@@ -1662,6 +1769,31 @@ $("checkoutForm").addEventListener("submit",async function(e){
     const selectedPayment=String(
       form.get("payment_method")||""
     );
+
+    /* PAYMENT VALIDATION */
+
+    if(
+      cartRequiresBankTransfer() &&
+      selectedPayment!=="Bank Transfer"
+    ){
+      throw new Error(
+        "This order contains a Bank Transfer Only product. Please select Bank Transfer."
+      );
+    }
+
+    if(
+      selectedPayment!=="Bank Transfer" &&
+      selectedPayment!=="Cash on Delivery"
+    ){
+      throw new Error("Please select a valid payment method.");
+    }
+
+    if(
+      selectedPayment==="Bank Transfer" &&
+      !String(form.get("selected_bank")||"").trim()
+    ){
+      throw new Error("Please select your bank.");
+    }
 
     const orderItems=[];
 
