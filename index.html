@@ -346,11 +346,28 @@ const db = window.supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
+/* UPDATED BANK DETAILS — FULL ACCOUNT NUMBERS */
+
 const BANK_INFO = {
-  "Commercial Bank":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
-  "Nations Trust Bank":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
-  "Amana Bank PLC":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
-  "HNB":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH"
+  "Commercial Bank":
+    "Account Name: Hamrah<br>" +
+    "Account Number: 8031077367<br>" +
+    "Branch: Mutwal",
+
+  "Nations Trust Bank":
+    "Account Name: MF Hamrah<br>" +
+    "Account Number: 200190100485<br>" +
+    "Branch: Union Place",
+
+  "Amana Bank PLC":
+    "Account Name: MOHAMMED ILMY FATHIMA HAMRAH<br>" +
+    "Account Number: 0290244734002<br>" +
+    "Branch: Kollupitiya",
+
+  "HNB":
+    "Account Name: Miss Hilmey F H M<br>" +
+    "Account Number: 096020094073<br>" +
+    "Branch: Kotahena"
 };
 
 let products = [];
