@@ -47,6 +47,7 @@ th{background:#faf7f2}
 .manual-item-grid{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}
 .section-title{color:var(--wine);font-family:Georgia,serif}
 .order-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.status-pill{display:inline-block;padding:5px 9px;background:#eee;border-radius:20px;font-size:12px}
 @media(max-width:650px){
  .wrap{padding:12px}
  .stats{grid-template-columns:1fr}
@@ -196,7 +197,7 @@ th{background:#faf7f2}
         <label><input style="width:auto" name="is_active" type="checkbox" checked> Active</label>
       </div>
     </div>
-    <button class="btn">SAVE PRODUCT</button>
+    <button class="btn" id="saveProductBtn">SAVE PRODUCT</button>
     <button type="button" class="btn light" onclick="resetProductForm()">CLEAR</button>
     <p id="productMessage" class="message"></p>
   </form>
@@ -216,16 +217,16 @@ const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-// Separate full product and manual-order caches.
+// Keep the complete product records separate from the manual-order dropdown.
 let productCache=[];
 let manualProductCache=[];
 let trackingCache=new Map();
-let manualItemCounter=0;
 
 const el=id=>document.getElementById(id);
 const money=n=>"LKR "+Number(n||0).toLocaleString("en-LK",{minimumFractionDigits:2,maximumFractionDigits:2});
 
 const COURIERS=["Pending assignment","Straightway courier","Royal Express","Self pickup"];
+
 const ORDER_STATUSES=[
  {value:"pending",label:"Pending"},
  {value:"confirmed",label:"Confirmed"},
@@ -236,6 +237,11 @@ const ORDER_STATUSES=[
  {value:"delivered",label:"Delivered"},
  {value:"cancelled",label:"Cancelled"},
  {value:"shipped",label:"Shipped (legacy)"}
+];
+
+const PAYMENT_STATUSES=[
+ {value:"pending",label:"Pending"},
+ {value:"paid",label:"Paid"}
 ];
 
 const TRACKING_LABELS={
@@ -253,24 +259,43 @@ const ZYRA_BANKS=[
 ];
 
 function renderAdminBankAccounts(){
- const root=el("adminBankAccounts");root.replaceChildren();
+ const root=el("adminBankAccounts");
+ root.replaceChildren();
+
  ZYRA_BANKS.forEach(b=>{
-  const card=document.createElement("div");card.className="order-card";
-  const title=document.createElement("strong");title.textContent=b.bank;
-  const details=document.createElement("p");details.className="muted";
+  const card=document.createElement("div");
+  card.className="order-card";
+
+  const title=document.createElement("strong");
+  title.textContent=b.bank;
+
+  const details=document.createElement("p");
+  details.className="muted";
   details.textContent=`Account name: ${b.holder} · Account number: ${b.number} · Branch: ${b.branch}`;
-  const copy=document.createElement("button");copy.className="btn light";copy.textContent="COPY ACCOUNT NUMBER";
+
+  const copy=document.createElement("button");
+  copy.className="btn light";
+  copy.textContent="COPY ACCOUNT NUMBER";
+
   copy.onclick=async()=>{
-   try{await navigator.clipboard.writeText(b.number);copy.textContent="COPIED";}
-   catch(e){alert("Copy unavailable. Account number: "+b.number);}
+   try{
+    await navigator.clipboard.writeText(b.number);
+    copy.textContent="COPIED";
+   }catch(e){
+    alert("Copy unavailable. Account number: "+b.number);
+   }
   };
-  card.append(title,details,copy);root.append(card);
+
+  card.append(title,details,copy);
+  root.append(card);
  });
 }
 renderAdminBankAccounts();
 
 function parseCustomisationDetails(raw){
- if(typeof raw==="string"){try{return JSON.parse(raw)}catch(_){return {instructions:raw}}}
+ if(typeof raw==="string"){
+  try{return JSON.parse(raw)}catch(_){return {instructions:raw}}
+ }
  return raw&&typeof raw==="object"?raw:{};
 }
 
@@ -278,34 +303,64 @@ function appendCustomisationDetails(parent,raw){
  const d=parseCustomisationDetails(raw);
  const paths=Array.isArray(d.photo_paths)?d.photo_paths:(d.photo_path?[d.photo_path]:[]);
  const details={...d};
+
  ["photo_path","photo_paths","photo_count","photo_file_names"].forEach(k=>delete details[k]);
- const text=document.createElement("div");text.className="muted";text.style.marginTop="6px";
+
+ const text=document.createElement("div");
+ text.className="muted";
+ text.style.marginTop="6px";
+
  if(Object.keys(details).length)text.textContent="Customisation: "+JSON.stringify(details);
  else if(!paths.length)text.textContent="Customisation details were not provided.";
+
  parent.append(text);
 
  if(paths.length){
-  const photos=document.createElement("div");photos.style.marginTop="8px";
-  const heading=document.createElement("strong");heading.textContent="Customer uploaded photo(s): ";
+  const photos=document.createElement("div");
+  photos.style.marginTop="8px";
+
+  const heading=document.createElement("strong");
+  heading.textContent="Customer uploaded photo(s): ";
   photos.append(heading);
+
   paths.forEach((path,i)=>{
-   const b=document.createElement("button");b.className="btn light";b.type="button";
-   b.style.margin="4px";b.textContent="VIEW PHOTO "+(i+1);
-   b.onclick=()=>viewCustomerPhoto(path,b);photos.append(b);
+   const b=document.createElement("button");
+   b.className="btn light";
+   b.type="button";
+   b.style.margin="4px";
+   b.textContent="VIEW PHOTO "+(i+1);
+   b.onclick=()=>viewCustomerPhoto(path,b);
+   photos.append(b);
   });
+
   parent.append(photos);
+
   if(Array.isArray(d.photo_file_names)&&d.photo_file_names.length){
-   const names=document.createElement("div");names.className="muted";
-   names.textContent="File name(s): "+d.photo_file_names.join(", ");parent.append(names);
+   const names=document.createElement("div");
+   names.className="muted";
+   names.textContent="File name(s): "+d.photo_file_names.join(", ");
+   parent.append(names);
   }
  }
 }
 
 async function viewCustomerPhoto(path,button){
- const old=button.textContent;button.disabled=true;button.textContent="OPENING...";
- const {data,error}=await sb.storage.from("customer-photos").createSignedUrl(path,300);
- button.disabled=false;button.textContent=old;
- if(error){alert("Could not open customer photo: "+error.message);return;}
+ const old=button.textContent;
+ button.disabled=true;
+ button.textContent="OPENING...";
+
+ const {data,error}=await sb.storage
+  .from("customer-photos")
+  .createSignedUrl(path,300);
+
+ button.disabled=false;
+ button.textContent=old;
+
+ if(error){
+  alert("Could not open customer photo: "+error.message);
+  return;
+ }
+
  window.open(data.signedUrl,"_blank","noopener");
 }
 
@@ -317,23 +372,44 @@ function showDashboard(show){
 
 async function checkSession(){
  const {data,error}=await sb.auth.getSession();
- if(error){el("loginMessage").textContent=error.message;return;}
- if(data.session){showDashboard(true);await refreshAll();}
- else showDashboard(false);
+
+ if(error){
+  el("loginMessage").textContent=error.message;
+  return;
+ }
+
+ if(data.session){
+  showDashboard(true);
+  await refreshAll();
+ }else{
+  showDashboard(false);
+ }
 }
 
 el("loginForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  const f=new FormData(e.target);
  el("loginMessage").textContent="Signing in...";
- const {error}=await sb.auth.signInWithPassword({email:f.get("email"),password:f.get("password")});
- if(error){el("loginMessage").textContent=error.message;return;}
+
+ const {error}=await sb.auth.signInWithPassword({
+  email:f.get("email"),
+  password:f.get("password")
+ });
+
+ if(error){
+  el("loginMessage").textContent=error.message;
+  return;
+ }
+
  el("loginMessage").textContent="";
- showDashboard(true);await refreshAll();
+ showDashboard(true);
+ await refreshAll();
 });
 
 async function logout(){
- await sb.auth.signOut();showDashboard(false);
+ await sb.auth.signOut();
+ showDashboard(false);
 }
 
 async function refreshAll(){
@@ -342,12 +418,16 @@ async function refreshAll(){
 
 async function loadTrackingRecords(orders){
  trackingCache=new Map();
+
  const ids=orders.map(o=>o.id).filter(Boolean);
  if(!ids.length)return null;
+
  const {data,error}=await sb.from("zyra_orders")
   .select("id,tracking_id,courier,courier_reference,status,location,note,estimated_delivery,store_order_id")
   .in("store_order_id",ids);
+
  if(error)return error;
+
  (data||[]).forEach(r=>trackingCache.set(r.store_order_id,r));
  return null;
 }
@@ -355,30 +435,55 @@ async function loadTrackingRecords(orders){
 function makeSelect(options,selected,includeUnknown=false){
  const s=document.createElement("select");
  const list=[...options];
- if(includeUnknown&&selected&&!list.some(x=>x.value===selected||x===selected))list.push(selected);
+
+ if(includeUnknown&&selected&&!list.some(x=>x.value===selected||x===selected)){
+  list.push(selected);
+ }
+
  list.forEach(item=>{
   const o=document.createElement("option");
-  if(typeof item==="string"){o.value=item;o.textContent=item;}
-  else{o.value=item.value;o.textContent=item.label;}
+
+  if(typeof item==="string"){
+   o.value=item;
+   o.textContent=item;
+  }else{
+   o.value=item.value;
+   o.textContent=item.label;
+  }
+
   s.append(o);
  });
+
  s.value=selected||"";
  return s;
 }
 
 function addField(parent,labelText,control){
- const box=document.createElement("div");box.className="field";
- const label=document.createElement("label");label.className="tracking-label";label.textContent=labelText;
- box.append(label,control);parent.append(box);return control;
+ const box=document.createElement("div");
+ box.className="field";
+
+ const label=document.createElement("label");
+ label.className="tracking-label";
+ label.textContent=labelText;
+
+ box.append(label,control);
+ parent.append(box);
+ return control;
 }
 
 function makeInput(value,type="text",placeholder=""){
- const input=document.createElement("input");input.type=type;
- input.value=value||"";input.placeholder=placeholder;return input;
+ const input=document.createElement("input");
+ input.type=type;
+ input.value=value||"";
+ input.placeholder=placeholder;
+ return input;
 }
 
 function makeTextarea(value,placeholder=""){
- const input=document.createElement("textarea");input.value=value||"";input.placeholder=placeholder;return input;
+ const input=document.createElement("textarea");
+ input.value=value||"";
+ input.placeholder=placeholder;
+ return input;
 }
 
 /* MANUAL ORDER FUNCTIONS */
@@ -386,10 +491,11 @@ function makeTextarea(value,placeholder=""){
 async function loadManualProductOptions(){
  const {data,error}=await sb.from("store_products")
   .select("id,name,price,is_customisable,is_active")
-  .eq("is_active",true).order("name");
+  .eq("is_active",true)
+  .order("name");
+
  if(error)throw error;
 
- // Do not overwrite productCache used by Edit Product.
  manualProductCache=data||[];
 }
 
@@ -397,12 +503,14 @@ function addManualItem(){
  const root=el("manualItems");
  const wrap=document.createElement("div");
  wrap.className="manual-item";
+
  const grid=document.createElement("div");
  grid.className="manual-item-grid";
 
  const product=document.createElement("select");
  product.className="product-choice";
  product.innerHTML='<option value="">Select product</option>';
+
  manualProductCache.forEach(p=>{
   const option=document.createElement("option");
   option.value=p.id;
@@ -411,7 +519,10 @@ function addManualItem(){
  });
 
  const qty=document.createElement("input");
- qty.type="number";qty.min="1";qty.max="20";qty.value="1";
+ qty.type="number";
+ qty.min="1";
+ qty.max="20";
+ qty.value="1";
  qty.setAttribute("aria-label","Quantity");
 
  const custom=document.createElement("textarea");
@@ -419,7 +530,9 @@ function addManualItem(){
  custom.style.minHeight="45px";
 
  const remove=document.createElement("button");
- remove.type="button";remove.className="btn danger";remove.textContent="REMOVE";
+ remove.type="button";
+ remove.className="btn danger";
+ remove.textContent="REMOVE";
 
  const priceLabel=document.createElement("div");
  priceLabel.className="muted";
@@ -430,12 +543,17 @@ function addManualItem(){
   priceLabel.textContent=p?money(p.price)+" each":"Select a product";
   updateManualSubtotal();
  });
+
  qty.addEventListener("input",updateManualSubtotal);
- remove.addEventListener("click",()=>{wrap.remove();updateManualSubtotal();});
+ remove.addEventListener("click",()=>{
+  wrap.remove();
+  updateManualSubtotal();
+ });
 
  grid.append(product,qty,remove);
  wrap.append(grid,priceLabel,custom);
  root.append(wrap);
+
  updateManualSubtotal();
 }
 
@@ -446,13 +564,18 @@ function getManualItems(){
   const instructions=wrap.querySelector("textarea").value.trim();
 
   const product=manualProductCache.find(p=>p.id===productId);
+
   return {product,productId,quantity,instructions};
  }).filter(x=>x.product);
 }
 
 function updateManualSubtotal(){
  const items=getManualItems();
- const total=items.reduce((sum,x)=>sum+Number(x.product.price||0)*Number(x.quantity||0),0);
+
+ const total=items.reduce(
+  (sum,x)=>sum+Number(x.product.price||0)*Number(x.quantity||0),0
+ );
+
  el("manualSubtotal").textContent=money(total);
 
  const hasCustom=items.some(x=>x.product.is_customisable===true);
@@ -460,7 +583,9 @@ function updateManualSubtotal(){
 
  if(hasCustom){
   payment.value="Bank Transfer";
-  [...payment.options].forEach(o=>{if(o.value==="COD")o.disabled=true;});
+  [...payment.options].forEach(o=>{
+   if(o.value==="COD")o.disabled=true;
+  });
  }else{
   [...payment.options].forEach(o=>{o.disabled=false;});
  }
@@ -474,30 +599,44 @@ function resetManualOrder(){
 }
 
 function validateManualOrder(form,items){
- if(!items.length)throw new Error("Please add at least one product.");
+ if(!items.length){
+  throw new Error("Please add at least one product.");
+ }
 
  for(const item of items){
-  if(!item.productId)throw new Error("Please select a product for every order line.");
-  if(!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>20)
+  if(!item.productId){
+   throw new Error("Please select a product for every order line.");
+  }
+
+  if(!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>20){
    throw new Error("Each product quantity must be between 1 and 20.");
-  if(item.product.is_customisable===true&&!item.instructions)
+  }
+
+  if(item.product.is_customisable===true&&!item.instructions){
    throw new Error("Please enter customisation details for "+item.product.name+".");
+  }
  }
 
  const hasCustom=items.some(x=>x.product.is_customisable===true);
- if(hasCustom&&form.elements.payment_method.value!=="Bank Transfer")
+
+ if(hasCustom&&form.elements.payment_method.value!=="Bank Transfer"){
   throw new Error("Orders containing customised products must use Bank Transfer.");
+ }
 
  const phone=form.elements.phone.value.trim();
- if(!/^07[0-9]{8}$/.test(phone))
-  throw new Error("Enter a valid Sri Lankan mobile number (07XXXXXXXX).");
 
- if(!/^[0-9]{5}$/.test(form.elements.postal_code.value.trim()))
+ if(!/^07[0-9]{8}$/.test(phone)){
+  throw new Error("Enter a valid Sri Lankan mobile number (07XXXXXXXX).");
+ }
+
+ if(!/^[0-9]{5}$/.test(form.elements.postal_code.value.trim())){
   throw new Error("Postal code must contain 5 digits.");
+ }
 }
 
 async function createManualOrder(event){
  event.preventDefault();
+
  const form=event.target;
  const button=el("createManualOrderBtn");
  const message=el("manualOrderMessage");
@@ -507,7 +646,10 @@ async function createManualOrder(event){
  try{
   validateManualOrder(form,items);
 
-  const subtotal=items.reduce((sum,x)=>sum+Number(x.product.price)*x.quantity,0);
+  const subtotal=items.reduce(
+   (sum,x)=>sum+Number(x.product.price)*x.quantity,0
+  );
+
   const hasCustom=items.some(x=>x.product.is_customisable===true);
 
   if(!confirm(
@@ -515,7 +657,9 @@ async function createManualOrder(event){
    "\nProducts: "+items.length+
    "\nProduct subtotal: "+money(subtotal)+
    "\nDelivery fee: paid separately to courier."
-  ))return;
+  )){
+   return;
+  }
 
   button.disabled=true;
   button.textContent="CREATING ORDER...";
@@ -541,9 +685,13 @@ async function createManualOrder(event){
   };
 
   const {data:order,error:orderError}=await sb.from("store_orders")
-   .insert(orderPayload).select("*").single();
+   .insert(orderPayload)
+   .select("*")
+   .single();
 
-  if(orderError)throw new Error("Could not create store order: "+orderError.message);
+  if(orderError){
+   throw new Error("Could not create store order: "+orderError.message);
+  }
 
   const itemPayload=items.map(x=>({
    order_id:order.id,
@@ -559,15 +707,26 @@ async function createManualOrder(event){
 
   if(itemError){
    const rollback=await sb.from("store_orders").delete().eq("id",order.id);
+
    if(rollback.error){
-    throw new Error("Order was created, but items failed and automatic cleanup also failed. Order ID: "+order.id+". Item error: "+itemError.message+". Cleanup error: "+rollback.error.message);
+    throw new Error(
+     "Order was created, but items failed and automatic cleanup also failed. "+
+     "Order ID: "+order.id+
+     ". Item error: "+itemError.message+
+     ". Cleanup error: "+rollback.error.message
+    );
    }
+
    throw new Error("Order could not save its product items: "+itemError.message);
   }
 
   const trackingId=order.order_number;
+
   if(!trackingId){
-   throw new Error("The order was saved, but no order_number was returned. Check the store_orders order number default.");
+   throw new Error(
+    "The order was saved, but no order_number was returned. "+
+    "Check the store_orders order number default."
+   );
   }
 
   const {error:trackingError}=await sb.from("zyra_orders").insert({
@@ -579,19 +738,25 @@ async function createManualOrder(event){
   });
 
   if(trackingError){
-   message.textContent="Order and items were saved, but tracking creation failed: "+trackingError.message+
+   message.textContent=
+    "Order and items were saved, but tracking creation failed: "+
+    trackingError.message+
     "\nPlease check the order before trying again.";
+
    await loadOrders();
    return;
   }
 
   message.textContent="Manual order created successfully! Order ID: "+trackingId;
+
   form.reset();
   resetManualOrder();
   await loadOrders();
 
  }catch(error){
-  message.textContent=error instanceof Error?error.message:"Could not create manual order.";
+  message.textContent=error instanceof Error
+   ?error.message
+   :"Could not create manual order.";
  }finally{
   button.disabled=false;
   button.textContent="CREATE ORDER";
@@ -607,7 +772,8 @@ async function loadOrders(){
 
  const {data,error}=await sb.from("store_orders")
   .select("*,store_order_items(*)")
-  .order("created_at",{ascending:false}).limit(200);
+  .order("created_at",{ascending:false})
+  .limit(200);
 
  if(error){
   el("ordersMessage").textContent="Could not load orders: "+error.message;
@@ -618,14 +784,21 @@ async function loadOrders(){
  const trackingError=await loadTrackingRecords(orders);
 
  el("statOrders").textContent=orders.length;
- el("statPending").textContent=orders.filter(o=>(o.order_status||"pending").toLowerCase()==="pending").length;
- el("statSales").textContent=money(orders.reduce((s,o)=>s+Number(o.total_amount||0),0));
+
+ el("statPending").textContent=orders.filter(
+  o=>(o.order_status||"pending").toLowerCase()==="pending"
+ ).length;
+
+ el("statSales").textContent=money(
+  orders.reduce((s,o)=>s+Number(o.total_amount||0),0)
+ );
 
  const root=el("ordersList");
  root.replaceChildren();
 
  el("ordersMessage").textContent=trackingError
-  ?"Orders loaded, but tracking records could not be read: "+trackingError.message:"";
+  ?"Orders loaded, but tracking records could not be read: "+trackingError.message
+  :"";
 
  if(!orders.length){
   root.textContent="No store orders have been placed yet.";
@@ -651,16 +824,63 @@ async function loadOrders(){
   const info=document.createElement("p");
   info.className="muted";
   info.textContent=[
-   order.phone||"No phone",order.email||"No email",order.city||"",
-   order.payment_method||"",order.payment_status||"",
+   order.phone||"No phone",
+   order.email||"No email",
+   order.city||"",
+   order.payment_method||"",
    new Date(order.created_at).toLocaleString()
   ].filter(Boolean).join(" · ");
+
   card.append(info);
+
+  // PAYMENT STATUS CONTROL
+  const paymentPanel=document.createElement("div");
+  paymentPanel.className="tracking-panel";
+
+  const paymentHeading=document.createElement("strong");
+  paymentHeading.textContent="PAYMENT STATUS";
+  paymentPanel.append(paymentHeading);
+
+  const paymentGrid=document.createElement("div");
+  paymentGrid.className="tracking-grid";
+
+  const currentPayment=String(order.payment_status||"pending").toLowerCase();
+
+  const paymentSelect=addField(
+   paymentGrid,
+   "PAYMENT STATUS",
+   makeSelect(PAYMENT_STATUSES,currentPayment,true)
+  );
+
+  paymentPanel.append(paymentGrid);
+
+  const paymentSave=document.createElement("button");
+  paymentSave.className="btn";
+  paymentSave.style.marginTop="10px";
+  paymentSave.textContent="SAVE PAYMENT STATUS";
+
+  paymentSave.onclick=()=>savePaymentStatus(
+   order,
+   paymentSelect.value,
+   paymentSave
+  );
+
+  paymentPanel.append(paymentSave);
+  card.append(paymentPanel);
+
+  const orderStatus=document.createElement("p");
+  orderStatus.className="muted";
+  orderStatus.textContent="Order status: "+(order.order_status||"pending").toUpperCase();
+  card.append(orderStatus);
 
   const address=document.createElement("p");
   address.textContent="Delivery: "+[
-   order.delivery_address,order.city,order.district,order.postal_code
+   order.delivery_address,
+   order.city,
+   order.district,
+   order.postal_code
   ].filter(Boolean).join(", ");
+
   card.append(address);
 
   if(order.customer_notes){
@@ -672,7 +892,8 @@ async function loadOrders(){
   if(order.selected_bank||order.bank_transaction_reference){
    const payment=document.createElement("p");
    payment.className="muted";
-   payment.textContent="Bank: "+(order.selected_bank||"—")+" · Reference: "+(order.bank_transaction_reference||"—");
+   payment.textContent="Bank: "+(order.selected_bank||"—")+
+    " · Reference: "+(order.bank_transaction_reference||"—");
    card.append(payment);
   }
 
@@ -686,11 +907,15 @@ async function loadOrders(){
    items.forEach(it=>{
     const line=document.createElement("div");
     line.className="itemline";
-    line.textContent=`${it.product_name} × ${it.quantity} — ${money(Number(it.unit_price)*Number(it.quantity))}`;
+
+    line.textContent=
+     `${it.product_name} × ${it.quantity} — `+
+     money(Number(it.unit_price)*Number(it.quantity));
 
     if(it.is_customised&&it.customisation_details){
      appendCustomisationDetails(line,it.customisation_details);
     }
+
     itemBox.append(line);
    });
   }
@@ -722,18 +947,52 @@ async function loadOrders(){
   if(tracking){
    const trackInfo=document.createElement("p");
    trackInfo.className="muted";
-   trackInfo.textContent="Customer Order ID: "+(tracking.tracking_id||order.order_number||"—");
+   trackInfo.textContent="Customer Order ID: "+
+    (tracking.tracking_id||order.order_number||"—");
    panel.append(trackInfo);
 
    const grid=document.createElement("div");
    grid.className="tracking-grid";
 
-   const courier=addField(grid,"ASSIGN COURIER",makeSelect(COURIERS,tracking.courier||"Pending assignment",true));
-   const status=addField(grid,"DELIVERY STATUS",makeSelect(ORDER_STATUSES,statusValueFromTracking(tracking.status,order.order_status),true));
-   const reference=addField(grid,"COURIER REFERENCE NUMBER",makeInput(tracking.courier_reference,"text","Enter courier reference"));
-   const location=addField(grid,"CURRENT LOCATION",makeInput(tracking.location,"text","Enter current parcel location"));
-   const estimated=addField(grid,"ESTIMATED DELIVERY",makeInput(toDateInput(tracking.estimated_delivery),"date"));
-   const note=addField(grid,"DELIVERY UPDATE / NOTE",makeTextarea(tracking.note,"Example: Parcel handed over to courier"));
+   const courier=addField(
+    grid,
+    "ASSIGN COURIER",
+    makeSelect(COURIERS,tracking.courier||"Pending assignment",true)
+   );
+
+   const status=addField(
+    grid,
+    "DELIVERY STATUS",
+    makeSelect(
+     ORDER_STATUSES,
+     statusValueFromTracking(tracking.status,order.order_status),
+     true
+    )
+   );
+
+   const reference=addField(
+    grid,
+    "COURIER REFERENCE NUMBER",
+    makeInput(tracking.courier_reference,"text","Enter courier reference")
+   );
+
+   const location=addField(
+    grid,
+    "CURRENT LOCATION",
+    makeInput(tracking.location,"text","Enter current parcel location")
+   );
+
+   const estimated=addField(
+    grid,
+    "ESTIMATED DELIVERY",
+    makeInput(toDateInput(tracking.estimated_delivery),"date")
+   );
+
+   const note=addField(
+    grid,
+    "DELIVERY UPDATE / NOTE",
+    makeTextarea(tracking.note,"Example: Parcel handed over to courier")
+   );
 
    panel.append(grid);
 
@@ -742,21 +1001,31 @@ async function loadOrders(){
    save.textContent="SAVE DELIVERY TRACKING";
 
    save.onclick=()=>saveOrderTracking({
-    order,tracking,courier:courier.value,status:status.value,
-    reference:reference.value.trim(),location:location.value.trim(),
-    estimated:estimated.value,note:note.value.trim(),button:save
+    order,
+    tracking,
+    courier:courier.value,
+    status:status.value,
+    reference:reference.value.trim(),
+    location:location.value.trim(),
+    estimated:estimated.value,
+    note:note.value.trim(),
+    button:save
    });
 
    panel.append(save);
 
    const customerHint=document.createElement("p");
    customerHint.className="muted";
-   customerHint.textContent="Customers can enter this Order ID in the Track Order section on the main Zyra.lk website.";
+   customerHint.textContent=
+    "Customers can enter this Order ID in the Track Order section on the main Zyra.lk website.";
+
    panel.append(customerHint);
   }else{
    const warning=document.createElement("p");
    warning.className="muted";
-   warning.textContent="No linked tracking record was found. This order may have been created before tracking integration.";
+   warning.textContent=
+    "No linked tracking record was found. This order may have been created before tracking integration.";
+
    panel.append(warning);
   }
 
@@ -782,33 +1051,117 @@ async function loadOrders(){
  });
 }
 
+/* SAVE PAYMENT STATUS */
+
+async function savePaymentStatus(order,newStatus,button){
+ if(!PAYMENT_STATUSES.some(x=>x.value===newStatus)){
+  alert("Please select a valid payment status.");
+  return;
+ }
+
+ const oldStatus=String(order.payment_status||"pending").toLowerCase();
+
+ if(oldStatus===newStatus){
+  alert("Payment status is already "+newStatus+".");
+  return;
+ }
+
+ if(!confirm(
+  "Update payment status?\n\n"+
+  "Order: "+(order.order_number||order.id)+"\n"+
+  "Customer: "+(order.customer_name||"Customer")+"\n"+
+  "New payment status: "+newStatus.toUpperCase()
+ )){
+  return;
+ }
+
+ button.disabled=true;
+ button.textContent="SAVING...";
+
+ try{
+  const updateData={
+   payment_status:newStatus
+  };
+
+  // Confirm a pending bank-transfer order after payment is verified.
+  // COD orders remain separately controlled.
+  if(
+   newStatus==="paid" &&
+   String(order.payment_method||"").toLowerCase()==="bank transfer" &&
+   String(order.order_status||"pending").toLowerCase()==="pending"
+  ){
+   updateData.order_status="confirmed";
+  }
+
+  const {error}=await sb.from("store_orders")
+   .update(updateData)
+   .eq("id",order.id);
+
+  if(error)throw new Error(error.message);
+
+  alert("Payment status updated successfully.");
+  await loadOrders();
+
+ }catch(error){
+  alert("Could not update payment status: "+error.message);
+ }finally{
+  button.disabled=false;
+  button.textContent="SAVE PAYMENT STATUS";
+ }
+}
+
 function toDateInput(value){
  if(!value)return "";
+
  const d=new Date(value);
  if(Number.isNaN(d.getTime()))return "";
+
  return d.toISOString().slice(0,10);
 }
 
 function statusValueFromTracking(trackingStatus,orderStatus){
  const s=String(trackingStatus||"").toLowerCase().replaceAll(" ","_");
+
  if(ORDER_STATUSES.some(x=>x.value===s))return s;
+
  const fallback=String(orderStatus||"pending").toLowerCase();
- return ORDER_STATUSES.some(x=>x.value===fallback)?fallback:"pending";
+
+ return ORDER_STATUSES.some(x=>x.value===fallback)
+  ?fallback
+  :"pending";
 }
 
 function mapStoreOrderStatus(status){
- if(["dispatched","in_transit","out_for_delivery","shipped"].includes(status))return "shipped";
+ if(["dispatched","in_transit","out_for_delivery","shipped"].includes(status)){
+  return "shipped";
+ }
  return status;
 }
 
 async function saveOrderTracking({
  order,tracking,courier,status,reference,location,estimated,note,button
 }){
- if(!tracking?.id){alert("No linked tracking record was found.");return;}
- if(!COURIERS.includes(courier)){alert("Please select a valid courier.");return;}
- if(!ORDER_STATUSES.some(x=>x.value===status)){alert("Please select a valid delivery status.");return;}
+ if(!tracking?.id){
+  alert("No linked tracking record was found.");
+  return;
+ }
 
- if(!confirm("Save delivery updates?\n\nOrder: "+order.order_number+"\nCourier: "+courier+"\nStatus: "+status))return;
+ if(!COURIERS.includes(courier)){
+  alert("Please select a valid courier.");
+  return;
+ }
+
+ if(!ORDER_STATUSES.some(x=>x.value===status)){
+  alert("Please select a valid delivery status.");
+  return;
+ }
+
+ if(!confirm(
+  "Save delivery updates?\n\nOrder: "+order.order_number+
+  "\nCourier: "+courier+"\nStatus: "+status
+ )){
+  return;
+ }
 
  button.disabled=true;
  button.textContent="SAVING...";
@@ -825,20 +1178,39 @@ async function saveOrderTracking({
   };
 
   const {error:trackingError}=await sb.from("zyra_orders")
-   .update(trackingUpdate).eq("id",tracking.id).eq("store_order_id",order.id);
+   .update(trackingUpdate)
+   .eq("id",tracking.id)
+   .eq("store_order_id",order.id);
 
-  if(trackingError)throw new Error("Tracking update failed: "+trackingError.message);
+  if(trackingError){
+   throw new Error("Tracking update failed: "+trackingError.message);
+  }
 
   const {error:orderError}=await sb.from("store_orders")
-   .update({order_status:mapStoreOrderStatus(status)}).eq("id",order.id);
+   .update({order_status:mapStoreOrderStatus(status)})
+   .eq("id",order.id);
 
-  if(orderError)throw new Error("Tracking was updated, but store order status could not be updated: "+orderError.message);
+  if(orderError){
+   throw new Error(
+    "Tracking was updated, but store order status could not be updated: "+
+    orderError.message
+   );
+  }
 
-  alert("Delivery tracking saved successfully!\n\nOrder ID: "+tracking.tracking_id+"\nCourier: "+courier+"\nStatus: "+(TRACKING_LABELS[status]||"Pending"));
+  alert(
+   "Delivery tracking saved successfully!\n\n"+
+   "Order ID: "+tracking.tracking_id+
+   "\nCourier: "+courier+
+   "\nStatus: "+(TRACKING_LABELS[status]||"Pending")
+  );
+
   await loadOrders();
 
  }catch(error){
-  alert(error instanceof Error?error.message:"Could not update delivery tracking.");
+  alert(error instanceof Error
+   ?error.message
+   :"Could not update delivery tracking.");
+
   await loadOrders();
  }finally{
   button.disabled=false;
@@ -846,12 +1218,7 @@ async function saveOrderTracking({
  }
 }
 
-/*
- REMOVE ORDER
- Deletes the tracking record first, then order items,
- then the main store order.
- Each step checks for errors.
-*/
+/* REMOVE ORDER */
 
 async function removeOrder(order,button){
  const orderId=order.id;
@@ -879,7 +1246,6 @@ async function removeOrder(order,button){
  button.textContent="REMOVING...";
 
  try{
-  // Step 1: Delete linked Zyra tracking record(s).
   const {error:trackingError}=await sb.from("zyra_orders")
    .delete()
    .eq("store_order_id",orderId);
@@ -891,7 +1257,6 @@ async function removeOrder(order,button){
    );
   }
 
-  // Step 2: Delete linked store order items.
   const {error:itemError}=await sb.from("store_order_items")
    .delete()
    .eq("order_id",orderId);
@@ -903,7 +1268,6 @@ async function removeOrder(order,button){
    );
   }
 
-  // Step 3: Delete the main store order.
   const {error:orderError}=await sb.from("store_orders")
    .delete()
    .eq("id",orderId);
@@ -918,11 +1282,13 @@ async function removeOrder(order,button){
   trackingCache.delete(orderId);
 
   alert("Order "+orderNumber+" was successfully removed.");
-
   await loadOrders();
 
  }catch(error){
-  alert(error instanceof Error?error.message:"Could not remove this order.");
+  alert(error instanceof Error
+   ?error.message
+   :"Could not remove this order.");
+
   await loadOrders();
  }finally{
   button.disabled=false;
@@ -932,9 +1298,15 @@ async function removeOrder(order,button){
 
 function escapeHtml(s){
  return String(s??"").replace(/[&<>"']/g,c=>({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
  }[c]));
 }
+
+/* INVOICE */
 
 function printInvoice(o){
  const items=o.store_order_items||[];
@@ -944,7 +1316,8 @@ function printInvoice(o){
 
   const customText=i.is_customised
    ?Object.entries(details).map(([k,v])=>
-    escapeHtml(k)+": "+escapeHtml(typeof v==="object"?JSON.stringify(v):v)
+    escapeHtml(k)+": "+
+    escapeHtml(typeof v==="object"?JSON.stringify(v):v)
    ).join("<br>")
    :"";
 
@@ -963,6 +1336,8 @@ function printInvoice(o){
   return;
  }
 
+ const paymentStatus=String(o.payment_status||"pending").toUpperCase();
+
  w.document.write(`<!doctype html>
  <html><head><title>Invoice ${escapeHtml(o.order_number)}</title>
  <style>
@@ -973,22 +1348,35 @@ function printInvoice(o){
  .total{text-align:right;font-weight:bold;margin-top:20px}
  small{color:#82766f}
  </style></head><body>
- <h1>ZYRA.LK</h1><h2>Order Invoice</h2>
- <p><b>Order:</b> ${escapeHtml(o.order_number)}<br>
+ <h1>ZYRA.LK</h1>
+ <h2>Order Invoice</h2>
+
+ <p>
+ <b>Order:</b> ${escapeHtml(o.order_number)}<br>
  <b>Date:</b> ${new Date(o.created_at).toLocaleString()}<br>
  <b>Customer:</b> ${escapeHtml(o.customer_name)}<br>
  <b>Phone:</b> ${escapeHtml(o.phone)}<br>
  <b>Email:</b> ${escapeHtml(o.email||"Not provided")}<br>
  <b>Address:</b> ${escapeHtml(o.delivery_address)}, ${escapeHtml(o.city)}, ${escapeHtml(o.district||"")}, ${escapeHtml(o.postal_code||"")}<br>
- <b>Payment:</b> ${escapeHtml(o.payment_method)}</p>
- <table><thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead>
- <tbody>${rows}</tbody></table>
+ <b>Payment Method:</b> ${escapeHtml(o.payment_method)}<br>
+ <b>Payment Status:</b> ${escapeHtml(paymentStatus)}
+ </p>
+
+ <table>
+ <thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead>
+ <tbody>${rows}</tbody>
+ </table>
+
  <div class="total">
  <h3>Amount payable to Zyra: ${money(o.total_amount)}</h3>
  <p>Delivery fee: Paid separately to courier on delivery</p>
  </div>
+
  <p>Thank you for shopping with Zyra.lk.</p>
- <script>window.onload=()=>window.print();<\/script>
+
+ <script>
+ window.onload=()=>window.print();
+ <\/script>
  </body></html>`);
 
  w.document.close();
@@ -998,14 +1386,15 @@ function printInvoice(o){
 
 async function loadProducts(){
  const {data,error}=await sb.from("store_products")
-  .select("*").order("created_at",{ascending:false});
+  .select("*")
+  .order("created_at",{ascending:false});
 
  if(error){
   el("productMessage").textContent="Could not load products: "+error.message;
   return;
  }
 
- // Full product data is preserved for editing.
+ // This is the full product data used by the EDIT button.
  productCache=data||[];
 
  const body=el("productsBody");
@@ -1015,8 +1404,12 @@ async function loadProducts(){
   const tr=document.createElement("tr");
 
   [
-   p.name,money(p.price),p.category||"—",p.stock_quantity,
-   p.is_customisable?"Yes":"No",p.is_active?"Yes":"No"
+   p.name,
+   money(p.price),
+   p.category||"—",
+   p.stock_quantity,
+   p.is_customisable?"Yes":"No",
+   p.is_active?"Yes":"No"
   ].forEach(v=>{
    const td=document.createElement("td");
    td.textContent=v;
@@ -1026,6 +1419,7 @@ async function loadProducts(){
   const action=document.createElement("td");
 
   const edit=document.createElement("button");
+  edit.type="button";
   edit.className="btn light";
   edit.textContent="EDIT";
   edit.onclick=()=>editProduct(p.id);
@@ -1042,54 +1436,75 @@ async function loadProducts(){
    "Could not load manual order products: "+error.message;
  }
 
- if(!el("manualItems").children.length)addManualItem();
+ if(!el("manualItems").children.length){
+  addManualItem();
+ }
 }
 
+/* EDIT PRODUCT */
+
 function editProduct(id){
- const p=productCache.find(x=>x.id===id);
- if(!p)return;
+ const p=productCache.find(x=>String(x.id)===String(id));
+
+ if(!p){
+  el("productMessage").textContent=
+   "Product not found. Please refresh the products list.";
+  return;
+ }
 
  const f=el("productForm");
 
- [
-  "id","name","price","category","image_url",
-  "description","stock_quantity"
- ].forEach(k=>{
-  f.elements[k].value=p[k]??"";
- });
+ // Fill the existing product information into the form.
+ f.elements.id.value=p.id;
+ f.elements.name.value=p.name??"";
+ f.elements.price.value=p.price??"";
+ f.elements.category.value=p.category??"";
+ f.elements.image_url.value=p.image_url??"";
+ f.elements.description.value=p.description??"";
+ f.elements.stock_quantity.value=p.stock_quantity??0;
 
  f.elements.is_customisable.checked=!!p.is_customisable;
  f.elements.is_active.checked=!!p.is_active;
 
- el("productMessage").textContent="Editing: "+p.name;
+ el("saveProductBtn").textContent="UPDATE PRODUCT";
+ el("productMessage").textContent="Editing product: "+p.name;
 
- el("productForm").scrollIntoView({
+ f.scrollIntoView({
   behavior:"smooth",
   block:"start"
  });
 }
 
 function resetProductForm(){
- el("productForm").reset();
-
  const f=el("productForm");
+
+ f.reset();
  f.elements.id.value="";
  f.elements.stock_quantity.value=0;
  f.elements.is_active.checked=true;
 
+ el("saveProductBtn").textContent="SAVE PRODUCT";
  el("productMessage").textContent="";
 }
+
+/* SAVE OR UPDATE PRODUCT */
 
 el("productForm").addEventListener("submit",async e=>{
  e.preventDefault();
 
  const f=e.target;
- const id=f.elements.id.value;
+ const id=f.elements.id.value.trim();
+
  const price=Number(f.elements.price.value);
  const stock=Number(f.elements.stock_quantity.value);
 
- if(!Number.isFinite(price)||price<0||!Number.isInteger(stock)||stock<0){
-  el("productMessage").textContent="Enter a valid price and stock quantity.";
+ if(!Number.isFinite(price)||price<0){
+  el("productMessage").textContent="Enter a valid product price.";
+  return;
+ }
+
+ if(!Number.isInteger(stock)||stock<0){
+  el("productMessage").textContent="Enter a valid stock quantity.";
   return;
  }
 
@@ -1104,18 +1519,58 @@ el("productForm").addEventListener("submit",async e=>{
   is_active:f.elements.is_active.checked
  };
 
- const result=id
-  ?await sb.from("store_products").update(payload).eq("id",id)
-  :await sb.from("store_products").insert(payload);
-
- if(result.error){
-  el("productMessage").textContent=result.error.message;
+ if(!payload.name){
+  el("productMessage").textContent="Product name is required.";
   return;
  }
 
- el("productMessage").textContent="Product saved successfully.";
- resetProductForm();
- await loadProducts();
+ const button=el("saveProductBtn");
+ button.disabled=true;
+ button.textContent=id?"UPDATING...":"SAVING...";
+
+ try{
+  let result;
+
+  if(id){
+   // Update the existing row using its product ID.
+   result=await sb.from("store_products")
+    .update(payload)
+    .eq("id",id)
+    .select("*");
+
+   if(result.error)throw result.error;
+
+   if(!result.data||result.data.length===0){
+    throw new Error(
+     "No product was updated. Check your Supabase update permission (RLS)."
+    );
+   }
+
+   el("productMessage").textContent="Product updated successfully.";
+  }else{
+   result=await sb.from("store_products")
+    .insert(payload)
+    .select("*");
+
+   if(result.error)throw result.error;
+
+   el("productMessage").textContent="Product added successfully.";
+  }
+
+  resetProductForm();
+  await loadProducts();
+
+  el("productMessage").textContent=
+   id?"Product updated successfully.":"Product added successfully.";
+
+ }catch(error){
+  el("productMessage").textContent=
+   "Could not save product: "+(error.message||"Unknown error");
+ }finally{
+  button.disabled=false;
+  button.textContent=
+   f.elements.id.value?"UPDATE PRODUCT":"SAVE PRODUCT";
+ }
 });
 
 sb.auth.onAuthStateChange((_event,session)=>{
