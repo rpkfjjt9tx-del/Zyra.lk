@@ -8,110 +8,102 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
+:root {
   --wine:#842d40;
   --cream:#faf7f2;
   --dark:#292522;
   --muted:#82766f;
   --line:#e9e1dc;
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.zyra-header{
+* {box-sizing:border-box}
+body {margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
+button,input,select,textarea {font:inherit}
+button {cursor:pointer}
+.zyra-header {
   background:#fff;min-height:76px;padding:12px 6%;
   display:flex;align-items:center;justify-content:space-between;
   gap:20px;position:sticky;top:0;z-index:100;
   border-bottom:1px solid var(--line);
-  box-shadow:0 2px 12px rgba(40,25,25,.035)
 }
-.zyra-brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
-.zyra-brand img{display:block;max-width:175px;max-height:48px;object-fit:contain}
-.zyra-brand-fallback{display:none;color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:3px}
-.zyra-nav{display:flex;align-items:center;gap:25px}
-.zyra-nav a{color:var(--dark);text-decoration:none;font-size:11px;letter-spacing:1.2px;font-weight:600;transition:color .2s}
-.zyra-nav a:hover{color:var(--wine)}
-.zyra-cart{background:var(--wine);color:#fff;border:1px solid var(--wine);padding:12px 18px;font-size:11px;letter-spacing:1px}
-.zyra-cart:hover{background:#682132}
-.btn,.checkout-button{background:var(--wine);color:#fff;border:0;padding:12px 18px}
-.hero{min-height:390px;background:#eee4dc;display:grid;place-items:center;text-align:center;padding:50px 20px}
-.hero h1{font:clamp(36px,6vw,60px) Georgia,serif;margin:0 0 14px}
-.hero p{color:#655a53;margin:0 auto 24px;line-height:1.8;max-width:580px}
-.section{padding:55px 6%}
-.section-title{text-align:center;font:32px Georgia,serif;margin-bottom:10px}
-.section-subtitle{text-align:center;color:var(--muted);margin-bottom:28px;font-size:14px}
-.toolbar{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:25px}
-.toolbar input,.toolbar select{padding:12px;border:1px solid #ddd;background:#fff;min-width:180px}
-.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
-.product-card{background:#fff;border:1px solid var(--line)}
-.product-image{width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4}
-.product-info{padding:15px}
-.product-info h3{font-size:15px;margin:0 0 8px}
-.product-info p{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 10px}
-.price{color:var(--wine);font-weight:bold;margin:0 0 13px}
-.add-button{width:100%;padding:12px;border:0;background:var(--dark);color:#fff}
-.empty{text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
-.benefits{background:#eee5dc;padding:35px 6%;display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:20px}
-.benefits h3{font:20px Georgia,serif;margin-bottom:8px}
-.benefits p{font-size:13px;color:var(--muted)}
-footer{background:var(--dark);color:#fff;padding:35px 6%;text-align:center}
-footer p{font-size:13px;margin-top:10px;color:#ddd}
-.footer-brand{font:bold 27px Georgia,serif;letter-spacing:3px}
-.modal{display:none;position:fixed;inset:0;z-index:300;background:#0009;overflow-y:auto;padding:22px 12px}
-.modal-content{background:#fff;max-width:680px;margin:20px auto;padding:24px;border-radius:3px}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.close{border:0;background:transparent;font-size:26px}
-.cart-item{padding:14px 0;border-bottom:1px solid var(--line)}
-.cart-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
-.cart-row button{border:0;background:transparent;color:var(--wine);padding:5px}
-.custom-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-.custom-fields input,.custom-fields textarea{width:100%;padding:10px;border:1px solid #ddd}
-.custom-fields .wide{grid-column:1/-1}
-.cart-total{font-weight:bold;text-align:right;margin:18px 0}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
-.form-group{margin-bottom:14px}
-.form-group.full{grid-column:1/-1}
-.form-group label{display:block;margin-bottom:6px;font-size:13px}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:11px;border:1px solid #ddd;background:#fff}
-.form-group textarea{min-height:70px;resize:vertical}
-.checkout-button{width:100%}
-.checkout-button:disabled{opacity:.6;cursor:wait}
-.message{margin-top:12px;font-size:13px;line-height:1.6;white-space:pre-wrap}
-.muted{color:var(--muted);font-size:12px}
-.bank-box{display:none;background:#f7f1ec;padding:14px;margin:8px 0 16px;font-size:13px;line-height:1.7}
-.bank-box strong{color:var(--wine)}
-.copy-account{margin-top:10px;background:var(--wine);color:#fff;border:0;padding:9px 13px;border-radius:2px;font-size:12px}
-.tracking{max-width:600px;margin:0 auto}
-.tracking input{width:100%;padding:12px;border:1px solid #ddd;margin:8px 0}
-.tracking-result{background:#fff;padding:15px;margin-top:12px;white-space:pre-wrap}
-.fine{font-size:11px;color:var(--muted);line-height:1.6}
-.photo-upload{grid-column:1/-1;border:1px dashed #cbb8ae;background:#fcfaf8;padding:12px;margin-top:8px}
-.photo-upload label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
-.photo-upload input{width:100%;font-size:13px}
-.photo-help{font-size:11px;color:var(--muted);line-height:1.5;margin-top:7px}
-.image-placeholder{height:250px;display:grid;place-items:center;background:#eee9e4;color:#82766f;font-size:12px;letter-spacing:.5px}
-.payment-slip-upload{border:1px dashed #cbb8ae;background:#fcfaf8;padding:13px;margin-top:8px}
-.payment-slip-upload label{display:block;font-size:13px;font-weight:bold;margin-bottom:8px}
-.payment-slip-upload input{width:100%;font-size:13px}
-.payment-slip-help{font-size:11px;color:var(--muted);line-height:1.6;margin-top:7px}
-@media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:650px){
-  .zyra-header{padding:12px 4%;min-height:68px;gap:8px}
-  .zyra-brand img{max-width:125px;max-height:40px}
-  .zyra-brand-fallback{font-size:21px}
-  .zyra-nav{gap:10px}
-  .zyra-nav a{display:none}
-  .zyra-cart{padding:10px 12px;font-size:10px}
-  .products{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
-  .product-image,.image-placeholder{height:185px}
-  .product-info{padding:10px}
-  .benefits{grid-template-columns:1fr}
-  .section{padding:40px 4%}
-  .form-grid,.custom-fields{grid-template-columns:1fr}
-  .form-group.full,.custom-fields .wide{grid-column:auto}
-  .modal-content{padding:17px}
-  .hero{min-height:330px}
+.zyra-brand {display:flex;align-items:center;text-decoration:none}
+.zyra-brand img {max-width:175px;max-height:48px;object-fit:contain}
+.zyra-brand-fallback {display:none;color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:3px}
+.zyra-nav {display:flex;align-items:center;gap:25px}
+.zyra-nav a {color:var(--dark);text-decoration:none;font-size:11px;letter-spacing:1.2px;font-weight:600}
+.zyra-cart,.btn,.checkout-button {background:var(--wine);color:#fff;border:0;padding:12px 18px}
+.hero {min-height:390px;background:#eee4dc;display:grid;place-items:center;text-align:center;padding:50px 20px}
+.hero h1 {font:clamp(36px,6vw,60px) Georgia,serif;margin:0 0 14px}
+.hero p {color:#655a53;margin:0 auto 24px;line-height:1.8;max-width:580px}
+.section {padding:55px 6%}
+.section-title {text-align:center;font:32px Georgia,serif;margin-bottom:10px}
+.section-subtitle {text-align:center;color:var(--muted);margin-bottom:28px;font-size:14px}
+.toolbar {display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:25px}
+.toolbar input,.toolbar select {padding:12px;border:1px solid #ddd;background:#fff;min-width:180px}
+.products {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.product-card {background:#fff;border:1px solid var(--line)}
+.product-image {width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4}
+.product-info {padding:15px}
+.product-info h3 {font-size:15px;margin:0 0 8px}
+.product-info p {color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 10px}
+.price {color:var(--wine);font-weight:bold;margin:0 0 13px}
+.add-button {width:100%;padding:12px;border:0;background:var(--dark);color:#fff}
+.empty {text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
+.benefits {background:#eee5dc;padding:35px 6%;display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:20px}
+.benefits h3 {font:20px Georgia,serif;margin-bottom:8px}
+.benefits p {font-size:13px;color:var(--muted)}
+footer {background:var(--dark);color:#fff;padding:35px 6%;text-align:center}
+footer p {font-size:13px;margin-top:10px;color:#ddd}
+.footer-brand {font:bold 27px Georgia,serif;letter-spacing:3px}
+.modal {display:none;position:fixed;inset:0;z-index:300;background:#0009;overflow-y:auto;padding:22px 12px}
+.modal-content {background:#fff;max-width:680px;margin:20px auto;padding:24px;border-radius:3px}
+.modal-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.close {border:0;background:transparent;font-size:26px}
+.cart-item {padding:14px 0;border-bottom:1px solid var(--line)}
+.cart-row {display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cart-row button {border:0;background:transparent;color:var(--wine);padding:5px}
+.custom-fields {display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.custom-fields input,.custom-fields textarea,.custom-fields select {width:100%;padding:10px;border:1px solid #ddd;background:#fff}
+.custom-fields .wide {grid-column:1/-1}
+.cart-total {font-weight:bold;text-align:right;margin:18px 0}
+.form-grid {display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.form-group {margin-bottom:14px}
+.form-group.full {grid-column:1/-1}
+.form-group label {display:block;margin-bottom:6px;font-size:13px}
+.form-group input,.form-group textarea,.form-group select {width:100%;padding:11px;border:1px solid #ddd;background:#fff}
+.form-group textarea {min-height:70px;resize:vertical}
+.checkout-button {width:100%}
+.checkout-button:disabled {opacity:.6;cursor:wait}
+.message {margin-top:12px;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.muted,.fine {font-size:12px;color:var(--muted);line-height:1.6}
+.bank-box {display:none;background:#f7f1ec;padding:14px;margin:8px 0 16px;font-size:13px;line-height:1.7}
+.bank-box strong {color:var(--wine)}
+.tracking {max-width:600px;margin:0 auto}
+.tracking input {width:100%;padding:12px;border:1px solid #ddd;margin:8px 0}
+.tracking-result {background:#fff;padding:15px;margin-top:12px;white-space:pre-wrap}
+.photo-upload,.payment-slip-upload {grid-column:1/-1;border:1px dashed #cbb8ae;background:#fcfaf8;padding:12px;margin-top:8px}
+.photo-upload label,.payment-slip-upload label {display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.photo-upload input,.payment-slip-upload input {width:100%;font-size:13px}
+.photo-help,.payment-slip-help {font-size:11px;color:var(--muted);line-height:1.5;margin-top:7px}
+.image-placeholder {height:250px;display:grid;place-items:center;background:#eee9e4;color:#82766f;font-size:12px}
+@media(max-width:900px) {
+  .products {grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:650px) {
+  .zyra-header {padding:12px 4%;min-height:68px;gap:8px}
+  .zyra-brand img {max-width:125px;max-height:40px}
+  .zyra-brand-fallback {font-size:21px}
+  .zyra-nav {gap:10px}
+  .zyra-nav a {display:none}
+  .zyra-cart {padding:10px 12px;font-size:10px}
+  .products {grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .product-image,.image-placeholder {height:185px}
+  .product-info {padding:10px}
+  .benefits {grid-template-columns:1fr}
+  .section {padding:40px 4%}
+  .form-grid,.custom-fields {grid-template-columns:1fr}
+  .form-group.full,.custom-fields .wide {grid-column:auto}
+  .modal-content {padding:17px}
+  .hero {min-height:330px}
 }
 </style>
 </head>
@@ -124,7 +116,6 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
       onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span class="zyra-brand-fallback">ZYRA.LK</span>
   </a>
-
   <nav class="zyra-nav">
     <a href="#home">HOME</a>
     <a href="#products">COLLECTION</a>
@@ -177,7 +168,6 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
   <p>© 2026 Zyra.lk. All rights reserved.</p>
 </footer>
 
-<!-- SHOPPING BAG -->
 <div class="modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -190,7 +180,6 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
   </div>
 </div>
 
-<!-- CHECKOUT -->
 <div class="modal" id="checkoutModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -215,7 +204,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
           <input name="phone" type="tel" required maxlength="10" minlength="10"
             pattern="07[0-9]{8}" inputmode="numeric" autocomplete="tel-national"
             placeholder="0771234567">
-          <small class="fine">Enter exactly 10 digits, including the first 0. Example: 0771234567</small>
+          <small class="fine">Enter exactly 10 digits, including the first 0.</small>
         </div>
 
         <div class="form-group full">
@@ -277,19 +266,16 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
           <label>Bank Transaction Reference *</label>
           <input name="bank_transaction_reference" id="bankTransactionReference"
             maxlength="150" placeholder="Enter your bank transaction reference">
-          <small class="fine">Enter the transaction reference for your bank transfer.</small>
         </div>
 
-        <!-- PAYMENT SLIP UPLOAD -->
         <div class="form-group full" id="paymentSlipGroup" style="display:none">
           <div class="payment-slip-upload">
             <label for="paymentSlip">Upload Bank Payment Slip *</label>
             <input type="file" id="paymentSlip"
-              accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf">
+              accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf">
             <div class="payment-slip-help">
-              Accepted formats: PDF and common photo formats, including JPG, PNG, WEBP, GIF and HEIC.
+              Accepted formats: PDF, JPG, PNG, WEBP, GIF and HEIC.
               Maximum file size: 10 MB.
-              Upload your payment receipt to complete your Bank Transfer order.
             </div>
             <p id="paymentSlipFileName" class="fine"></p>
           </div>
@@ -313,7 +299,6 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
   </div>
 </div>
 
-<!-- SUCCESS -->
 <div class="modal" id="successModal">
   <div class="modal-content" style="text-align:center">
     <h2>Thank You!</h2>
@@ -325,75 +310,94 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 </div>
 
 <script>
+"use strict";
+
 /* SUPABASE CONFIGURATION */
 
-const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_C-Q-HwV2D";
+const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
 
-const PRODUCT_TABLE="store_products";
-const STORAGE_BUCKET="Product -image";
+const SUPABASE_ANON_KEY =
+  "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 
-const PAYMENT_SLIP_MAX_BYTES=10*1024*1024;
-const CUSTOMER_PHOTO_BUCKET="customer-photos";
-const PHOTO_MAX_BYTES=5*1024*1024;
+const PRODUCT_TABLE = "store_products";
+const STORAGE_BUCKET = "Product -image";
+const CUSTOMER_PHOTO_BUCKET = "customer-photos";
 
-const PAYMENT_SLIP_MIME_TYPES=[
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "image/heic",
-  "image/heif",
-  "application/pdf"
-];
+const PAYMENT_SLIP_MAX_BYTES = 10 * 1024 * 1024;
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const PAYMENT_SLIP_TYPES = {
+  jpg:"image/jpeg",
+  jpeg:"image/jpeg",
+  png:"image/png",
+  webp:"image/webp",
+  gif:"image/gif",
+  heic:"image/heic",
+  heif:"image/heif",
+  pdf:"application/pdf"
+};
 
-const BANK_INFO={
+if (!window.supabase) {
+  throw new Error("Supabase library failed to load. Please refresh the page.");
+}
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+const BANK_INFO = {
   "Commercial Bank":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
   "Nations Trust Bank":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
   "Amana Bank PLC":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
   "HNB":"Account Name: YOUR NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH"
 };
 
-let products=[];
-let cart=[];
+let products = [];
+let cart = [];
 
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-const money=n=>Number(n||0).toLocaleString("en-LK",{
+const money = n => Number(n || 0).toLocaleString("en-LK", {
   maximumFractionDigits:2
 });
 
 /* PRODUCT HELPERS */
 
-function isPhotoProduct(name){
-  const n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
-  const engravedEye=n.includes("engraved eye")||n.includes("eye engraved");
+function normaliseProductName(name) {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g," ")
+    .trim();
+}
 
-  return n.includes("photo roll")||
-    n.includes("photo projection")||
-    engravedEye||
-    n.includes("i engraved")||
+function isRegularNoPersonalisationProduct(name) {
+  const n = normaliseProductName(name);
+  return n.includes("rapunzel 360 necklace") ||
+    n.includes("heart necklace");
+}
+
+function isPhotoProduct(name) {
+  const n = normaliseProductName(name);
+
+  return n.includes("photo roll") ||
+    n.includes("photo projection") ||
+    n.includes("engraved eye") ||
+    n.includes("eye engraved") ||
+    n.includes("i engraved") ||
     n.includes("iron grade");
 }
 
-function photoCountFor(name){
-  return String(name||"").toLowerCase().includes("photo roll")?10:(isPhotoProduct(name)?1:0);
+function photoCountFor(name) {
+  const n = normaliseProductName(name);
+  if (n.includes("photo roll")) return 10;
+  if (isPhotoProduct(name)) return 1;
+  return 0;
 }
 
-function normaliseProductName(name){
-  return String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
-}
+/* BANK TRANSFER ONLY PRODUCTS */
 
-function isRegularNoPersonalisationProduct(name){
-  const n=normaliseProductName(name);
-  return n.includes("rapunzel 360 necklace")||n.includes("heart necklace");
-}
-
-/* BANK TRANSFER ONLY PRODUCT LIST */
-
-const BANK_TRANSFER_ONLY_PRODUCTS=new Set([
+const BANK_TRANSFER_ONLY_PRODUCTS = new Set([
   "english name necklace",
   "different font style name necklace",
   "arabic name necklace",
@@ -415,224 +419,259 @@ const BANK_TRANSFER_ONLY_PRODUCTS=new Set([
   "customised phone case"
 ]);
 
-function getProductPaymentOption(product){
-  const saved=String(product.payment_option||"").toLowerCase();
-  if(saved==="bank_transfer_only")return "bank_transfer_only";
-  if(saved==="both")return "both";
+function getProductPaymentOption(product) {
+  if (isRegularNoPersonalisationProduct(product.name)) {
+    return "both";
+  }
 
-  return BANK_TRANSFER_ONLY_PRODUCTS.has(normaliseProductName(product.name))
-    ?"bank_transfer_only":"both";
+  const saved = String(product.payment_option || "").toLowerCase();
+
+  if (saved === "bank_transfer_only") return "bank_transfer_only";
+  if (saved === "both") return "both";
+
+  return BANK_TRANSFER_ONLY_PRODUCTS.has(
+    normaliseProductName(product.name)
+  ) ? "bank_transfer_only" : "both";
 }
 
-function cartRequiresBankTransfer(){
-  return cart.some(item=>
-    item.payment_option==="bank_transfer_only"||
-    (item.is_customisable&&!isRegularNoPersonalisationProduct(item.name))
+function cartRequiresBankTransfer() {
+  return cart.some(item =>
+    item.payment_option === "bank_transfer_only" ||
+    (item.is_customisable &&
+      !isRegularNoPersonalisationProduct(item.name))
   );
 }
 
-function updatePaymentOptions(){
-  const payment=$("paymentMethod");
-  if(!payment)return;
+/* PAYMENT DISPLAY */
 
-  const codOption=Array.from(payment.options).find(
-    option=>option.value==="Cash on Delivery"
+function updatePaymentOptions() {
+  const payment = $("paymentMethod");
+
+  const codOption = Array.from(payment.options).find(
+    option => option.value === "Cash on Delivery"
   );
 
-  const restricted=cartRequiresBankTransfer();
+  const restricted = cartRequiresBankTransfer();
 
-  if(codOption)codOption.disabled=restricted;
+  if (codOption) codOption.disabled = restricted;
 
-  if(restricted&&payment.value==="Cash on Delivery"){
-    payment.value="Bank Transfer";
+  if (restricted && payment.value === "Cash on Delivery") {
+    payment.value = "Bank Transfer";
   }
 
-  const existing=$("paymentRestrictionMessage");
+  const message = $("paymentRestrictionMessage");
 
-  if(existing){
-    existing.textContent=restricted
-      ?"Your bag contains a customised or Bank Transfer Only product. Cash on Delivery is unavailable for this order."
-      :"";
-    existing.style.display=restricted?"block":"none";
-  }
+  message.textContent = restricted
+    ? "Your bag contains a customised or Bank Transfer Only product. Cash on Delivery is unavailable for this order."
+    : "";
+
+  message.style.display = restricted ? "block" : "none";
 
   updatePaymentFields();
 }
 
-function updatePaymentFields(){
-  const isBank=$("paymentMethod").value==="Bank Transfer";
+function updatePaymentFields() {
+  const isBank = $("paymentMethod").value === "Bank Transfer";
 
-  $("bankGroup").style.display=isBank?"block":"none";
-  $("referenceGroup").style.display=isBank?"block":"none";
-  $("paymentSlipGroup").style.display=isBank?"block":"none";
+  $("bankGroup").style.display = isBank ? "block" : "none";
+  $("referenceGroup").style.display = isBank ? "block" : "none";
+  $("paymentSlipGroup").style.display = isBank ? "block" : "none";
 
-  $("selectedBank").required=isBank;
-  $("bankTransactionReference").required=isBank;
-  $("paymentSlip").required=isBank;
+  $("selectedBank").required = isBank;
+  $("bankTransactionReference").required = isBank;
+  $("paymentSlip").required = isBank;
 
-  if(!isBank){
-    $("paymentSlip").value="";
-    $("paymentSlipFileName").textContent="";
-    $("bankTransactionReference").value="";
-    $("selectedBank").value="";
-    $("bankDetails").style.display="none";
-    $("bankDetails").innerHTML="";
+  if (!isBank) {
+    $("paymentSlip").value = "";
+    $("paymentSlipFileName").textContent = "";
+    $("bankTransactionReference").value = "";
+    $("selectedBank").value = "";
+    $("bankDetails").style.display = "none";
+    $("bankDetails").innerHTML = "";
   }
 }
 
-function imageUrlForProduct(p){
-  const raw=p.image_url||p.image_path||p.image||"";
-  if(!raw)return "";
-  if(/^https?:\/\//i.test(raw))return raw;
+/* PRODUCT IMAGES */
+
+function imageUrlForProduct(product) {
+  const raw = product.image_url ||
+    product.image_path ||
+    product.image ||
+    "";
+
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
 
   return db.storage.from(STORAGE_BUCKET).getPublicUrl(raw).data.publicUrl;
 }
 
-function safeFileExt(file){
-  const ext=(file.name.split(".").pop()||"").toLowerCase();
-  return ["jpg","jpeg","png","webp","pdf","gif","heic","heif"].includes(ext)?ext:"jpg";
-}
-
 /* LOAD PRODUCTS */
 
-async function loadProducts(){
-  const root=$("productList");
-  root.textContent="Loading collection...";
+async function loadProducts() {
+  const root = $("productList");
+  root.textContent = "Connecting to Zyra store...";
 
-  let result=await db.from(PRODUCT_TABLE)
+  let result = await db
+    .from(PRODUCT_TABLE)
     .select("*")
     .eq("is_active",true)
     .order("created_at",{ascending:false});
 
-  if(result.error){
-    console.error("Product query with sorting failed:",result.error);
-    result=await db.from(PRODUCT_TABLE).select("*").eq("is_active",true);
+  if (result.error) {
+    console.warn("Sorted product query failed:",result.error);
+
+    result = await db
+      .from(PRODUCT_TABLE)
+      .select("*")
+      .eq("is_active",true);
   }
 
-  if(result.error){
-    console.error("Product loading failed:",result.error);
-    root.textContent="Unable to load products: "+result.error.message+
-      " ("+(result.error.code||"no code")+
-      "). Check the store_products SELECT permission and column/table names.";
+  console.log("ZYRA SUPABASE PRODUCT RESULT:",result);
+
+  if (result.error) {
+    const e = result.error;
+
+    root.textContent =
+      "Unable to load products.\n" +
+      "Message: " + e.message + "\n" +
+      "Code: " + (e.code || "None") + "\n" +
+      "Details: " + (e.details || "None") + "\n" +
+      "Hint: " + (e.hint || "None");
+
     return;
   }
 
-  products=result.data||[];
+  products = result.data || [];
 
-  const cat=$("categoryFilter");
-  const old=cat.value;
-  cat.innerHTML='<option value="">All Collections</option>';
+  if (!products.length) {
+    root.textContent =
+      "Supabase connected successfully, but no active products were found in store_products.";
+    return;
+  }
 
-  [...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{
-    const o=document.createElement("option");
-    o.value=c;
-    o.textContent=c;
-    cat.append(o);
-  });
+  const category = $("categoryFilter");
+  const previous = category.value;
 
-  cat.value=old;
+  category.innerHTML = '<option value="">All Collections</option>';
+
+  [...new Set(products.map(p => p.category).filter(Boolean))]
+    .sort()
+    .forEach(value => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      category.append(option);
+    });
+
+  category.value = previous;
   renderProducts(products);
 }
 
 /* RENDER PRODUCTS */
 
-function renderProducts(items){
-  const root=$("productList");
+function renderProducts(items) {
+  const root = $("productList");
   root.replaceChildren();
 
-  if(!items.length){
-    root.innerHTML='<div class="empty">No products found.</div>';
+  if (!items.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No products found.";
+    root.append(empty);
     return;
   }
 
-  items.forEach(p=>{
-    const card=document.createElement("article");
-    card.className="product-card";
+  items.forEach(product => {
+    const card = document.createElement("article");
+    card.className = "product-card";
 
-    const src=imageUrlForProduct(p);
+    const src = imageUrlForProduct(product);
 
-    if(src){
-      const img=document.createElement("img");
-      img.className="product-image";
-      img.alt=p.name||"Zyra product";
-      img.loading="lazy";
-      img.src=src;
+    if (src) {
+      const img = document.createElement("img");
+      img.className = "product-image";
+      img.alt = product.name || "Zyra product";
+      img.loading = "lazy";
+      img.src = src;
 
-      img.onerror=()=>{
-        const ph=document.createElement("div");
-        ph.className="image-placeholder";
-        ph.textContent="IMAGE UNAVAILABLE";
-        img.replaceWith(ph);
+      img.onerror = () => {
+        const placeholder = document.createElement("div");
+        placeholder.className = "image-placeholder";
+        placeholder.textContent = "IMAGE UNAVAILABLE";
+        img.replaceWith(placeholder);
       };
 
       card.append(img);
-    }else{
-      const ph=document.createElement("div");
-      ph.className="image-placeholder";
-      ph.textContent="IMAGE COMING SOON";
-      card.append(ph);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "image-placeholder";
+      placeholder.textContent = "IMAGE COMING SOON";
+      card.append(placeholder);
     }
 
-    const info=document.createElement("div");
-    info.className="product-info";
+    const info = document.createElement("div");
+    info.className = "product-info";
 
-    const h=document.createElement("h3");
-    h.textContent=p.name||"Product";
+    const heading = document.createElement("h3");
+    heading.textContent = product.name || "Product";
 
-    const d=document.createElement("p");
-    d.textContent=p.description||"";
+    const description = document.createElement("p");
+    description.textContent = product.description || "";
 
-    const price=document.createElement("div");
-    price.className="price";
-    price.textContent="LKR "+money(p.price);
+    const price = document.createElement("div");
+    price.className = "price";
+    price.textContent = "LKR " + money(product.price);
 
-    const b=document.createElement("button");
-    b.className="add-button";
-    b.textContent="ADD TO BAG";
-    b.onclick=()=>addToCart(p.id);
+    const addButton = document.createElement("button");
+    addButton.className = "add-button";
+    addButton.textContent = "ADD TO BAG";
+    addButton.onclick = () => addToCart(product.id);
 
-    info.append(h,d,price);
+    info.append(heading,description,price);
 
-    if(p.is_customisable||isPhotoProduct(p.name)){
-      const c=document.createElement("p");
-      c.textContent=isPhotoProduct(p.name)?"Photo upload required":"Customisable";
-      c.style.color="var(--wine)";
-      info.append(c);
+    if (product.is_customisable || isPhotoProduct(product.name)) {
+      const customLabel = document.createElement("p");
+      customLabel.textContent = isPhotoProduct(product.name)
+        ? "Photo upload required"
+        : "Customisable";
+      customLabel.style.color = "var(--wine)";
+      info.append(customLabel);
     }
 
-    info.append(b);
+    info.append(addButton);
     card.append(info);
     root.append(card);
   });
 }
 
-function filterProducts(){
-  const q=$("searchInput").value.toLowerCase();
-  const c=$("categoryFilter").value;
+function filterProducts() {
+  const query = $("searchInput").value.toLowerCase();
+  const category = $("categoryFilter").value;
 
-  renderProducts(products.filter(p=>
-    (p.name||"").toLowerCase().includes(q)&&(!c||p.category===c)
+  renderProducts(products.filter(product =>
+    (product.name || "").toLowerCase().includes(query) &&
+    (!category || product.category === category)
   ));
 }
 
 /* SHOPPING BAG */
 
-function addToCart(id){
-  const p=products.find(x=>x.id===id);
-  if(!p)return;
+function addToCart(id) {
+  const product = products.find(item => item.id === id);
+  if (!product) return;
 
-  const found=cart.find(x=>x.id===id);
+  const existing = cart.find(item => item.id === id);
 
-  if(found){
-    found.quantity++;
-  }else{
+  if (existing) {
+    existing.quantity++;
+  } else {
     cart.push({
-      id:p.id,
-      name:p.name,
-      price:Number(p.price),
+      id:product.id,
+      name:product.name,
+      price:Number(product.price),
       quantity:1,
-      payment_option:getProductPaymentOption(p),
-      is_customisable:!!p.is_customisable||isPhotoProduct(p.name),
+      payment_option:getProductPaymentOption(product),
+      is_customisable:!!product.is_customisable || isPhotoProduct(product.name),
       details:{},
       photoFiles:[]
     });
@@ -642,92 +681,115 @@ function addToCart(id){
   openCart();
 }
 
-function removeItem(id){
-  cart=cart.filter(x=>x.id!==id);
+function removeItem(id) {
+  cart = cart.filter(item => item.id !== id);
   renderCart();
 }
 
-function changeQty(id,delta){
-  const x=cart.find(i=>i.id===id);
-  if(!x)return;
+function changeQty(id,delta) {
+  const item = cart.find(entry => entry.id === id);
+  if (!item) return;
 
-  x.quantity+=delta;
-  if(x.quantity<1)removeItem(id);
+  item.quantity += delta;
+
+  if (item.quantity < 1) removeItem(id);
   else renderCart();
 }
 
-function total(){
-  return cart.reduce((s,x)=>s+x.price*x.quantity,0);
+function total() {
+  return cart.reduce((sum,item) =>
+    sum + item.price * item.quantity,0
+  );
 }
 
-/* CUSTOMISATION FIELDS */
+/* CUSTOMISATION INPUT */
 
-function customField(item,key,label,placeholder,max=120,wide=false){
-  const wrap=document.createElement("div");
-  if(wide)wrap.className="wide";
+function customField(item,key,label,placeholder,max=120,wide=false) {
+  const wrap = document.createElement("div");
+  if (wide) wrap.className = "wide";
 
-  const input=document.createElement("input");
-  input.placeholder=placeholder||label;
-  input.maxLength=max;
-  input.value=item.details[key]||"";
+  const input = document.createElement("input");
+  input.placeholder = placeholder || label;
+  input.maxLength = max;
+  input.value = item.details[key] || "";
   input.setAttribute("aria-label",label);
 
-  input.oninput=()=>{item.details[key]=input.value;};
-  wrap.append(input);
+  input.oninput = () => {
+    item.details[key] = input.value;
+  };
 
+  wrap.append(input);
   return wrap;
 }
 
-/* CUSTOMER PHOTO UPLOAD CONTROL */
+/* PHOTO UPLOAD CONTROL */
 
-function photoUploadControl(item){
-  const count=photoCountFor(item.name);
-  if(!count)return null;
+function photoUploadControl(item) {
+  const count = photoCountFor(item.name);
+  if (!count) return null;
 
-  const wrap=document.createElement("div");
-  wrap.className="photo-upload";
+  const wrap = document.createElement("div");
+  wrap.className = "photo-upload";
 
-  const label=document.createElement("label");
-  label.textContent=count===10?"Upload exactly 10 photos *":"Upload your photo *";
+  const label = document.createElement("label");
+  label.textContent = count === 10
+    ? "Upload exactly 10 photos *"
+    : "Upload your photo *";
 
-  const input=document.createElement("input");
-  input.type="file";
-  input.accept="image/jpeg,image/png,image/webp";
-  input.multiple=count>1;
-  input.required=true;
-  input.setAttribute("aria-label",label.textContent);
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/jpeg,image/png,image/webp";
+  input.multiple = count > 1;
+  input.required = true;
 
-  input.onchange=()=>{
-    const files=Array.from(input.files||[]);
+  input.onchange = () => {
+    const files = Array.from(input.files || []);
 
-    if(files.length!==count){
-      alert("Please select exactly "+count+" photo(s) for "+item.name+".");
-      input.value="";
-      item.photoFiles=[];
+    if (files.length !== count) {
+      alert("Please select exactly " + count + " photo(s) for " + item.name + ".");
+      input.value = "";
+      item.photoFiles = [];
       return;
     }
 
-    item.photoFiles=files;
+    const invalid = files.find(file =>
+      !["image/jpeg","image/png","image/webp"].includes(file.type) ||
+      file.size <= 0 ||
+      file.size > PHOTO_MAX_BYTES
+    );
+
+    if (invalid) {
+      alert("Each photo must be JPG, PNG or WEBP and no larger than 5MB.");
+      input.value = "";
+      item.photoFiles = [];
+      return;
+    }
+
+    item.photoFiles = files;
   };
 
-  const help=document.createElement("div");
-  help.className="photo-help";
-  help.textContent=count===10
-    ?"Select 10 photos for your Photo Roll. JPG, PNG or WEBP; maximum 5MB per photo."
-    :"Select 1 clear photo. JPG, PNG or WEBP; maximum 5MB.";
+  const help = document.createElement("div");
+  help.className = "photo-help";
+  help.textContent = count === 10
+    ? "Select 10 photos for your Photo Roll. JPG, PNG or WEBP; maximum 5MB per photo."
+    : "Select 1 clear photo. JPG, PNG or WEBP; maximum 5MB.";
 
   wrap.append(label,input,help);
 
-  if(count===10){
-    const msg=document.createElement("input");
-    msg.type="text";
-    msg.maxLength=200;
-    msg.placeholder="Birthday message (optional)";
-    msg.value=item.details.birthday_message||"";
-    msg.style.width="100%";
-    msg.style.marginTop="10px";
-    msg.oninput=()=>{item.details.birthday_message=msg.value;};
-    wrap.append(msg);
+  if (count === 10) {
+    const message = document.createElement("input");
+    message.type = "text";
+    message.maxLength = 200;
+    message.placeholder = "Birthday message (optional)";
+    message.value = item.details.birthday_message || "";
+    message.style.width = "100%";
+    message.style.marginTop = "10px";
+
+    message.oninput = () => {
+      item.details.birthday_message = message.value;
+    };
+
+    wrap.append(message);
   }
 
   return wrap;
@@ -735,107 +797,152 @@ function photoUploadControl(item){
 
 /* RENDER CART */
 
-function renderCart(){
-  $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0);
+function renderCart() {
+  $("cartCount").textContent = cart.reduce(
+    (sum,item) => sum + item.quantity,0
+  );
 
-  const root=$("cartItems");
+  const root = $("cartItems");
   root.replaceChildren();
 
-  if(!cart.length)root.textContent="Your shopping bag is empty.";
+  if (!cart.length) root.textContent = "Your shopping bag is empty.";
 
-  cart.forEach(item=>{
-    const box=document.createElement("div");
-    box.className="cart-item";
+  cart.forEach(item => {
+    const box = document.createElement("div");
+    box.className = "cart-item";
 
-    const row=document.createElement("div");
-    row.className="cart-row";
+    const row = document.createElement("div");
+    row.className = "cart-row";
 
-    const label=document.createElement("strong");
-    label.textContent=`${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
+    const label = document.createElement("strong");
+    label.textContent =
+      `${item.name} × ${item.quantity} — LKR ${money(item.price * item.quantity)}`;
 
-    const controls=document.createElement("span");
+    const controls = document.createElement("span");
 
-    [["−",()=>changeQty(item.id,-1)],["+",()=>changeQty(item.id,1)],["Remove",()=>removeItem(item.id)]].forEach(([t,fn])=>{
-      const b=document.createElement("button");
-      b.textContent=t;
-      b.onclick=fn;
-      controls.append(b);
+    [
+      ["−",() => changeQty(item.id,-1)],
+      ["+",() => changeQty(item.id,1)],
+      ["Remove",() => removeItem(item.id)]
+    ].forEach(([text,callback]) => {
+      const button = document.createElement("button");
+      button.textContent = text;
+      button.onclick = callback;
+      controls.append(button);
     });
 
     row.append(label,controls);
     box.append(row);
 
-    if(item.is_customisable||isPhotoProduct(item.name)){
-      const fields=document.createElement("div");
-      fields.className="custom-fields";
-      const n=item.name.toLowerCase();
+    if (item.is_customisable || isPhotoProduct(item.name)) {
+      const fields = document.createElement("div");
+      fields.className = "custom-fields";
 
-      if(n.includes("initial couple ring")){
+      const name = normaliseProductName(item.name);
+
+      if (name.includes("initial couple ring")) {
         fields.append(
           customField(item,"first_box_initial","First box initial","First box — 1 character",1),
           customField(item,"second_box_initial","Second box initial","Second box — 1 character",1)
         );
-      }
-      else if(n.includes("customised ring")||n.includes("customized ring")){
-        fields.append(customField(item,"name","Ring name","Enter name — max 6 characters",6,true));
-      }
-      else if(n.includes("double layered name necklace")){
+
+      } else if (
+        name.includes("customised ring") ||
+        name.includes("customized ring") ||
+        name.includes("customise ring") ||
+        name.includes("customize ring")
+      ) {
+        fields.append(
+          customField(item,"name","Ring name","Enter name — max 6 characters",6,true)
+        );
+
+      } else if (name.includes("double layered name necklace")) {
         fields.append(
           customField(item,"first_layer_name","First layer name","First layer — max 8 characters",8),
           customField(item,"second_layer_name","Second layer name","Second layer — max 8 characters",8)
         );
-      }
-      else if(n.includes("name necklace with bst")||n.includes("birthstone")){
-        fields.append(customField(item,"name","Name","Name — max 12 characters",12,true));
 
-        const wrap=document.createElement("div");
-        wrap.className="wide";
+      } else if (name.includes("bst") || name.includes("birthstone")) {
+        fields.append(
+          customField(item,"name","Name","Name — max 12 characters",12,true)
+        );
 
-        const sel=document.createElement("select");
-        sel.setAttribute("aria-label","Birthstone month");
-        sel.innerHTML='<option value="">Select birthstone month</option>'+
-          ["January","February","March","April","May","June","July","August","September","October","November","December"]
-          .map(m=>`<option value="${m}">${m}</option>`).join("");
+        const wrap = document.createElement("div");
+        wrap.className = "wide";
 
-        sel.value=item.details.birthstone_month||"";
-        sel.onchange=()=>{item.details.birthstone_month=sel.value;};
-        wrap.append(sel);
+        const select = document.createElement("select");
+        select.setAttribute("aria-label","Birthstone month");
+
+        select.innerHTML =
+          '<option value="">Select birthstone month</option>' +
+          [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+          ].map(month =>
+            `<option value="${month}">${month}</option>`
+          ).join("");
+
+        select.value = item.details.birthstone_month || "";
+
+        select.onchange = () => {
+          item.details.birthstone_month = select.value;
+        };
+
+        wrap.append(select);
         fields.append(wrap);
-      }
-      else if(n.includes("name necklace with design")||n.includes("infinity")){
+
+      } else if (
+        name.includes("name necklace with design") ||
+        name.includes("infinity")
+      ) {
         fields.append(
           customField(item,"name_one","First name","First name — max 6 characters",6),
           customField(item,"name_two","Second name","Second name — max 6 characters",6),
           customField(item,"special_date","Special date","DDMMYY — 6 digits",6,true)
         );
-      }
-      else if(n.includes("couple name necklace")){
+
+      } else if (
+        name.includes("couple name necklace") ||
+        name.includes("double name couple necklace")
+      ) {
         fields.append(
           customField(item,"first_name","First name","First name — max 6 characters",6),
           customField(item,"second_name","Second name","Second name — max 6 characters",6)
         );
-      }
-      else if(n.includes("bracelet necklace combo")||n.includes("bracelet and necklace")){
+
+      } else if (
+        name.includes("bracelet necklace combo") ||
+        name.includes("bracelet and necklace")
+      ) {
         fields.append(
           customField(item,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),
           customField(item,"necklace_name","Necklace name","Necklace name — max 8 characters",8)
         );
-      }
-      else if(n.includes("name necklace")||n.includes("name bracelet")){
-        fields.append(customField(item,"name","Name to customise","Enter name — max 8 characters",8,true));
-      }
-      else if(!isPhotoProduct(item.name)){
-        const t=document.createElement("textarea");
-        t.className="wide";
-        t.placeholder="Enter customisation details";
-        t.value=item.details.instructions||"";
-        t.maxLength=1000;
-        t.oninput=()=>{item.details.instructions=t.value;};
-        fields.append(t);
+
+      } else if (
+        name.includes("name necklace") ||
+        name.includes("name bracelet")
+      ) {
+        fields.append(
+          customField(item,"name","Name to customise","Enter name — max 8 characters",8,true)
+        );
+
+      } else if (!isPhotoProduct(item.name)) {
+        const textarea = document.createElement("textarea");
+        textarea.className = "wide";
+        textarea.placeholder = "Enter customisation details";
+        textarea.value = item.details.instructions || "";
+        textarea.maxLength = 1000;
+
+        textarea.oninput = () => {
+          item.details.instructions = textarea.value;
+        };
+
+        fields.append(textarea);
       }
 
-      const photoControl=photoUploadControl(item);
-      if(photoControl)fields.append(photoControl);
+      const photoControl = photoUploadControl(item);
+      if (photoControl) fields.append(photoControl);
 
       box.append(fields);
     }
@@ -843,157 +950,182 @@ function renderCart(){
     root.append(box);
   });
 
-  $("cartTotal").textContent="Total: LKR "+money(total());
+  $("cartTotal").textContent = "Total: LKR " + money(total());
   updatePaymentOptions();
 }
 
 /* MODALS */
 
-function openCart(){$("cartModal").style.display="block";}
-function closeModal(id){$(id).style.display="none";}
+function openCart() {
+  $("cartModal").style.display = "block";
+}
 
-function showCheckout(){
-  if(!cart.length){
+function closeModal(id) {
+  $(id).style.display = "none";
+}
+
+function showCheckout() {
+  if (!cart.length) {
     alert("Please add a product first.");
     return;
   }
 
   updatePaymentOptions();
   closeModal("cartModal");
-  $("checkoutTotal").textContent="Order Total: LKR "+money(total());
-  $("checkoutModal").style.display="block";
+
+  $("checkoutTotal").textContent = "Order Total: LKR " + money(total());
+  $("checkoutModal").style.display = "block";
 }
 
-function finishOrder(){
-  cart=[];
+function finishOrder() {
+  cart = [];
   renderCart();
   closeModal("successModal");
 }
 
 /* PAYMENT METHOD */
 
-$("paymentMethod").addEventListener("change",()=>{
-  if(cartRequiresBankTransfer()&&$("paymentMethod").value==="Cash on Delivery"){
-    $("paymentMethod").value="Bank Transfer";
+$("paymentMethod").addEventListener("change",() => {
+  if (
+    cartRequiresBankTransfer() &&
+    $("paymentMethod").value === "Cash on Delivery"
+  ) {
+    $("paymentMethod").value = "Bank Transfer";
   }
   updatePaymentFields();
 });
 
-$("selectedBank").addEventListener("change",()=>{
-  const v=$("selectedBank").value;
-  const box=$("bankDetails");
+$("selectedBank").addEventListener("change",() => {
+  const value = $("selectedBank").value;
+  const box = $("bankDetails");
 
-  if(v&&BANK_INFO[v]){
-    box.innerHTML="<strong>Transfer details — "+v+"</strong><br>"+BANK_INFO[v];
-    box.style.display="block";
-  }else{
-    box.style.display="none";
-    box.innerHTML="";
+  if (value && BANK_INFO[value]) {
+    box.innerHTML =
+      "<strong>Transfer details — " + value + "</strong><br>" +
+      BANK_INFO[value];
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
+    box.innerHTML = "";
   }
 });
 
-$("paymentSlip").addEventListener("change",()=>{
-  const file=$("paymentSlip").files[0];
-  $("paymentSlipFileName").textContent=file
-    ?"Selected receipt: "+file.name
-    :"";
+$("paymentSlip").addEventListener("change",() => {
+  const file = $("paymentSlip").files[0];
+  $("paymentSlipFileName").textContent = file
+    ? "Selected receipt: " + file.name
+    : "";
 });
 
-/* VALIDATE PAYMENT SLIP */
+/* PAYMENT SLIP VALIDATION */
 
-function validatePaymentSlip(file){
-  if(!file)throw new Error("Please upload your bank payment slip.");
+function paymentSlipContentType(file) {
+  const extension = (file.name.split(".").pop() || "").toLowerCase();
+  const expectedType = PAYMENT_SLIP_TYPES[extension];
 
-  const type=file.type.toLowerCase();
-
-  const extension=(file.name.split(".").pop()||"").toLowerCase();
-
-  const allowedExtensions=["jpg","jpeg","png","webp","gif","heic","heif","pdf"];
-
-  if(!PAYMENT_SLIP_MIME_TYPES.includes(type)&&!allowedExtensions.includes(extension)){
-    throw new Error("Please upload a PDF or common photo receipt (JPG, PNG, WEBP, GIF or HEIC).");
+  if (!expectedType) {
+    throw new Error("Unsupported payment slip format. Use PDF, JPG, PNG, WEBP, GIF or HEIC.");
   }
 
-  if(file.size<=0||file.size>PAYMENT_SLIP_MAX_BYTES){
+  const browserType = String(file.type || "").toLowerCase();
+
+  if (
+    browserType &&
+    browserType !== "application/octet-stream" &&
+    browserType !== expectedType
+  ) {
+    throw new Error("The payment slip file type does not match its filename.");
+  }
+
+  return expectedType;
+}
+
+function validatePaymentSlip(file) {
+  if (!file) throw new Error("Please upload your bank payment slip.");
+
+  paymentSlipContentType(file);
+
+  if (file.size <= 0 || file.size > PAYMENT_SLIP_MAX_BYTES) {
     throw new Error("Your payment slip must be a valid file of 10MB or smaller.");
   }
 }
 
-/*
-  Convert the selected receipt to Base64.
-  The Edge Function receives:
-  file_name
-  content_type
-  data_base64
-
-  Do NOT upload the payment slip directly from
-  the browser to Storage in this version.
-*/
-
-async function paymentSlipToBase64(file){
+async function paymentSlipToBase64(file) {
   validatePaymentSlip(file);
 
-  const buffer=await file.arrayBuffer();
-  const bytes=new Uint8Array(buffer);
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
 
-  let binary="";
-  const chunkSize=0x8000;
+  let binary = "";
+  const chunkSize = 0x8000;
 
-  for(let i=0;i<bytes.length;i+=chunkSize){
-    binary+=String.fromCharCode(...bytes.subarray(i,i+chunkSize));
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i,i + chunkSize));
   }
-
-  const base64=btoa(binary);
 
   return {
     file_name:file.name,
-    content_type:file.type||(
-      file.name.toLowerCase().endsWith(".pdf")
-        ?"application/pdf"
-        :"application/octet-stream"
-    ),
-    data_base64:base64
+    content_type:paymentSlipContentType(file),
+    data_base64:btoa(binary)
   };
 }
 
-/* UPLOAD CUSTOMER PHOTOS */
+/* CUSTOMER PHOTO UPLOAD */
 
-async function uploadItemPhotos(item){
-  const required=photoCountFor(item.name);
-  if(!required)return null;
+function safePhotoExtension(file) {
+  const extension = (file.name.split(".").pop() || "").toLowerCase();
 
-  const files=item.photoFiles||[];
-
-  if(files.length!==required){
-    throw new Error(item.name+": please upload exactly "+required+" photo(s).");
+  if (!["jpg","jpeg","png","webp"].includes(extension)) {
+    throw new Error("Customer photos must use JPG, PNG or WEBP files.");
   }
 
-  const paths=[];
-  const names=[];
+  return extension;
+}
 
-  for(let i=0;i<files.length;i++){
-    const file=files[i];
+async function uploadItemPhotos(item) {
+  const required = photoCountFor(item.name);
+  if (!required) return null;
 
-    if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+  const files = item.photoFiles || [];
+
+  if (files.length !== required) {
+    throw new Error(item.name + ": please upload exactly " + required + " photo(s).");
+  }
+
+  const paths = [];
+  const names = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+
+    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
       throw new Error("Only JPG, PNG or WEBP customer photos are accepted.");
     }
 
-    if(file.size>PHOTO_MAX_BYTES){
+    if (file.size <= 0 || file.size > PHOTO_MAX_BYTES) {
       throw new Error("Each customer photo must be 5MB or smaller.");
     }
 
-    const ext=safeFileExt(file);
-    const path=`customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-${i+1}.${ext}`;
+    const extension = safePhotoExtension(file);
+    const path = "customer-orders/" +
+      crypto.randomUUID() + "-" + (i + 1) + "." + extension;
 
-    const {error}=await db.storage
+    const {data,error} = await db.storage
       .from(CUSTOMER_PHOTO_BUCKET)
-      .upload(path,file,{contentType:file.type,upsert:false});
+      .upload(path,file,{
+        contentType:file.type,
+        upsert:false
+      });
 
-    if(error){
-      throw new Error("Photo upload failed for "+file.name+": "+error.message);
+    if (error || !data) {
+      console.error("Customer photo upload failed:",error);
+      throw new Error(
+        "Photo upload failed for " + file.name + ": " +
+        (error?.message || "Storage upload failed.")
+      );
     }
 
-    paths.push(path);
+    paths.push(data.path);
     names.push(file.name);
   }
 
@@ -1005,162 +1137,214 @@ async function uploadItemPhotos(item){
   };
 }
 
+/* CUSTOMISATION VALIDATION */
+
+function validateCartCustomisation(item) {
+  const name = normaliseProductName(item.name);
+  const details = item.details || {};
+
+  if (name.includes("initial couple ring")) {
+    if (
+      !details.first_box_initial ||
+      !details.second_box_initial ||
+      details.first_box_initial.trim().length !== 1 ||
+      details.second_box_initial.trim().length !== 1
+    ) {
+      throw new Error("Initial Couple Ring requires one character in each of its two boxes.");
+    }
+
+  } else if (
+    name.includes("customised ring") ||
+    name.includes("customized ring") ||
+    name.includes("customise ring") ||
+    name.includes("customize ring")
+  ) {
+    if (!details.name || details.name.trim().length > 6) {
+      throw new Error("Customised Ring name must contain 1 to 6 characters.");
+    }
+
+  } else if (name.includes("double layered name necklace")) {
+    if (!details.first_layer_name || !details.second_layer_name) {
+      throw new Error("Please enter both names for your Double Layered Name Necklace.");
+    }
+
+    if (
+      details.first_layer_name.trim().length > 8 ||
+      details.second_layer_name.trim().length > 8
+    ) {
+      throw new Error("Each layer name must be 8 characters or fewer.");
+    }
+
+  } else if (name.includes("bst") || name.includes("birthstone")) {
+    if (!details.name || !details.birthstone_month) {
+      throw new Error("Please enter the name and select a birthstone month.");
+    }
+
+    if (details.name.trim().length > 12) {
+      throw new Error("Name must be 12 characters or fewer.");
+    }
+
+  } else if (
+    name.includes("name necklace with design") ||
+    name.includes("infinity")
+  ) {
+    if (
+      !details.name_one ||
+      !details.name_two ||
+      details.name_one.trim().length > 6 ||
+      details.name_two.trim().length > 6 ||
+      !/^[0-9]{6}$/.test(details.special_date || "")
+    ) {
+      throw new Error("Enter both names (up to 6 characters each) and the special date in DDMMYY format.");
+    }
+
+  } else if (
+    name.includes("couple name necklace") ||
+    name.includes("double name couple necklace")
+  ) {
+    if (
+      !details.first_name ||
+      !details.second_name ||
+      details.first_name.trim().length > 6 ||
+      details.second_name.trim().length > 6
+    ) {
+      throw new Error("Enter both couple names. Each name must be 6 characters or fewer.");
+    }
+
+  } else if (
+    name.includes("bracelet necklace combo") ||
+    name.includes("bracelet and necklace")
+  ) {
+    if (
+      !details.bracelet_name ||
+      !details.necklace_name ||
+      details.bracelet_name.trim().length > 8 ||
+      details.necklace_name.trim().length > 8
+    ) {
+      throw new Error("Enter both names. Each name must be 8 characters or fewer.");
+    }
+
+  } else if (
+    name.includes("name necklace") ||
+    name.includes("name bracelet")
+  ) {
+    if (!details.name || !details.name.trim() || details.name.trim().length > 8) {
+      throw new Error("Please enter a name of up to 8 characters for " + item.name + ".");
+    }
+
+  } else if (item.is_customisable && !isPhotoProduct(item.name)) {
+    if (!details.instructions || !details.instructions.trim()) {
+      throw new Error("Please enter customisation instructions for " + item.name + ".");
+    }
+  }
+}
+
 /* PLACE ORDER */
 
-$("checkoutForm").addEventListener("submit",async function(e){
-  e.preventDefault();
-  if(!cart.length)return;
+$("checkoutForm").addEventListener("submit",async function(event) {
+  event.preventDefault();
 
-  const form=new FormData(this);
-  const phone=String(form.get("phone")||"").trim();
-  const postal=String(form.get("postal_code")||"").trim();
+  if (!cart.length) return;
 
-  if(!/^07[0-9]{8}$/.test(phone)){
-    alert("Enter a valid 10-digit Sri Lankan mobile number starting with 07. Example: 0771234567");
+  const form = new FormData(this);
+  const phone = String(form.get("phone") || "").trim();
+  const postal = String(form.get("postal_code") || "").trim();
+
+  if (!/^07[0-9]{8}$/.test(phone)) {
+    alert("Enter a valid 10-digit Sri Lankan mobile number starting with 07.");
     return;
   }
 
-  if(!/^[0-9]{5}$/.test(postal)){
+  if (!/^[0-9]{5}$/.test(postal)) {
     alert("Postal code must contain exactly 5 digits.");
     return;
   }
 
-  /* VALIDATE CUSTOMISATION */
+  const button = $("placeOrderButton");
+  const message = $("checkoutMessage");
 
-  for(const item of cart){
-    const n=item.name.toLowerCase();
-    const d=item.details;
+  button.disabled = true;
+  button.textContent = "PREPARING ORDER...";
+  message.textContent = "";
 
-    if(n.includes("initial couple ring")&&(
-      !d.first_box_initial||!d.second_box_initial||
-      d.first_box_initial.length!==1||d.second_box_initial.length!==1
-    )){
-      alert("Initial Couple Ring requires one character in each of its two boxes.");
-      return;
-    }
-
-    if((n.includes("customised ring")||n.includes("customized ring"))&&
-      (!d.name||d.name.trim().length>6)){
-      alert("Customised Ring name must contain 1 to 6 characters.");
-      return;
-    }
-
-    if(item.is_customisable&&!isPhotoProduct(item.name)){
-      let required=[];
-
-      if(n.includes("initial couple ring")){
-        required=["first_box_initial","second_box_initial"];
-      }
-      else if(n.includes("double layered name necklace")){
-        required=["first_layer_name","second_layer_name"];
-      }
-      else if(n.includes("name necklace with design")||n.includes("infinity")){
-        required=["name_one","name_two","special_date"];
-      }
-      else if(n.includes("couple name necklace")){
-        required=["first_name","second_name"];
-      }
-      else if(n.includes("bracelet necklace combo")||n.includes("bracelet and necklace")){
-        required=["bracelet_name","necklace_name"];
-      }
-      else if(n.includes("name necklace with bst")||n.includes("birthstone")){
-        required=["name","birthstone_month"];
-      }
-      else if(n.includes("name necklace")||n.includes("name bracelet")||
-        n.includes("customised ring")||n.includes("customized ring")){
-        required=["name"];
-      }
-      else{
-        required=["instructions"];
+  try {
+    for (const item of cart) {
+      if (item.is_customisable && !isPhotoProduct(item.name)) {
+        validateCartCustomisation(item);
       }
 
-      if(required.some(k=>!String(d[k]||"").trim())){
-        alert("Please complete all customisation fields for "+item.name+".");
-        return;
-      }
+      if (isPhotoProduct(item.name)) {
+        const required = photoCountFor(item.name);
 
-      if((n.includes("name necklace with design")||n.includes("infinity"))&&
-        !/^[0-9]{6}$/.test(d.special_date)){
-        alert("Enter the special date as six digits in DDMMYY format.");
-        return;
-      }
+        if ((item.photoFiles || []).length !== required) {
+          throw new Error(
+            item.name + ": please upload exactly " + required + " photo(s) before checkout."
+          );
+        }
 
-      if((n.includes("customised ring")||n.includes("customized ring"))&&d.name.length>6){
-        alert("Customised Ring name must be 6 characters or fewer.");
-        return;
+        for (const file of item.photoFiles) {
+          if (
+            !["image/jpeg","image/png","image/webp"].includes(file.type) ||
+            file.size <= 0 ||
+            file.size > PHOTO_MAX_BYTES
+          ) {
+            throw new Error("Each customer photo must be JPG, PNG or WEBP and no larger than 5MB.");
+          }
+        }
       }
     }
 
-    if(isPhotoProduct(item.name)){
-      const needed=photoCountFor(item.name);
+    const selectedPayment = String(form.get("payment_method") || "");
 
-      if((item.photoFiles||[]).length!==needed){
-        alert(item.name+": please upload exactly "+needed+" photo(s) before checkout.");
-        return;
-      }
-    }
-  }
-
-  const button=$("placeOrderButton");
-  const msg=$("checkoutMessage");
-
-  button.disabled=true;
-  button.textContent="PREPARING ORDER...";
-  msg.textContent="";
-
-  try{
-    const selectedPayment=String(form.get("payment_method")||"");
-
-    if(cartRequiresBankTransfer()&&selectedPayment!=="Bank Transfer"){
+    if (cartRequiresBankTransfer() && selectedPayment !== "Bank Transfer") {
       throw new Error("This order contains a customised or Bank Transfer Only product. Please select Bank Transfer.");
     }
 
-    if(selectedPayment!=="Bank Transfer"&&selectedPayment!=="Cash on Delivery"){
+    if (!["Bank Transfer","Cash on Delivery"].includes(selectedPayment)) {
       throw new Error("Please select a valid payment method.");
     }
 
-    let paymentSlip=null;
+    let paymentSlip = null;
 
-    /* CONVERT PAYMENT SLIP TO BASE64 */
+    if (selectedPayment === "Bank Transfer") {
+      const selectedBank = String(form.get("selected_bank") || "").trim();
+      const reference = String(form.get("bank_transaction_reference") || "").trim();
 
-    if(selectedPayment==="Bank Transfer"){
-      const selectedBank=String(form.get("selected_bank")||"").trim();
-      const reference=String(form.get("bank_transaction_reference")||"").trim();
-
-      if(!selectedBank)throw new Error("Please select your bank.");
-
-      if(!["Commercial Bank","Nations Trust Bank","Amana Bank PLC","HNB"].includes(selectedBank)){
+      if (!["Commercial Bank","Nations Trust Bank","Amana Bank PLC","HNB"].includes(selectedBank)) {
         throw new Error("Please select a valid bank.");
       }
 
-      if(!reference)throw new Error("Please enter your bank transaction reference.");
-      if(reference.length>150)throw new Error("Bank transaction reference must be 150 characters or fewer.");
+      if (!reference || reference.length > 150) {
+        throw new Error("Please enter a valid bank transaction reference.");
+      }
 
-      const slipFile=$("paymentSlip").files[0];
+      const slipFile = $("paymentSlip").files[0];
       validatePaymentSlip(slipFile);
 
-      button.textContent="READING PAYMENT RECEIPT...";
-
-      paymentSlip=await paymentSlipToBase64(slipFile);
+      button.textContent = "READING PAYMENT RECEIPT...";
+      paymentSlip = await paymentSlipToBase64(slipFile);
     }
 
-    const orderItems=[];
+    const orderItems = [];
 
-    for(const item of cart){
-      let details=item.is_customisable?{...item.details}:null;
+    for (const item of cart) {
+      let details = item.is_customisable ? {...item.details} : null;
 
-      if(isPhotoProduct(item.name)){
-        button.textContent="UPLOADING CUSTOMER PHOTOS...";
+      if (isPhotoProduct(item.name)) {
+        button.textContent = "UPLOADING CUSTOMER PHOTOS...";
 
-        const photoMeta=await uploadItemPhotos(item);
+        const photoMetadata = await uploadItemPhotos(item);
 
-        details={
-          ...(details||{}),
-          ...photoMeta
+        details = {
+          ...(details || {}),
+          ...photoMetadata
         };
 
-        if(item.name.toLowerCase().includes("photo roll")&&item.details.birthday_message){
-          details.birthday_message=item.details.birthday_message;
+        if (
+          normaliseProductName(item.name).includes("photo roll") &&
+          item.details.birthday_message
+        ) {
+          details.birthday_message = item.details.birthday_message;
         }
       }
 
@@ -1171,109 +1355,123 @@ $("checkoutForm").addEventListener("submit",async function(e){
       });
     }
 
-    button.textContent="SUBMITTING ORDER...";
+    button.textContent = "SUBMITTING ORDER...";
 
-    const payload={
-      customer_name:String(form.get("customer_name")||"").trim(),
-      email:String(form.get("email")||"").trim()||null,
+    const payload = {
+      customer_name:String(form.get("customer_name") || "").trim(),
+      email:String(form.get("email") || "").trim() || null,
       phone,
-      delivery_address:String(form.get("delivery_address")||"").trim(),
-      city:String(form.get("city")||"").trim(),
-      district:String(form.get("district")||"").trim(),
+      delivery_address:String(form.get("delivery_address") || "").trim(),
+      city:String(form.get("city") || "").trim(),
+      district:String(form.get("district") || "").trim(),
       postal_code:postal,
 
-      payment_method:selectedPayment==="Cash on Delivery"?"COD":"Bank Transfer",
+      payment_method:selectedPayment === "Cash on Delivery" ? "COD" : "Bank Transfer",
 
-      selected_bank:selectedPayment==="Bank Transfer"
-        ?String(form.get("selected_bank")||"").trim()
-        :null,
+      selected_bank:selectedPayment === "Bank Transfer"
+        ? String(form.get("selected_bank") || "").trim()
+        : null,
 
-      bank_transaction_reference:selectedPayment==="Bank Transfer"
-        ?String(form.get("bank_transaction_reference")||"").trim()
-        :null,
+      bank_transaction_reference:selectedPayment === "Bank Transfer"
+        ? String(form.get("bank_transaction_reference") || "").trim()
+        : null,
 
       payment_slip:paymentSlip,
 
-      customer_notes:String(form.get("customer_notes")||"").trim()||null,
+      customer_notes:String(form.get("customer_notes") || "").trim() || null,
       items:orderItems
     };
 
-    const {data,error}=await db.functions.invoke("place-order",{body:payload});
+    const {data,error} = await db.functions.invoke(
+      "place-order",
+      {body:payload}
+    );
 
-    if(error){
-      let serverMessage="";
+    if (error) {
+      let serverMessage = "";
 
-      try{
-        if(error.context){
-          const response=await error.context.json();
-          serverMessage=response.error||response.message||"";
+      try {
+        if (error.context) {
+          const response = await error.context.json();
+          serverMessage = response.error || response.message || "";
         }
-      }catch{}
+      } catch {
+        /* Use original function error. */
+      }
 
-      throw new Error(serverMessage||error.message||"The order request failed.");
+      throw new Error(serverMessage || error.message || "The order request failed.");
     }
 
-    if(!data||!data.order_number){
-      throw new Error(data?.error||"The server did not return an order number.");
+    if (!data || !data.success || !data.order_number) {
+      throw new Error(data?.error || "The server did not return a valid order confirmation.");
     }
 
     closeModal("checkoutModal");
 
-    $("trackingNumber").textContent="Your store order number: "+data.order_number;
-    $("successModal").style.display="block";
+    $("trackingNumber").textContent =
+      "Your store order number: " + data.order_number;
+
+    $("successModal").style.display = "block";
 
     this.reset();
 
-    $("bankGroup").style.display="none";
-    $("referenceGroup").style.display="none";
-    $("paymentSlipGroup").style.display="none";
-    $("bankDetails").style.display="none";
-    $("paymentSlipFileName").textContent="";
+    $("bankGroup").style.display = "none";
+    $("referenceGroup").style.display = "none";
+    $("paymentSlipGroup").style.display = "none";
+    $("bankDetails").style.display = "none";
+    $("paymentSlipFileName").textContent = "";
 
-  }catch(err){
-    console.error("Zyra order submission failed:",err);
-    msg.textContent=err.message||"We couldn't submit your order. Please try again.";
-  }finally{
-    button.disabled=false;
-    button.textContent="PLACE ORDER";
+  } catch (error) {
+    console.error("Zyra order submission failed:",error);
+
+    message.textContent =
+      error.message || "We couldn't submit your order. Please try again.";
+
+  } finally {
+    button.disabled = false;
+    button.textContent = "PLACE ORDER";
   }
 });
 
 /* DELIVERY TRACKING */
 
-async function trackDelivery(){
-  const id=$("trackingId").value.trim();
-  const box=$("trackingResult");
+async function trackDelivery() {
+  const id = $("trackingId").value.trim();
+  const box = $("trackingResult");
 
-  box.hidden=false;
-  box.textContent="Checking...";
+  box.hidden = false;
+  box.textContent = "Checking...";
 
-  if(!id){
-    box.textContent="Please enter your tracking ID.";
+  if (!id) {
+    box.textContent = "Please enter your tracking ID.";
     return;
   }
 
-  const {data,error}=await db.rpc("track_zyra_order",{p_tracking_id:id});
+  const {data,error} = await db.rpc(
+    "track_zyra_order",
+    {p_tracking_id:id}
+  );
 
-  if(error){
-    box.textContent="Unable to check tracking: "+error.message;
+  if (error) {
+    console.error("Tracking lookup failed:",error);
+    box.textContent = "Unable to check tracking: " + error.message;
     return;
   }
 
-  const o=Array.isArray(data)?data[0]:data;
+  const order = Array.isArray(data) ? data[0] : data;
 
-  if(!o||o.found===false||!o.tracking_id){
-    box.textContent="No tracking record found. Please check your tracking ID.";
+  if (!order || order.found === false || !order.tracking_id) {
+    box.textContent = "No tracking record found. Please check your tracking ID.";
     return;
   }
 
-  box.textContent=
-`Tracking ID: ${o.tracking_id}
-Status: ${o.status||"Not available"}
-Courier: ${o.courier||"Not assigned"}
-Location: ${o.location||"Not updated"}
-Estimated delivery: ${o.estimated_delivery||"Not available"}
-${o.note||""}`;
+  box.textContent =
+`Tracking ID: ${order.tracking_id}
+Status: ${order.status || "Not available"}
+Courier: ${order.courier || "Not assigned"}
+Location: ${order.location || "Not updated"}
+Estimated delivery: ${order.estimated_delivery || "Not available"}
+${order.note || ""}`;
 }
 
 /* INITIALISE */
