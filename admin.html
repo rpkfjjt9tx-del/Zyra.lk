@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zyra.lk | Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
   --wine:#842d40;
@@ -19,11 +20,10 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
-button{cursor:pointer}
+button{cursor:pointer;border:0}
 header{background:#fff;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
 .logo{font:bold 25px Georgia,serif;letter-spacing:3px;color:var(--wine)}
 .header-right{display:flex;gap:10px;align-items:center}
-button{border:0}
 .btn{background:var(--wine);color:white;padding:11px 16px}
 .btn.secondary{background:var(--dark)}
 .btn.light{background:#fff;color:var(--wine);border:1px solid var(--wine)}
@@ -34,11 +34,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .login-card h2{text-align:center;font:27px Georgia,serif;color:var(--wine)}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:13px;margin-bottom:6px}
-.field input,.field select,.field textarea{
-width:100%;padding:11px;border:1px solid #ddd;background:white;
-}
+.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid #ddd;background:white}
 .field textarea{min-height:75px;resize:vertical}
 .error{color:var(--red);font-size:13px;margin-top:10px}
+.success{color:var(--green);font-size:13px;margin-top:10px}
 .muted{color:var(--muted);font-size:12px;line-height:1.6}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:25px}
 .tab{padding:11px 16px;background:white;border:1px solid var(--line);color:var(--dark)}
@@ -55,7 +54,7 @@ width:100%;padding:11px;border:1px solid #ddd;background:white;
 .order-id{font-weight:bold;color:var(--wine)}
 .status{font-size:11px;background:#f2e9e6;padding:6px 9px;display:inline-block;margin:6px 0}
 .order-details{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:15px 0}
-.order-details div{font-size:13px;line-height:1.7}
+.order-details div{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
 .order-details strong{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}
 .items{border-top:1px solid var(--line);padding-top:12px;font-size:13px;line-height:1.8}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
@@ -67,7 +66,6 @@ table{border-collapse:collapse;width:100%;min-width:650px;font-size:13px}
 th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line)}
 th{background:#f4eee9;color:var(--wine)}
 .product-image{width:55px;height:55px;object-fit:cover;background:#eee}
-.tag{font-size:11px;padding:5px 8px;background:#eee}
 .invoice-area{display:none}
 .small-btn{padding:7px 10px;background:var(--wine);color:white;font-size:12px}
 .small-btn.gray{background:#555}
@@ -80,318 +78,508 @@ th{background:#f4eee9;color:var(--wine)}
 .notice{background:#f4eee9;padding:13px;font-size:12px;line-height:1.6;margin:15px 0}
 hr{border:0;border-top:1px solid var(--line);margin:20px 0}
 @media(max-width:800px){
-.stats{grid-template-columns:repeat(2,1fr)}
-.report-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .report-grid{grid-template-columns:1fr}
 }
 @media(max-width:600px){
-.container{padding:18px 4%}
-.grid-form,.order-details{grid-template-columns:1fr}
-.full{grid-column:auto}
-.login-card{margin:40px 4%;padding:22px}
-header{padding:13px 4%}
-.logo{font-size:21px}
+  .container{padding:18px 4%}
+  .grid-form,.order-details{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .login-card{margin:40px 4%;padding:22px}
+  header{padding:13px 4%}
+  .logo{font-size:21px}
 }
 @media print{
-body{background:white}
-header,.tabs,.no-print,#loginSection{display:none!important}
-.container{padding:0;max-width:none}
-.panel{display:none!important}
-#invoicePrint{display:block!important}
-.invoice-area{display:block}
+  body{background:white}
+  header,.tabs,.no-print,#loginSection{display:none!important}
+  .container{padding:0;max-width:none}
+  .panel{display:none!important}
+  #invoicePrint{display:block!important}
+  .invoice-area{display:block}
 }
 </style>
 </head>
+
 <body>
 
 <header>
-<div class="logo">ZYRA.LK</div>
-<div class="header-right">
-<span id="adminEmail" class="muted"></span>
-<button class="btn danger" id="logoutBtn" onclick="logout()" hidden>LOG OUT</button>
-</div>
+  <div class="logo">ZYRA.LK</div>
+  <div class="header-right">
+    <span id="adminEmail" class="muted"></span>
+    <button class="btn danger" id="logoutBtn" hidden>LOG OUT</button>
+  </div>
 </header>
 
 <section id="loginSection">
-<div class="login-card">
-<h2>Admin Login</h2>
-<p class="muted" style="text-align:center">Zyra.lk management portal</p>
-<form id="loginForm">
-<div class="field">
-<label>Email Address</label>
-<input type="email" name="email" required autocomplete="username">
-</div>
-<div class="field">
-<label>Password</label>
-<input type="password" name="password" required autocomplete="current-password">
-</div>
-<button class="btn" style="width:100%">LOGIN</button>
-<p id="loginMessage" class="error"></p>
-</form>
-</div>
+  <div class="login-card">
+    <h2>Admin Login</h2>
+    <p class="muted" style="text-align:center">Zyra.lk management portal</p>
+    <form id="loginForm">
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" name="email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn" style="width:100%">LOGIN</button>
+      <p id="loginMessage" class="error"></p>
+    </form>
+  </div>
 </section>
 
 <main id="dashboard" class="container" hidden>
 
-<div class="tabs no-print">
-<button class="tab active" data-tab="overview">Overview</button>
-<button class="tab" data-tab="orders">Store Orders</button>
-<button class="tab" data-tab="products">Products</button>
-<button class="tab" data-tab="payments">Payments</button>
-<button class="tab" data-tab="expenses">Expenses</button>
-<button class="tab" data-tab="reports">Profit & Reports</button>
-</div>
+  <div class="tabs no-print">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="orders">Store Orders</button>
+    <button class="tab" data-tab="products">Products</button>
+    <button class="tab" data-tab="payments">Payments</button>
+    <button class="tab" data-tab="expenses">Expenses</button>
+    <button class="tab" data-tab="reports">Profit & Reports</button>
+  </div>
 
-<section id="overview" class="panel active">
-<div class="section-heading"><h2>Dashboard Overview</h2><button class="btn" onclick="refreshAll()">REFRESH</button></div>
-<div class="stats">
-<div class="stat"><span>Total Store Orders</span><strong id="statOrders">0</strong></div>
-<div class="stat"><span>Pending Orders</span><strong id="statPending">0</strong></div>
-<div class="stat"><span>Verified Revenue</span><strong id="statRevenue">LKR 0</strong></div>
-<div class="stat"><span>Pending Payments</span><strong id="statUnpaid">LKR 0</strong></div>
-</div>
-<div class="notice">
-This dashboard uses <strong>store_orders</strong> and <strong>store_order_items</strong> for shop orders and sales. Delivery tracking remains separate in <strong>zyra_orders</strong>.
-</div>
-<div class="section-heading"><h3>Recent Store Orders</h3><button class="btn light" onclick="switchTab('orders')">VIEW ALL</button></div>
-<div id="recentOrders"></div>
-</section>
+  <!-- OVERVIEW -->
+  <section id="overview" class="panel active">
+    <div class="section-heading">
+      <h2>Dashboard Overview</h2>
+      <button class="btn" onclick="refreshAll()">REFRESH</button>
+    </div>
 
-<section id="orders" class="panel">
-<div class="section-heading">
-<h2>Store Orders</h2>
-<button class="btn" onclick="loadOrders()">REFRESH ORDERS</button>
-</div>
-<div class="field">
-<input id="orderSearch" placeholder="Search order number, customer or phone..." oninput="renderOrders()">
-</div>
-<div id="ordersList"></div>
-</section>
+    <div class="stats">
+      <div class="stat"><span>Total Store Orders</span><strong id="statOrders">0</strong></div>
+      <div class="stat"><span>Pending Orders</span><strong id="statPending">0</strong></div>
+      <div class="stat"><span>Verified Revenue</span><strong id="statRevenue">LKR 0</strong></div>
+      <div class="stat"><span>Pending Payments</span><strong id="statUnpaid">LKR 0</strong></div>
+    </div>
 
-<section id="products" class="panel">
-<div class="section-heading">
-<h2>Product Management</h2>
-<button class="btn" onclick="newProduct()">ADD PRODUCT</button>
-</div>
+    <div class="notice">
+      Shop orders and sales use <strong>store_orders</strong> and
+      <strong>store_order_items</strong>. Delivery tracking uses
+      <strong>zyra_orders</strong>. Order status updates are synchronized
+      between the connected records.
+    </div>
 
-<div id="productFormCard" class="card" hidden>
-<h3 id="productFormTitle">Add Product</h3>
-<form id="productForm">
-<input type="hidden" name="id">
-<div class="grid-form">
-<div class="field"><label>Product Name *</label><input name="name" required maxlength="200"></div>
-<div class="field"><label>Price (LKR) *</label><input name="price" type="number" min="0" step="0.01" required></div>
-<div class="field"><label>Category</label><input name="category" maxlength="100"></div>
-<div class="field"><label>Stock Quantity</label><input name="stock_quantity" type="number" min="0" step="1" value="0"></div>
-<div class="field"><label>Product Image URL / Storage Path</label><input name="image_url" placeholder="Paste image URL or storage path"></div>
-<div class="field"><label>Product Cost (LKR)</label><input name="cost_price" type="number" min="0" step="0.01" placeholder="For profit calculation"></div>
-<div class="field full"><label>Description</label><textarea name="description"></textarea></div>
-<div class="field"><label><input type="checkbox" name="is_customisable"> Customisable product</label></div>
-<div class="field"><label><input type="checkbox" name="is_active" checked> Active / visible in shop</label></div>
-</div>
-<p class="muted">Product cost is saved only if your store_products table has a cost_price column. If it does not, the save will show a database error; use the SQL setup discussed separately before enabling profit reporting.</p>
-<div class="actions">
-<button class="btn" type="submit">SAVE PRODUCT</button>
-<button class="btn light" type="button" onclick="closeProductForm()">CANCEL</button>
-</div>
-<p id="productMessage" class="error"></p>
-</form>
-</div>
+    <div class="section-heading">
+      <h3>Recent Store Orders</h3>
+      <button class="btn light" onclick="switchTab('orders')">VIEW ALL</button>
+    </div>
+    <div id="recentOrders"></div>
+  </section>
 
-<div class="table-wrap">
-<table>
-<thead><tr><th>Image</th><th>Product</th><th>Category</th><th>Price</th><th>Cost</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
-<tbody id="productsTable"></tbody>
-</table>
-</div>
-</section>
+  <!-- ORDERS -->
+  <section id="orders" class="panel">
+    <div class="section-heading">
+      <h2>Store Orders</h2>
+      <button class="btn" onclick="loadOrders()">REFRESH ORDERS</button>
+    </div>
+    <div class="field">
+      <input id="orderSearch" placeholder="Search order number, customer or phone...">
+    </div>
+    <div id="ordersList"></div>
+  </section>
 
-<section id="payments" class="panel">
-<div class="section-heading"><h2>Payment Verification</h2><button class="btn" onclick="loadOrders()">REFRESH</button></div>
-<div class="notice">Review bank-transfer references and update payment status after checking your bank account. The payment status update requires a <strong>payment_status</strong> column in store_orders.</div>
-<div id="paymentsList"></div>
-</section>
+  <!-- PRODUCTS -->
+  <section id="products" class="panel">
+    <div class="section-heading">
+      <h2>Product Management</h2>
+      <button class="btn" onclick="newProduct()">ADD PRODUCT</button>
+    </div>
 
-<section id="expenses" class="panel">
-<div class="section-heading"><h2>Business Expenses</h2></div>
-<div class="card">
-<h3>Add Expense</h3>
-<form id="expenseForm">
-<div class="grid-form">
-<div class="field"><label>Expense Description *</label><input name="description" required maxlength="200"></div>
-<div class="field"><label>Amount (LKR) *</label><input name="amount" type="number" min="0.01" step="0.01" required></div>
-<div class="field"><label>Expense Date *</label><input name="expense_date" type="date" required></div>
-<div class="field"><label>Category</label>
-<select name="category">
-<option>Packaging</option><option>Delivery</option><option>Marketing</option>
-<option>Supplies</option><option>Other</option>
-</select>
-</div>
-<div class="field full"><label>Notes</label><textarea name="notes"></textarea></div>
-</div>
-<button class="btn">SAVE EXPENSE</button>
-<p id="expenseMessage" class="error"></p>
-</form>
-</div>
-<div class="table-wrap">
-<table>
-<thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Action</th></tr></thead>
-<tbody id="expensesTable"></tbody>
-</table>
-</div>
-</section>
+    <div id="productFormCard" class="card" hidden>
+      <h3 id="productFormTitle">Add Product</h3>
+      <form id="productForm">
+        <input type="hidden" name="id">
 
-<section id="reports" class="panel">
-<div class="section-heading">
-<h2>Profit & Reports</h2>
-<button class="btn" onclick="loadReports()">REFRESH REPORTS</button>
-</div>
-<div class="report-grid">
-<div class="report-box"><span class="muted">Verified Revenue</span><strong id="reportRevenue">LKR 0</strong></div>
-<div class="report-box"><span class="muted">Product Cost</span><strong id="reportCosts">LKR 0</strong></div>
-<div class="report-box"><span class="muted">Business Expenses</span><strong id="reportExpenses">LKR 0</strong></div>
-<div class="report-box"><span class="muted">Estimated Net Profit</span><strong id="reportProfit">LKR 0</strong></div>
-<div class="report-box"><span class="muted">Total Units Sold</span><strong id="reportUnits">0</strong></div>
-<div class="report-box"><span class="muted">Completed Orders</span><strong id="reportCompleted">0</strong></div>
-</div>
-<div class="notice">
-Profit calculations depend on accurate product cost prices and verified payment records. The report uses available order-item cost information when present. Missing cost information is treated as zero, so the displayed profit may be overstated.
-</div>
-<div class="card">
-<h3>Sales by Product</h3>
-<div id="productSales"></div>
-</div>
-</section>
+        <div class="grid-form">
+          <div class="field">
+            <label>Product Name *</label>
+            <input name="name" required maxlength="200">
+          </div>
+
+          <div class="field">
+            <label>Price (LKR) *</label>
+            <input name="price" type="number" min="0" step="0.01" required>
+          </div>
+
+          <div class="field">
+            <label>Category</label>
+            <input name="category" maxlength="100">
+          </div>
+
+          <div class="field">
+            <label>Stock Quantity</label>
+            <input name="stock_quantity" type="number" min="0" step="1" value="0">
+          </div>
+
+          <div class="field">
+            <label>Product Image URL / Storage Path</label>
+            <input name="image_url" placeholder="Paste image URL or storage path">
+          </div>
+
+          <div class="field">
+            <label>Product Cost (LKR)</label>
+            <input name="cost_price" type="number" min="0" step="0.01">
+          </div>
+
+          <div class="field full">
+            <label>Description</label>
+            <textarea name="description"></textarea>
+          </div>
+
+          <div class="field">
+            <label><input type="checkbox" name="is_customisable"> Customisable product</label>
+          </div>
+
+          <div class="field">
+            <label><input type="checkbox" name="is_active" checked> Active / visible in shop</label>
+          </div>
+        </div>
+
+        <div class="notice">
+          Product cost saving requires a cost_price column in store_products.
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="submit">SAVE PRODUCT</button>
+          <button class="btn light" type="button" onclick="closeProductForm()">CANCEL</button>
+        </div>
+        <p id="productMessage" class="error"></p>
+      </form>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th><th>Product</th><th>Category</th>
+            <th>Price</th><th>Cost</th><th>Stock</th>
+            <th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PAYMENTS -->
+  <section id="payments" class="panel">
+    <div class="section-heading">
+      <h2>Payment Verification</h2>
+      <button class="btn" onclick="loadOrders()">REFRESH</button>
+    </div>
+    <div class="notice">
+      Review bank-transfer references and update payment status after checking
+      your bank account. Requires payment_status in store_orders.
+    </div>
+    <div id="paymentsList"></div>
+  </section>
+
+  <!-- EXPENSES -->
+  <section id="expenses" class="panel">
+    <div class="section-heading">
+      <h2>Business Expenses</h2>
+    </div>
+
+    <div class="card">
+      <h3>Add Expense</h3>
+      <form id="expenseForm">
+        <div class="grid-form">
+          <div class="field">
+            <label>Expense Description *</label>
+            <input name="description" required maxlength="200">
+          </div>
+
+          <div class="field">
+            <label>Amount (LKR) *</label>
+            <input name="amount" type="number" min="0.01" step="0.01" required>
+          </div>
+
+          <div class="field">
+            <label>Expense Date *</label>
+            <input name="expense_date" type="date" required>
+          </div>
+
+          <div class="field">
+            <label>Category</label>
+            <select name="category">
+              <option>Packaging</option>
+              <option>Delivery</option>
+              <option>Marketing</option>
+              <option>Supplies</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label>Notes</label>
+            <textarea name="notes"></textarea>
+          </div>
+        </div>
+
+        <button class="btn">SAVE EXPENSE</button>
+        <p id="expenseMessage" class="error"></p>
+      </form>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Action</th></tr>
+        </thead>
+        <tbody id="expensesTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REPORTS -->
+  <section id="reports" class="panel">
+    <div class="section-heading">
+      <h2>Profit & Reports</h2>
+      <button class="btn" onclick="loadReports()">REFRESH REPORTS</button>
+    </div>
+
+    <div class="report-grid">
+      <div class="report-box"><span class="muted">Verified Revenue</span><strong id="reportRevenue">LKR 0</strong></div>
+      <div class="report-box"><span class="muted">Product Cost</span><strong id="reportCosts">LKR 0</strong></div>
+      <div class="report-box"><span class="muted">Business Expenses</span><strong id="reportExpenses">LKR 0</strong></div>
+      <div class="report-box"><span class="muted">Estimated Net Profit</span><strong id="reportProfit">LKR 0</strong></div>
+      <div class="report-box"><span class="muted">Total Units Sold</span><strong id="reportUnits">0</strong></div>
+      <div class="report-box"><span class="muted">Completed Orders</span><strong id="reportCompleted">0</strong></div>
+    </div>
+
+    <div class="notice">
+      Profit calculations depend on accurate product cost prices and verified
+      payment records. Missing cost information is treated as zero.
+    </div>
+
+    <div class="card">
+      <h3>Sales by Product</h3>
+      <div id="productSales"></div>
+    </div>
+  </section>
 
 </main>
 
 <section id="invoicePrint" class="invoice-area"></section>
 
 <script>
-const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
-const PRODUCT_TABLE="store_products";
-const ORDER_TABLE="store_orders";
-const ITEM_TABLE="store_order_items";
-const EXPENSE_TABLE="zyra_expenses";
-const PHOTO_BUCKET="customer-photos";
-const PRODUCT_BUCKET="Product -image";
+"use strict";
 
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+/* DATABASE CONFIGURATION */
+const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 
-const $=id=>document.getElementById(id);
-const money=n=>Number(n||0).toLocaleString("en-LK",{minimumFractionDigits:2,maximumFractionDigits:2});
-const dateText=v=>v?new Date(v).toLocaleDateString("en-LK"):"—";
+const PRODUCT_TABLE = "store_products";
+const ORDER_TABLE = "store_orders";
+const ITEM_TABLE = "store_order_items";
+const TRACKING_TABLE = "zyra_orders";
+const EXPENSE_TABLE = "zyra_expenses";
 
-let orders=[],products=[],expenses=[];
-let activeOrder=null;
-let productCostAvailable=true;
-let paymentColumnAvailable=true;
+const PHOTO_BUCKET = "customer-photos";
+const PRODUCT_BUCKET = "Product -image";
 
-function showError(id,message){
-  const el=$(id);
-  if(el)el.textContent=message;
-}
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
-function escapeHTML(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+const $ = id => document.getElementById(id);
+
+const money = n => Number(n || 0).toLocaleString("en-LK", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+const dateText = v => v
+  ? new Date(v).toLocaleDateString("en-LK")
+  : "—";
+
+let orders = [];
+let products = [];
+let expenses = [];
+let paymentColumnAvailable = true;
+
+/* SAFE HTML */
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
   }[c]));
 }
 
-async function checkSession(){
-  const {data,error}=await db.auth.getSession();
-  if(error)console.error(error);
-  if(data.session)showDashboard(data.session.user);
-  else showLogin();
+function showError(id, message) {
+  const el = $(id);
+  if (el) el.textContent = message;
 }
 
-function showLogin(){
-  $("loginSection").hidden=false;
-  $("dashboard").hidden=true;
-  $("logoutBtn").hidden=true;
+/* DISPLAY CUSTOMISATION IN A READABLE FORMAT */
+function formatCustomisation(value) {
+  if (value == null) return "";
+
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(item => formatCustomisation(item)).join(", ");
+  }
+
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .filter(([key, val]) => val !== null && val !== "")
+      .map(([key, val]) => {
+        const label = key
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, c => c.toUpperCase());
+
+        const formatted = typeof val === "object"
+          ? formatCustomisation(val)
+          : String(val);
+
+        return label + ": " + formatted;
+      })
+      .join(" | ");
+  }
+
+  return String(value);
 }
 
-function showDashboard(user){
-  $("loginSection").hidden=true;
-  $("dashboard").hidden=false;
-  $("logoutBtn").hidden=false;
-  $("adminEmail").textContent=user.email||"Admin";
+/* AUTHENTICATION */
+async function checkSession() {
+  const { data, error } = await db.auth.getSession();
+
+  if (error) console.error(error);
+
+  if (data.session) {
+    showDashboard(data.session.user);
+  } else {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  $("loginSection").hidden = false;
+  $("dashboard").hidden = true;
+  $("logoutBtn").hidden = true;
+}
+
+function showDashboard(user) {
+  $("loginSection").hidden = true;
+  $("dashboard").hidden = false;
+  $("logoutBtn").hidden = false;
+  $("adminEmail").textContent = user.email || "Admin";
   refreshAll();
 }
 
-$("loginForm").addEventListener("submit",async e=>{
+$("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const f=new FormData(e.currentTarget);
-  showError("loginMessage","Signing in...");
 
-  const {data,error}=await db.auth.signInWithPassword({
-    email:f.get("email"),
-    password:f.get("password")
+  const f = new FormData(e.currentTarget);
+  showError("loginMessage", "Signing in...");
+
+  const { data, error } = await db.auth.signInWithPassword({
+    email: f.get("email"),
+    password: f.get("password")
   });
 
-  if(error){
-    showError("loginMessage",error.message);
+  if (error) {
+    showError("loginMessage", error.message);
     return;
   }
 
   showDashboard(data.user);
 });
 
-async function logout(){
-  await db.auth.signOut();
-  showLogin();
-}
+async function logout() {
+  const { error } = await db.auth.signOut();
 
-$("logoutBtn").addEventListener("click",logout);
-
-document.querySelectorAll(".tab").forEach(b=>{
-  b.addEventListener("click",()=>switchTab(b.dataset.tab));
-});
-
-function switchTab(id){
-  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
-  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===id));
-
-  if(id==="orders")loadOrders();
-  if(id==="products")loadProducts();
-  if(id==="payments")loadPayments();
-  if(id==="expenses")loadExpenses();
-  if(id==="reports")loadReports();
-}
-
-async function refreshAll(){
-  await Promise.all([loadOrders(),loadProducts(),loadExpenses()]);
-  updateOverview();
-}
-
-async function loadOrders(){
-  const root=$("ordersList");
-  root.textContent="Loading orders...";
-
-  let result=await db.from(ORDER_TABLE)
-    .select("*,store_order_items(*)")
-    .order("created_at",{ascending:false})
-    .limit(200);
-
-  if(result.error){
-    console.error(result.error);
-    result=await db.from(ORDER_TABLE)
-      .select("*")
-      .order("created_at",{ascending:false})
-      .limit(200);
-  }
-
-  if(result.error){
-    root.textContent="Unable to load orders: "+result.error.message;
-    orders=[];
+  if (error) {
+    alert("Logout failed: " + error.message);
     return;
   }
 
-  orders=result.data||[];
+  showLogin();
+}
 
-  const first=orders[0];
-  if(first&&!("payment_status" in first))paymentColumnAvailable=false;
-  else if(first)paymentColumnAvailable=true;
+$("logoutBtn").addEventListener("click", logout);
+
+/* NAVIGATION */
+document.querySelectorAll(".tab").forEach(button => {
+  button.addEventListener("click", () => switchTab(button.dataset.tab));
+});
+
+function switchTab(id) {
+  document.querySelectorAll(".tab").forEach(b => {
+    b.classList.toggle("active", b.dataset.tab === id);
+  });
+
+  document.querySelectorAll(".panel").forEach(p => {
+    p.classList.toggle("active", p.id === id);
+  });
+
+  if (id === "orders") loadOrders();
+  if (id === "products") loadProducts();
+  if (id === "payments") loadPayments();
+  if (id === "expenses") loadExpenses();
+  if (id === "reports") loadReports();
+}
+
+/* REFRESH */
+async function refreshAll() {
+  await Promise.all([
+    loadOrders(),
+    loadProducts(),
+    loadExpenses()
+  ]);
+
+  updateOverview();
+}
+
+/* LOAD STORE ORDERS */
+async function loadOrders() {
+  const root = $("ordersList");
+  root.textContent = "Loading orders...";
+
+  let result = await db
+    .from(ORDER_TABLE)
+    .select("*,store_order_items(*)")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (result.error) {
+    console.error("Order items query:", result.error);
+
+    result = await db
+      .from(ORDER_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+  }
+
+  if (result.error) {
+    root.textContent = "Unable to load orders: " + result.error.message;
+    orders = [];
+    return;
+  }
+
+  orders = result.data || [];
+
+  const first = orders[0];
+
+  if (first && !("payment_status" in first)) {
+    paymentColumnAvailable = false;
+  } else if (first) {
+    paymentColumnAvailable = true;
+  }
 
   updateOverview();
   renderOrders();
@@ -399,122 +587,279 @@ async function loadOrders(){
   renderPayments();
 }
 
-function orderNumber(o){
-  return o.order_number||o.id||"—";
+function orderNumber(o) {
+  return o.order_number || o.id || "—";
 }
 
-function orderAmount(o){
-  return Number(o.total_amount??o.total??0);
+function orderAmount(o) {
+  return Number(o.total_amount ?? o.total ?? 0);
 }
 
-function getItems(o){
-  return o.store_order_items||o.items||[];
+function getItems(o) {
+  return o.store_order_items || o.items || [];
 }
 
-function getPaymentStatus(o){
-  return String(o.payment_status||"PENDING").toUpperCase();
+function getPaymentStatus(o) {
+  return String(o.payment_status || "PENDING").toUpperCase();
 }
 
-function renderOrders(){
-  const q=$("orderSearch").value.toLowerCase();
-  const filtered=orders.filter(o=>{
-    const s=[orderNumber(o),o.customer_name,o.phone,o.email].join(" ").toLowerCase();
-    return s.includes(q);
-  });
+/* TRACKING STATUS MAPPING */
+function getTrackingStatus(status) {
+  const map = {
+    pending: "Order Confirmed",
+    confirmed: "Order Confirmed",
+    processing: "Processing",
+    shipped: "Shipped",
+    completed: "Delivered",
+    cancelled: "Cancelled"
+  };
 
-  const root=$("ordersList");
-  root.replaceChildren();
+  return map[String(status).toLowerCase()] || "Order Confirmed";
+}
 
-  if(!filtered.length){
-    root.textContent="No matching store orders found.";
+/*
+  IMPORTANT:
+  Updates store_orders first, then the matching zyra_orders record.
+  The relationship is:
+  store_orders.id = zyra_orders.store_order_id
+*/
+async function updateOrderStatus(id, status, button) {
+  if (!id) {
+    alert("Order ID is missing.");
     return;
   }
 
-  filtered.forEach(o=>root.append(makeOrderCard(o)));
+  if (button) {
+    button.disabled = true;
+    button.textContent = "UPDATING...";
+  }
+
+  try {
+    /* STEP 1: UPDATE SHOP ORDER */
+    const { error: storeError } = await db
+      .from(ORDER_TABLE)
+      .update({ order_status: status })
+      .eq("id", id);
+
+    if (storeError) {
+      throw new Error(
+        "Store order update failed: " + storeError.message
+      );
+    }
+
+    /* STEP 2: FIND CONNECTED TRACKING ORDER */
+    const { data: trackingRecords, error: findError } = await db
+      .from(TRACKING_TABLE)
+      .select("id,tracking_id,status")
+      .eq("store_order_id", id);
+
+    if (findError) {
+      throw new Error(
+        "Store order was updated, but tracking records could not be checked: " +
+        findError.message
+      );
+    }
+
+    if (!trackingRecords || trackingRecords.length === 0) {
+      alert(
+        "Store order status updated.\n\n" +
+        "No connected tracking record was found in zyra_orders.\n\n" +
+        "The customer tracking status cannot be updated until a tracking " +
+        "record is connected using store_order_id."
+      );
+
+      await loadOrders();
+      return;
+    }
+
+    /* STEP 3: UPDATE CONNECTED TRACKING RECORDS */
+    const trackingStatus = getTrackingStatus(status);
+
+    const { data: updatedRecords, error: trackingError } = await db
+      .from(TRACKING_TABLE)
+      .update({
+        status: trackingStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq("store_order_id", id)
+      .select("id,tracking_id,status");
+
+    if (trackingError) {
+      throw new Error(
+        "Store order was updated, but tracking update failed: " +
+        trackingError.message
+      );
+    }
+
+    if (!updatedRecords || updatedRecords.length === 0) {
+      alert(
+        "Store order updated, but no tracking row was returned after update. " +
+        "Please check the zyra_orders update permissions."
+      );
+    } else {
+      alert(
+        "Order updated successfully!\n\n" +
+        "Shop status: " + status + "\n" +
+        "Customer tracking status: " + trackingStatus
+      );
+    }
+
+    await loadOrders();
+
+  } catch (error) {
+    console.error("Order status update:", error);
+    alert(error.message);
+    await loadOrders();
+
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "UPDATE ORDER";
+    }
+  }
 }
 
-function makeOrderCard(o){
-  const card=document.createElement("article");
-  card.className="card";
+/* ORDER SEARCH AND DISPLAY */
+function renderOrders() {
+  const q = $("orderSearch").value.toLowerCase();
 
-  const items=getItems(o);
-  const status=String(o.order_status||"pending");
-  const payment=getPaymentStatus(o);
+  const filtered = orders.filter(o => {
+    const s = [
+      orderNumber(o),
+      o.customer_name,
+      o.phone,
+      o.email
+    ].join(" ").toLowerCase();
 
-  const top=document.createElement("div");
-  top.className="order-top";
+    return s.includes(q);
+  });
 
-  const left=document.createElement("div");
-  left.innerHTML=`<div class="order-id">Order #${escapeHTML(orderNumber(o))}</div>
-    <div class="muted">${escapeHTML(dateText(o.created_at))}</div>`;
+  const root = $("ordersList");
+  root.replaceChildren();
 
-  const right=document.createElement("div");
-  right.innerHTML=`<span class="status">ORDER: ${escapeHTML(status.toUpperCase())}</span>
-    <span class="status">PAYMENT: ${escapeHTML(payment)}</span>`;
+  if (!filtered.length) {
+    root.textContent = "No matching store orders found.";
+    return;
+  }
 
-  top.append(left,right);
+  filtered.forEach(o => root.append(makeOrderCard(o)));
+}
+
+function makeOrderCard(o) {
+  const card = document.createElement("article");
+  card.className = "card";
+
+  const items = getItems(o);
+  const status = String(o.order_status || "pending").toLowerCase();
+  const payment = getPaymentStatus(o);
+
+  const top = document.createElement("div");
+  top.className = "order-top";
+
+  const left = document.createElement("div");
+  left.innerHTML = `
+    <div class="order-id">Order #${escapeHTML(orderNumber(o))}</div>
+    <div class="muted">${escapeHTML(dateText(o.created_at))}</div>
+  `;
+
+  const right = document.createElement("div");
+  right.innerHTML = `
+    <span class="status">ORDER: ${escapeHTML(status.toUpperCase())}</span>
+    <span class="status">PAYMENT: ${escapeHTML(payment)}</span>
+  `;
+
+  top.append(left, right);
   card.append(top);
 
-  const details=document.createElement("div");
-  details.className="order-details";
+  const details = document.createElement("div");
+  details.className = "order-details";
 
-  const fields=[
-    ["Customer",o.customer_name],
-    ["Phone",o.phone],
-    ["Email",o.email],
-    ["Payment Method",o.payment_method],
-    ["Bank",o.selected_bank],
-    ["Transaction Reference",o.bank_transaction_reference],
-    ["Address",o.delivery_address],
-    ["City / District",[o.city,o.district].filter(Boolean).join(", ")],
-    ["Postal Code",o.postal_code],
-    ["Notes",o.customer_notes]
+  const fields = [
+    ["Customer", o.customer_name],
+    ["Phone", o.phone],
+    ["Email", o.email],
+    ["Payment Method", o.payment_method],
+    ["Bank", o.selected_bank],
+    ["Transaction Reference", o.bank_transaction_reference],
+    ["Address", o.delivery_address],
+    ["City / District", [o.city, o.district].filter(Boolean).join(", ")],
+    ["Postal Code", o.postal_code],
+    ["Notes", o.customer_notes]
   ];
 
-  fields.forEach(([label,value])=>{
-    const div=document.createElement("div");
-    div.innerHTML=`<strong>${escapeHTML(label)}</strong>${escapeHTML(value||"—")}`;
+  fields.forEach(([label, value]) => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <strong>${escapeHTML(label)}</strong>
+      ${escapeHTML(value || "—")}
+    `;
     details.append(div);
   });
 
   card.append(details);
 
-  const itemBox=document.createElement("div");
-  itemBox.className="items";
-  itemBox.innerHTML="<strong>Products</strong><br>";
+  const itemBox = document.createElement("div");
+  itemBox.className = "items";
+  itemBox.innerHTML = "<strong>Products</strong><br>";
 
-  if(!items.length){
-    itemBox.innerHTML+="No item details available.";
-  }else{
-    items.forEach(i=>{
-      const name=i.product_name||i.name||i.name_snapshot||i.product_id||"Product";
-      const qty=i.quantity||1;
-      const price=i.unit_price??i.price??i.price_at_purchase;
-      const line=document.createElement("div");
-      line.textContent=`${name} × ${qty}`+(price!=null?" — LKR "+money(Number(price)*Number(qty)):"");
+  if (!items.length) {
+    itemBox.innerHTML += "No item details available.";
+  } else {
+    items.forEach(i => {
+      const name =
+        i.product_name ||
+        i.name ||
+        i.name_snapshot ||
+        i.product_id ||
+        "Product";
+
+      const qty = i.quantity || 1;
+      const price = i.unit_price ?? i.price ?? i.price_at_purchase;
+
+      const line = document.createElement("div");
+      line.textContent =
+        `${name} × ${qty}` +
+        (price != null
+          ? " — LKR " + money(Number(price) * Number(qty))
+          : "");
+
       itemBox.append(line);
 
-      const custom=i.customisation_details||i.customization_details;
-      if(custom){
-        const c=document.createElement("div");
-        c.className="muted";
-        c.textContent="Customisation: "+JSON.stringify(custom);
+      const custom =
+        i.customisation_details ||
+        i.customization_details;
+
+      if (custom) {
+        const c = document.createElement("div");
+        c.className = "muted";
+        c.textContent = "Customisation: " + formatCustomisation(custom);
         itemBox.append(c);
 
-        const paths=Array.isArray(custom.photo_paths)?custom.photo_paths:
-          (custom.photo_path?[custom.photo_path]:[]);
+        const paths = Array.isArray(custom.photo_paths)
+          ? custom.photo_paths
+          : (custom.photo_path ? [custom.photo_path] : []);
 
-        paths.forEach(path=>{
-          const a=document.createElement("a");
-          a.className="photo-link";
-          a.href="#";
-          a.textContent="View customer photo";
-          a.onclick=async e=>{
+        paths.forEach(path => {
+          const a = document.createElement("a");
+          a.className = "photo-link";
+          a.href = "#";
+          a.textContent = "View customer photo";
+
+          a.onclick = async e => {
             e.preventDefault();
-            const {data,error}=await db.storage.from(PHOTO_BUCKET).createSignedUrl(path,300);
-            if(error){alert(error.message);return;}
-            window.open(data.signedUrl,"_blank","noopener");
+
+            const { data, error } = await db.storage
+              .from(PHOTO_BUCKET)
+              .createSignedUrl(path, 300);
+
+            if (error) {
+              alert(error.message);
+              return;
+            }
+
+            window.open(data.signedUrl, "_blank", "noopener");
           };
+
           itemBox.append(a);
         });
       }
@@ -523,135 +868,173 @@ function makeOrderCard(o){
 
   card.append(itemBox);
 
-  const actions=document.createElement("div");
-  actions.className="actions";
+  const actions = document.createElement("div");
+  actions.className = "actions";
 
-  const statusSelect=document.createElement("select");
-  ["pending","confirmed","processing","shipped","completed","cancelled"].forEach(s=>{
-    const op=document.createElement("option");
-    op.value=s;
-    op.textContent=s.charAt(0).toUpperCase()+s.slice(1);
+  const statusSelect = document.createElement("select");
+
+  [
+    "pending",
+    "confirmed",
+    "processing",
+    "shipped",
+    "completed",
+    "cancelled"
+  ].forEach(s => {
+    const op = document.createElement("option");
+    op.value = s;
+    op.textContent = s.charAt(0).toUpperCase() + s.slice(1);
     statusSelect.append(op);
   });
-  statusSelect.value=status;
+
+  statusSelect.value = status;
   actions.append(statusSelect);
 
-  const update=document.createElement("button");
-  update.className="small-btn";
-  update.textContent="UPDATE ORDER";
-  update.onclick=()=>updateOrderStatus(o.id,statusSelect.value);
+  const update = document.createElement("button");
+  update.className = "small-btn";
+  update.textContent = "UPDATE ORDER";
+  update.onclick = () => {
+    updateOrderStatus(o.id, statusSelect.value, update);
+  };
+
   actions.append(update);
 
-  const invoice=document.createElement("button");
-  invoice.className="small-btn gray";
-  invoice.textContent="PRINT INVOICE";
-  invoice.onclick=()=>printInvoice(o);
-  actions.append(invoice);
+  const invoice = document.createElement("button");
+  invoice.className = "small-btn gray";
+  invoice.textContent = "PRINT INVOICE";
+  invoice.onclick = () => printInvoice(o);
 
+  actions.append(invoice);
   card.append(actions);
+
   return card;
 }
 
-async function updateOrderStatus(id,status){
-  if(!id)return;
-  const {error}=await db.from(ORDER_TABLE).update({order_status:status}).eq("id",id);
-  if(error){
-    alert("Could not update order: "+error.message);
-    return;
-  }
-  await loadOrders();
-}
-
-function renderRecentOrders(){
-  const root=$("recentOrders");
-  root.replaceChildren();
-  orders.slice(0,5).forEach(o=>root.append(makeOrderCard(o)));
-  if(!orders.length)root.textContent="No store orders yet.";
-}
-
-function updateOverview(){
-  $("statOrders").textContent=orders.length;
-  $("statPending").textContent=orders.filter(o=>String(o.order_status||"pending").toLowerCase()==="pending").length;
-
-  const verified=orders.filter(o=>getPaymentStatus(o)==="PAID");
-  const revenue=verified.reduce((s,o)=>s+orderAmount(o),0);
-  const unpaid=orders.filter(o=>getPaymentStatus(o)!=="PAID")
-    .reduce((s,o)=>s+orderAmount(o),0);
-
-  $("statRevenue").textContent="LKR "+money(revenue);
-  $("statUnpaid").textContent="LKR "+money(unpaid);
-}
-
-function renderPayments(){
-  const root=$("paymentsList");
+/* RECENT ORDERS */
+function renderRecentOrders() {
+  const root = $("recentOrders");
   root.replaceChildren();
 
-  if(!orders.length){
-    root.textContent="No store orders found.";
+  orders.slice(0, 5).forEach(o => {
+    root.append(makeOrderCard(o));
+  });
+
+  if (!orders.length) {
+    root.textContent = "No store orders yet.";
+  }
+}
+
+/* OVERVIEW */
+function updateOverview() {
+  $("statOrders").textContent = orders.length;
+
+  $("statPending").textContent = orders.filter(o =>
+    String(o.order_status || "pending").toLowerCase() === "pending"
+  ).length;
+
+  const verified = orders.filter(o => getPaymentStatus(o) === "PAID");
+
+  const revenue = verified.reduce(
+    (s, o) => s + orderAmount(o),
+    0
+  );
+
+  const unpaid = orders
+    .filter(o => getPaymentStatus(o) !== "PAID")
+    .reduce((s, o) => s + orderAmount(o), 0);
+
+  $("statRevenue").textContent = "LKR " + money(revenue);
+  $("statUnpaid").textContent = "LKR " + money(unpaid);
+}
+
+/* PAYMENTS */
+function renderPayments() {
+  const root = $("paymentsList");
+  root.replaceChildren();
+
+  if (!orders.length) {
+    root.textContent = "No store orders found.";
     return;
   }
 
-  orders.forEach(o=>{
-    const card=document.createElement("div");
-    card.className="card";
+  orders.forEach(o => {
+    const card = document.createElement("div");
+    card.className = "card";
 
-    const method=String(o.payment_method||"");
-    const status=getPaymentStatus(o);
+    const method = String(o.payment_method || "");
+    const status = getPaymentStatus(o);
 
-    const title=document.createElement("h3");
-    title.textContent="Order #"+orderNumber(o);
+    const title = document.createElement("h3");
+    title.textContent = "Order #" + orderNumber(o);
     card.append(title);
 
-    const info=document.createElement("p");
-    info.textContent=`${o.customer_name||"Customer"} | ${method} | LKR ${money(orderAmount(o))} | ${status}`;
+    const info = document.createElement("p");
+    info.textContent =
+      `${o.customer_name || "Customer"} | ${method} | ` +
+      `LKR ${money(orderAmount(o))} | ${status}`;
+
     card.append(info);
 
-    const ref=document.createElement("p");
-    ref.className="muted";
-    ref.textContent="Bank: "+(o.selected_bank||"—")+" | Transaction reference: "+(o.bank_transaction_reference||"—");
+    const ref = document.createElement("p");
+    ref.className = "muted";
+    ref.textContent =
+      "Bank: " + (o.selected_bank || "—") +
+      " | Transaction reference: " +
+      (o.bank_transaction_reference || "—");
+
     card.append(ref);
 
-    const select=document.createElement("select");
-    ["PENDING","PAID","FAILED","REFUNDED"].forEach(v=>{
-      const op=document.createElement("option");
-      op.value=v;op.textContent=v;
+    const select = document.createElement("select");
+
+    ["PENDING", "PAID", "FAILED", "REFUNDED"].forEach(v => {
+      const op = document.createElement("option");
+      op.value = v;
+      op.textContent = v;
       select.append(op);
     });
-    select.value=status;
 
-    const button=document.createElement("button");
-    button.className="small-btn";
-    button.textContent="UPDATE PAYMENT";
-    button.style.marginLeft="8px";
-    button.onclick=()=>updatePaymentStatus(o.id,select.value);
+    select.value = status;
 
-    card.append(select,button);
+    const button = document.createElement("button");
+    button.className = "small-btn";
+    button.textContent = "UPDATE PAYMENT";
+    button.style.marginLeft = "8px";
+    button.onclick = () => updatePaymentStatus(o.id, select.value);
 
-    if(!paymentColumnAvailable){
-      const note=document.createElement("p");
-      note.className="error";
-      note.textContent="Payment status column not detected. Add payment_status to store_orders before updating payments.";
+    card.append(select, button);
+
+    if (!paymentColumnAvailable) {
+      const note = document.createElement("p");
+      note.className = "error";
+      note.textContent =
+        "Payment status column not detected. Add payment_status " +
+        "to store_orders before updating payments.";
+
       card.append(note);
-      button.disabled=true;
+      button.disabled = true;
     }
 
     root.append(card);
   });
 }
 
-async function loadPayments(){
+async function loadPayments() {
   await loadOrders();
   renderPayments();
 }
 
-async function updatePaymentStatus(id,status){
-  const {error}=await db.from(ORDER_TABLE)
-    .update({payment_status:status})
-    .eq("id",id);
+async function updatePaymentStatus(id, status) {
+  const { error } = await db
+    .from(ORDER_TABLE)
+    .update({ payment_status: status })
+    .eq("id", id);
 
-  if(error){
-    alert("Payment update failed: "+error.message+
-      "\nCheck that store_orders has a payment_status column and the admin has permission.");
+  if (error) {
+    alert(
+      "Payment update failed: " + error.message +
+      "\nCheck that store_orders has a payment_status column " +
+      "and that the admin has permission."
+    );
     return;
   }
 
@@ -659,302 +1042,474 @@ async function updatePaymentStatus(id,status){
   await loadOrders();
 }
 
-async function loadProducts(){
-  const body=$("productsTable");
-  body.innerHTML="<tr><td colspan='8'>Loading products...</td></tr>";
+/* PRODUCTS */
+async function loadProducts() {
+  const body = $("productsTable");
+  body.innerHTML = "<tr><td colspan='8'>Loading products...</td></tr>";
 
-  let result=await db.from(PRODUCT_TABLE).select("*").order("created_at",{ascending:false});
+  let result = await db
+    .from(PRODUCT_TABLE)
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  if(result.error){
-    result=await db.from(PRODUCT_TABLE).select("*");
+  if (result.error) {
+    result = await db.from(PRODUCT_TABLE).select("*");
   }
 
-  if(result.error){
-    body.innerHTML=`<tr><td colspan="8">Unable to load products: ${escapeHTML(result.error.message)}</td></tr>`;
+  if (result.error) {
+    body.innerHTML =
+      `<tr><td colspan="8">Unable to load products: ` +
+      `${escapeHTML(result.error.message)}</td></tr>`;
     return;
   }
 
-  products=result.data||[];
-  productCostAvailable=products.length?("cost_price" in products[0]):false;
+  products = result.data || [];
   body.replaceChildren();
 
-  products.forEach(p=>{
-    const tr=document.createElement("tr");
+  products.forEach(p => {
+    const tr = document.createElement("tr");
 
-    const raw=p.image_url||"";
-    const src=raw?( /^https?:\/\//i.test(raw)?raw:db.storage.from(PRODUCT_BUCKET).getPublicUrl(raw).data.publicUrl):"";
+    const raw = p.image_url || "";
 
-    const image=document.createElement("td");
-    if(src){
-      const img=document.createElement("img");
-      img.className="product-image";
-      img.src=src;
-      img.alt=p.name||"Product";
+    const src = raw
+      ? (/^https?:\/\//i.test(raw)
+          ? raw
+          : db.storage.from(PRODUCT_BUCKET).getPublicUrl(raw).data.publicUrl)
+      : "";
+
+    const image = document.createElement("td");
+
+    if (src) {
+      const img = document.createElement("img");
+      img.className = "product-image";
+      img.src = src;
+      img.alt = p.name || "Product";
       image.append(img);
-    }else image.textContent="—";
+    } else {
+      image.textContent = "—";
+    }
 
-    const name=document.createElement("td");name.textContent=p.name||"";
-    const category=document.createElement("td");category.textContent=p.category||"—";
-    const price=document.createElement("td");price.textContent="LKR "+money(p.price);
-    const cost=document.createElement("td");cost.textContent=p.cost_price==null?"—":"LKR "+money(p.cost_price);
-    const stock=document.createElement("td");stock.textContent=p.stock_quantity??"—";
-    const status=document.createElement("td");status.textContent=p.is_active?"Active":"Inactive";
+    const name = document.createElement("td");
+    name.textContent = p.name || "";
 
-    const actions=document.createElement("td");
-    const edit=document.createElement("button");
-    edit.className="small-btn";edit.textContent="EDIT";
-    edit.onclick=()=>editProduct(p.id);
-    const toggle=document.createElement("button");
-    toggle.className="small-btn gray";toggle.style.marginLeft="5px";
-    toggle.textContent=p.is_active?"DEACTIVATE":"ACTIVATE";
-    toggle.onclick=()=>toggleProduct(p.id,!p.is_active);
-    actions.append(edit,toggle);
+    const category = document.createElement("td");
+    category.textContent = p.category || "—";
 
-    [image,name,category,price,cost,stock,status,actions].forEach(x=>tr.append(x));
+    const price = document.createElement("td");
+    price.textContent = "LKR " + money(p.price);
+
+    const cost = document.createElement("td");
+    cost.textContent =
+      p.cost_price == null ? "—" : "LKR " + money(p.cost_price);
+
+    const stock = document.createElement("td");
+    stock.textContent = p.stock_quantity ?? "—";
+
+    const status = document.createElement("td");
+    status.textContent = p.is_active ? "Active" : "Inactive";
+
+    const actions = document.createElement("td");
+
+    const edit = document.createElement("button");
+    edit.className = "small-btn";
+    edit.textContent = "EDIT";
+    edit.onclick = () => editProduct(p.id);
+
+    const toggle = document.createElement("button");
+    toggle.className = "small-btn gray";
+    toggle.style.marginLeft = "5px";
+    toggle.textContent = p.is_active ? "DEACTIVATE" : "ACTIVATE";
+    toggle.onclick = () => toggleProduct(p.id, !p.is_active);
+
+    actions.append(edit, toggle);
+
+    [image, name, category, price, cost, stock, status, actions]
+      .forEach(x => tr.append(x));
+
     body.append(tr);
   });
 }
 
-function newProduct(){
+function newProduct() {
   $("productForm").reset();
-  $("productForm").elements.id.value="";
-  $("productForm").elements.is_active.checked=true;
-  $("productFormTitle").textContent="Add Product";
-  $("productFormCard").hidden=false;
-  showError("productMessage","");
+  $("productForm").elements.id.value = "";
+  $("productForm").elements.is_active.checked = true;
+  $("productFormTitle").textContent = "Add Product";
+  $("productFormCard").hidden = false;
+  showError("productMessage", "");
 }
 
-function closeProductForm(){
-  $("productFormCard").hidden=true;
+function closeProductForm() {
+  $("productFormCard").hidden = true;
 }
 
-function editProduct(id){
-  const p=products.find(x=>x.id===id);
-  if(!p)return;
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
 
-  const f=$("productForm");
-  f.elements.id.value=p.id;
-  f.elements.name.value=p.name||"";
-  f.elements.price.value=p.price??"";
-  f.elements.category.value=p.category||"";
-  f.elements.stock_quantity.value=p.stock_quantity??0;
-  f.elements.image_url.value=p.image_url||"";
-  f.elements.description.value=p.description||"";
-  f.elements.is_customisable.checked=!!p.is_customisable;
-  f.elements.is_active.checked=!!p.is_active;
+  const f = $("productForm");
 
-  if(f.elements.cost_price)f.elements.cost_price.value=p.cost_price??"";
+  f.elements.id.value = p.id;
+  f.elements.name.value = p.name || "";
+  f.elements.price.value = p.price ?? "";
+  f.elements.category.value = p.category || "";
+  f.elements.stock_quantity.value = p.stock_quantity ?? 0;
+  f.elements.image_url.value = p.image_url || "";
+  f.elements.description.value = p.description || "";
+  f.elements.is_customisable.checked = !!p.is_customisable;
+  f.elements.is_active.checked = !!p.is_active;
 
-  $("productFormTitle").textContent="Edit Product";
-  $("productFormCard").hidden=false;
-  showError("productMessage","");
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-$("productForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const f=e.currentTarget;
-  const id=f.elements.id.value;
-
-  const payload={
-    name:f.elements.name.value.trim(),
-    price:Number(f.elements.price.value),
-    category:f.elements.category.value.trim()||null,
-    stock_quantity:Number(f.elements.stock_quantity.value||0),
-    image_url:f.elements.image_url.value.trim()||null,
-    description:f.elements.description.value.trim()||null,
-    is_customisable:f.elements.is_customisable.checked,
-    is_active:f.elements.is_active.checked
-  };
-
-  if(f.elements.cost_price&&f.elements.cost_price.value!==""){
-    payload.cost_price=Number(f.elements.cost_price.value);
+  if (f.elements.cost_price) {
+    f.elements.cost_price.value = p.cost_price ?? "";
   }
 
-  showError("productMessage","Saving...");
+  $("productFormTitle").textContent = "Edit Product";
+  $("productFormCard").hidden = false;
+  showError("productMessage", "");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$("productForm").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const f = e.currentTarget;
+  const id = f.elements.id.value;
+
+  const payload = {
+    name: f.elements.name.value.trim(),
+    price: Number(f.elements.price.value),
+    category: f.elements.category.value.trim() || null,
+    stock_quantity: Number(f.elements.stock_quantity.value || 0),
+    image_url: f.elements.image_url.value.trim() || null,
+    description: f.elements.description.value.trim() || null,
+    is_customisable: f.elements.is_customisable.checked,
+    is_active: f.elements.is_active.checked
+  };
+
+  if (f.elements.cost_price && f.elements.cost_price.value !== "") {
+    payload.cost_price = Number(f.elements.cost_price.value);
+  }
+
+  showError("productMessage", "Saving...");
 
   let result;
-  if(id){
-    result=await db.from(PRODUCT_TABLE).update(payload).eq("id",id);
-  }else{
-    result=await db.from(PRODUCT_TABLE).insert(payload);
+
+  if (id) {
+    result = await db.from(PRODUCT_TABLE).update(payload).eq("id", id);
+  } else {
+    result = await db.from(PRODUCT_TABLE).insert(payload);
   }
 
-  if(result.error){
-    showError("productMessage",result.error.message);
+  if (result.error) {
+    showError("productMessage", result.error.message);
     return;
   }
 
-  showError("productMessage","Product saved successfully.");
+  showError("productMessage", "Product saved successfully.");
+
   await loadProducts();
-  setTimeout(closeProductForm,700);
+  setTimeout(closeProductForm, 700);
 });
 
-async function toggleProduct(id,active){
-  const {error}=await db.from(PRODUCT_TABLE).update({is_active:active}).eq("id",id);
-  if(error){alert(error.message);return;}
+async function toggleProduct(id, active) {
+  const { error } = await db
+    .from(PRODUCT_TABLE)
+    .update({ is_active: active })
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
   await loadProducts();
 }
 
-async function loadExpenses(){
-  const body=$("expensesTable");
-  body.innerHTML="<tr><td colspan='5'>Loading...</td></tr>";
+/* EXPENSES */
+async function loadExpenses() {
+  const body = $("expensesTable");
+  body.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
 
-  const {data,error}=await db.from(EXPENSE_TABLE)
+  const { data, error } = await db
+    .from(EXPENSE_TABLE)
     .select("*")
-    .order("expense_date",{ascending:false});
+    .order("expense_date", { ascending: false });
 
-  if(error){
-    expenses=[];
-    body.innerHTML=`<tr><td colspan="5">Expense table unavailable: ${escapeHTML(error.message)}. Create zyra_expenses using the SQL setup before recording expenses.</td></tr>`;
+  if (error) {
+    expenses = [];
+    body.innerHTML =
+      `<tr><td colspan="5">Expense table unavailable: ` +
+      `${escapeHTML(error.message)}. Create zyra_expenses first.</td></tr>`;
     return;
   }
 
-  expenses=data||[];
+  expenses = data || [];
   body.replaceChildren();
 
-  expenses.forEach(x=>{
-    const tr=document.createElement("tr");
-    [dateText(x.expense_date),x.description,x.category||"Other","LKR "+money(x.amount)].forEach(v=>{
-      const td=document.createElement("td");td.textContent=v;tr.append(td);
+  expenses.forEach(x => {
+    const tr = document.createElement("tr");
+
+    [
+      dateText(x.expense_date),
+      x.description,
+      x.category || "Other",
+      "LKR " + money(x.amount)
+    ].forEach(v => {
+      const td = document.createElement("td");
+      td.textContent = v;
+      tr.append(td);
     });
 
-    const action=document.createElement("td");
-    const del=document.createElement("button");
-    del.className="small-btn";
-    del.textContent="DELETE";
-    del.onclick=()=>deleteExpense(x.id);
-    action.append(del);tr.append(action);
+    const action = document.createElement("td");
+
+    const del = document.createElement("button");
+    del.className = "small-btn";
+    del.textContent = "DELETE";
+    del.onclick = () => deleteExpense(x.id);
+
+    action.append(del);
+    tr.append(action);
     body.append(tr);
   });
 }
 
-$("expenseForm").addEventListener("submit",async e=>{
+$("expenseForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const f=new FormData(e.currentTarget);
 
-  const payload={
-    description:String(f.get("description")).trim(),
-    amount:Number(f.get("amount")),
-    expense_date:f.get("expense_date"),
-    category:f.get("category"),
-    notes:String(f.get("notes")||"").trim()||null
+  const f = new FormData(e.currentTarget);
+
+  const payload = {
+    description: String(f.get("description")).trim(),
+    amount: Number(f.get("amount")),
+    expense_date: f.get("expense_date"),
+    category: f.get("category"),
+    notes: String(f.get("notes") || "").trim() || null
   };
 
-  showError("expenseMessage","Saving...");
+  showError("expenseMessage", "Saving...");
 
-  const {error}=await db.from(EXPENSE_TABLE).insert(payload);
+  const { error } = await db
+    .from(EXPENSE_TABLE)
+    .insert(payload);
 
-  if(error){
-    showError("expenseMessage","Could not save expense: "+error.message);
+  if (error) {
+    showError("expenseMessage", "Could not save expense: " + error.message);
     return;
   }
 
-  showError("expenseMessage","Expense saved.");
+  showError("expenseMessage", "Expense saved.");
   e.currentTarget.reset();
+
   await loadExpenses();
   await loadReports();
 });
 
-async function deleteExpense(id){
-  if(!confirm("Delete this expense?"))return;
-  const {error}=await db.from(EXPENSE_TABLE).delete().eq("id",id);
-  if(error){alert(error.message);return;}
+async function deleteExpense(id) {
+  if (!confirm("Delete this expense?")) return;
+
+  const { error } = await db
+    .from(EXPENSE_TABLE)
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
   await loadExpenses();
   await loadReports();
 }
 
-async function loadReports(){
-  await Promise.all([loadOrders(),loadExpenses()]);
+/* REPORTS */
+async function loadReports() {
+  await Promise.all([
+    loadOrders(),
+    loadExpenses()
+  ]);
 
-  const verified=orders.filter(o=>getPaymentStatus(o)==="PAID");
-  const revenue=verified.reduce((s,o)=>s+orderAmount(o),0);
-  const expenseTotal=expenses.reduce((s,e)=>s+Number(e.amount||0),0);
+  const verified = orders.filter(
+    o => getPaymentStatus(o) === "PAID"
+  );
 
-  let productCosts=0,units=0;
-  const byProduct={};
+  const revenue = verified.reduce(
+    (s, o) => s + orderAmount(o),
+    0
+  );
 
-  verified.forEach(o=>{
-    getItems(o).forEach(i=>{
-      const qty=Number(i.quantity||1);
-      const name=i.product_name||i.name||i.name_snapshot||i.product_id||"Product";
-      const price=Number(i.unit_price??i.price??i.price_at_purchase??0);
-      const cost=Number(i.unit_cost??i.cost_price??0);
-      units+=qty;
-      productCosts+=cost*qty;
+  const expenseTotal = expenses.reduce(
+    (s, e) => s + Number(e.amount || 0),
+    0
+  );
 
-      if(!byProduct[name])byProduct[name]={quantity:0,revenue:0};
-      byProduct[name].quantity+=qty;
-      byProduct[name].revenue+=price*qty;
+  let productCosts = 0;
+  let units = 0;
+
+  const byProduct = {};
+
+  verified.forEach(o => {
+    getItems(o).forEach(i => {
+      const qty = Number(i.quantity || 1);
+
+      const name =
+        i.product_name ||
+        i.name ||
+        i.name_snapshot ||
+        i.product_id ||
+        "Product";
+
+      const price = Number(
+        i.unit_price ?? i.price ?? i.price_at_purchase ?? 0
+      );
+
+      const cost = Number(
+        i.unit_cost ?? i.cost_price ?? 0
+      );
+
+      units += qty;
+      productCosts += cost * qty;
+
+      if (!byProduct[name]) {
+        byProduct[name] = {
+          quantity: 0,
+          revenue: 0
+        };
+      }
+
+      byProduct[name].quantity += qty;
+      byProduct[name].revenue += price * qty;
     });
   });
 
-  const profit=revenue-productCosts-expenseTotal;
+  const profit = revenue - productCosts - expenseTotal;
 
-  $("reportRevenue").textContent="LKR "+money(revenue);
-  $("reportCosts").textContent="LKR "+money(productCosts);
-  $("reportExpenses").textContent="LKR "+money(expenseTotal);
-  $("reportProfit").textContent="LKR "+money(profit);
-  $("reportUnits").textContent=units;
-  $("reportCompleted").textContent=orders.filter(o=>String(o.order_status).toLowerCase()==="completed").length;
+  $("reportRevenue").textContent = "LKR " + money(revenue);
+  $("reportCosts").textContent = "LKR " + money(productCosts);
+  $("reportExpenses").textContent = "LKR " + money(expenseTotal);
+  $("reportProfit").textContent = "LKR " + money(profit);
+  $("reportUnits").textContent = units;
 
-  const root=$("productSales");
+  $("reportCompleted").textContent = orders.filter(
+    o => String(o.order_status).toLowerCase() === "completed"
+  ).length;
+
+  const root = $("productSales");
   root.replaceChildren();
 
-  Object.entries(byProduct).sort((a,b)=>b[1].quantity-a[1].quantity).forEach(([name,v])=>{
-    const p=document.createElement("p");
-    p.textContent=`${name} — ${v.quantity} sold — LKR ${money(v.revenue)}`;
-    root.append(p);
-  });
+  Object.entries(byProduct)
+    .sort((a, b) => b[1].quantity - a[1].quantity)
+    .forEach(([name, v]) => {
+      const p = document.createElement("p");
+      p.textContent =
+        `${name} — ${v.quantity} sold — LKR ${money(v.revenue)}`;
+      root.append(p);
+    });
 
-  if(!Object.keys(byProduct).length)root.textContent="No verified sales available.";
+  if (!Object.keys(byProduct).length) {
+    root.textContent = "No verified sales available.";
+  }
 }
 
-function printInvoice(o){
-  const items=getItems(o);
-  const lines=items.map(i=>{
-    const name=i.product_name||i.name||i.name_snapshot||"Product";
-    const qty=Number(i.quantity||1);
-    const price=Number(i.unit_price??i.price??i.price_at_purchase??0);
-    const custom=i.customisation_details||i.customization_details;
-    return `<tr>
-      <td>${escapeHTML(name)}${custom?'<div style="font-size:11px;color:#666">Customisation: '+escapeHTML(JSON.stringify(custom))+'</div>':""}</td>
-      <td>${qty}</td>
-      <td>LKR ${money(price)}</td>
-      <td>LKR ${money(price*qty)}</td>
-    </tr>`;
+/* INVOICE */
+function printInvoice(o) {
+  const items = getItems(o);
+
+  const lines = items.map(i => {
+    const name =
+      i.product_name ||
+      i.name ||
+      i.name_snapshot ||
+      "Product";
+
+    const qty = Number(i.quantity || 1);
+
+    const price = Number(
+      i.unit_price ?? i.price ?? i.price_at_purchase ?? 0
+    );
+
+    const custom =
+      i.customisation_details ||
+      i.customization_details;
+
+    const customText = custom
+      ? '<div style="font-size:11px;color:#666">Customisation: ' +
+        escapeHTML(formatCustomisation(custom)) +
+        '</div>'
+      : "";
+
+    return `
+      <tr>
+        <td>${escapeHTML(name)}${customText}</td>
+        <td>${qty}</td>
+        <td>LKR ${money(price)}</td>
+        <td>LKR ${money(price * qty)}</td>
+      </tr>
+    `;
   }).join("");
 
-  $("invoicePrint").innerHTML=`
-  <div style="max-width:800px;margin:20px auto;padding:30px;color:#292522;font-family:Arial,sans-serif">
-    <div style="display:flex;justify-content:space-between;align-items:start">
-      <div><h1 style="color:#842d40;letter-spacing:3px">ZYRA.LK</h1><p>Exclusive Collection</p></div>
-      <div style="text-align:right"><h2>INVOICE</h2><p>Invoice #: ${escapeHTML(orderNumber(o))}</p><p>Date: ${escapeHTML(dateText(o.created_at))}</p></div>
+  $("invoicePrint").innerHTML = `
+    <div style="max-width:800px;margin:20px auto;padding:30px;color:#292522;font-family:Arial,sans-serif">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div>
+          <h1 style="color:#842d40;letter-spacing:3px">ZYRA.LK</h1>
+          <p>Exclusive Collection</p>
+        </div>
+
+        <div style="text-align:right">
+          <h2>INVOICE</h2>
+          <p>Invoice #: ${escapeHTML(orderNumber(o))}</p>
+          <p>Date: ${escapeHTML(dateText(o.created_at))}</p>
+        </div>
+      </div>
+
+      <hr>
+
+      <h3>Bill To</h3>
+      <p>
+        <strong>${escapeHTML(o.customer_name || "Customer")}</strong><br>
+        ${escapeHTML(o.phone || "")}<br>
+        ${escapeHTML(o.email || "")}<br>
+        ${escapeHTML(o.delivery_address || "")}<br>
+        ${escapeHTML([o.city, o.district, o.postal_code].filter(Boolean).join(", "))}
+      </p>
+
+      <table style="width:100%;border-collapse:collapse;margin-top:25px">
+        <thead>
+          <tr style="background:#f4eee9">
+            <th style="padding:10px;text-align:left">Product</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>${lines}</tbody>
+      </table>
+
+      <h2 style="text-align:right;color:#842d40;margin-top:25px">
+        Total: LKR ${money(orderAmount(o))}
+      </h2>
+
+      <p>Payment Method: ${escapeHTML(o.payment_method || "—")}</p>
+      <p>Payment Status: ${escapeHTML(getPaymentStatus(o))}</p>
+      <p>Order Status: ${escapeHTML(o.order_status || "pending")}</p>
+
+      <hr>
+      <p style="text-align:center;font-size:13px">
+        Thank you for shopping with Zyra.lk.
+      </p>
     </div>
-    <hr>
-    <h3>Bill To</h3>
-    <p><strong>${escapeHTML(o.customer_name||"Customer")}</strong><br>
-    ${escapeHTML(o.phone||"")}<br>${escapeHTML(o.email||"")}<br>
-    ${escapeHTML(o.delivery_address||"")}<br>
-    ${escapeHTML([o.city,o.district,o.postal_code].filter(Boolean).join(", "))}</p>
-    <table style="width:100%;border-collapse:collapse;margin-top:25px">
-      <thead><tr style="background:#f4eee9"><th style="padding:10px;text-align:left">Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
-      <tbody>${lines}</tbody>
-    </table>
-    <h2 style="text-align:right;color:#842d40;margin-top:25px">Total: LKR ${money(orderAmount(o))}</h2>
-    <p>Payment Method: ${escapeHTML(o.payment_method||"—")}</p>
-    <p>Payment Status: ${escapeHTML(getPaymentStatus(o))}</p>
-    <p>Order Status: ${escapeHTML(o.order_status||"pending")}</p>
-    <hr>
-    <p style="text-align:center;font-size:13px">Thank you for shopping with Zyra.lk.</p>
-  </div>`;
+  `;
 
   window.print();
 }
- 
-$("orderSearch").addEventListener("input",renderOrders);
 
+/* SEARCH */
+$("orderSearch").addEventListener("input", renderOrders);
+
+/* START */
 checkSession();
+
 </script>
 </body>
 </html>
