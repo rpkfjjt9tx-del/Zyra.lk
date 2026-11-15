@@ -46,8 +46,11 @@ th{background:#faf7f2}
 .manual-item{border:1px solid #eee;padding:12px;margin:10px 0;background:#fff}
 .manual-item-grid{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end}
 .section-title{color:var(--wine);font-family:Georgia,serif}
+.order-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 @media(max-width:650px){
- .wrap{padding:12px}.stats{grid-template-columns:1fr}.panel{padding:14px}
+ .wrap{padding:12px}
+ .stats{grid-template-columns:1fr}
+ .panel{padding:14px}
  .tracking-grid{grid-template-columns:1fr}
  .manual-item-grid{grid-template-columns:1fr 1fr}
  .manual-item-grid .product-choice{grid-column:1/-1}
@@ -89,7 +92,6 @@ th{background:#faf7f2}
   <div id="adminBankAccounts"></div>
 </section>
 
-<!-- MANUAL ORDER SECTION -->
 <section class="panel">
   <h2 class="section-title">Create Manual Order</h2>
   <p class="muted">Create an order received through WhatsApp, Instagram, or another channel.</p>
@@ -214,7 +216,9 @@ const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
+// Separate full product and manual-order caches.
 let productCache=[];
+let manualProductCache=[];
 let trackingCache=new Map();
 let manualItemCounter=0;
 
@@ -384,7 +388,9 @@ async function loadManualProductOptions(){
   .select("id,name,price,is_customisable,is_active")
   .eq("is_active",true).order("name");
  if(error)throw error;
- productCache=data||[];
+
+ // Do not overwrite productCache used by Edit Product.
+ manualProductCache=data||[];
 }
 
 function addManualItem(){
@@ -397,7 +403,7 @@ function addManualItem(){
  const product=document.createElement("select");
  product.className="product-choice";
  product.innerHTML='<option value="">Select product</option>';
- productCache.forEach(p=>{
+ manualProductCache.forEach(p=>{
   const option=document.createElement("option");
   option.value=p.id;
   option.textContent=p.name+" — "+money(p.price);
@@ -420,7 +426,7 @@ function addManualItem(){
  priceLabel.textContent="Select a product";
 
  product.addEventListener("change",()=>{
-  const p=productCache.find(x=>x.id===product.value);
+  const p=manualProductCache.find(x=>x.id===product.value);
   priceLabel.textContent=p?money(p.price)+" each":"Select a product";
   updateManualSubtotal();
  });
@@ -438,7 +444,8 @@ function getManualItems(){
   const productId=wrap.querySelector("select").value;
   const quantity=Number(wrap.querySelector('input[type="number"]').value);
   const instructions=wrap.querySelector("textarea").value.trim();
-  const product=productCache.find(p=>p.id===productId);
+
+  const product=manualProductCache.find(p=>p.id===productId);
   return {product,productId,quantity,instructions};
  }).filter(x=>x.product);
 }
@@ -447,8 +454,10 @@ function updateManualSubtotal(){
  const items=getManualItems();
  const total=items.reduce((sum,x)=>sum+Number(x.product.price||0)*Number(x.quantity||0),0);
  el("manualSubtotal").textContent=money(total);
- const hasCustom=items.some(x=>x.product.is_customisable);
+
+ const hasCustom=items.some(x=>x.product.is_customisable===true);
  const payment=el("manualPayment");
+
  if(hasCustom){
   payment.value="Bank Transfer";
   [...payment.options].forEach(o=>{if(o.value==="COD")o.disabled=true;});
@@ -466,19 +475,23 @@ function resetManualOrder(){
 
 function validateManualOrder(form,items){
  if(!items.length)throw new Error("Please add at least one product.");
+
  for(const item of items){
   if(!item.productId)throw new Error("Please select a product for every order line.");
   if(!Number.isInteger(item.quantity)||item.quantity<1||item.quantity>20)
    throw new Error("Each product quantity must be between 1 and 20.");
-  if(item.product.is_customisable&&!item.instructions)
+  if(item.product.is_customisable===true&&!item.instructions)
    throw new Error("Please enter customisation details for "+item.product.name+".");
  }
- const hasCustom=items.some(x=>x.product.is_customisable);
+
+ const hasCustom=items.some(x=>x.product.is_customisable===true);
  if(hasCustom&&form.elements.payment_method.value!=="Bank Transfer")
   throw new Error("Orders containing customised products must use Bank Transfer.");
+
  const phone=form.elements.phone.value.trim();
  if(!/^07[0-9]{8}$/.test(phone))
   throw new Error("Enter a valid Sri Lankan mobile number (07XXXXXXXX).");
+
  if(!/^[0-9]{5}$/.test(form.elements.postal_code.value.trim()))
   throw new Error("Postal code must contain 5 digits.");
 }
@@ -493,8 +506,9 @@ async function createManualOrder(event){
 
  try{
   validateManualOrder(form,items);
+
   const subtotal=items.reduce((sum,x)=>sum+Number(x.product.price)*x.quantity,0);
-  const hasCustom=items.some(x=>x.product.is_customisable);
+  const hasCustom=items.some(x=>x.product.is_customisable===true);
 
   if(!confirm(
    "Create this manual order?\n\nCustomer: "+formData.get("customer_name")+
@@ -542,8 +556,12 @@ async function createManualOrder(event){
   }));
 
   const {error:itemError}=await sb.from("store_order_items").insert(itemPayload);
+
   if(itemError){
-   await sb.from("store_orders").delete().eq("id",order.id);
+   const rollback=await sb.from("store_orders").delete().eq("id",order.id);
+   if(rollback.error){
+    throw new Error("Order was created, but items failed and automatic cleanup also failed. Order ID: "+order.id+". Item error: "+itemError.message+". Cleanup error: "+rollback.error.message);
+   }
    throw new Error("Order could not save its product items: "+itemError.message);
   }
 
@@ -586,11 +604,15 @@ el("manualOrderForm").addEventListener("submit",createManualOrder);
 
 async function loadOrders(){
  el("ordersMessage").textContent="Loading orders...";
+
  const {data,error}=await sb.from("store_orders")
   .select("*,store_order_items(*)")
   .order("created_at",{ascending:false}).limit(200);
 
- if(error){el("ordersMessage").textContent="Could not load orders: "+error.message;return;}
+ if(error){
+  el("ordersMessage").textContent="Could not load orders: "+error.message;
+  return;
+ }
 
  const orders=data||[];
  const trackingError=await loadTrackingRecords(orders);
@@ -599,21 +621,35 @@ async function loadOrders(){
  el("statPending").textContent=orders.filter(o=>(o.order_status||"pending").toLowerCase()==="pending").length;
  el("statSales").textContent=money(orders.reduce((s,o)=>s+Number(o.total_amount||0),0));
 
- const root=el("ordersList");root.replaceChildren();
+ const root=el("ordersList");
+ root.replaceChildren();
+
  el("ordersMessage").textContent=trackingError
   ?"Orders loaded, but tracking records could not be read: "+trackingError.message:"";
 
- if(!orders.length){root.textContent="No store orders have been placed yet.";return;}
+ if(!orders.length){
+  root.textContent="No store orders have been placed yet.";
+  return;
+ }
 
  orders.forEach(order=>{
-  const card=document.createElement("article");card.className="order-card";
+  const card=document.createElement("article");
+  card.className="order-card";
 
-  const heading=document.createElement("div");heading.className="row";
-  const title=document.createElement("h3");title.textContent=(order.order_number||"Order")+" · "+(order.customer_name||"Customer");
-  const total=document.createElement("strong");total.textContent=money(order.total_amount);
-  heading.append(title,total);card.append(heading);
+  const heading=document.createElement("div");
+  heading.className="row";
 
-  const info=document.createElement("p");info.className="muted";
+  const title=document.createElement("h3");
+  title.textContent=(order.order_number||"Order")+" · "+(order.customer_name||"Customer");
+
+  const total=document.createElement("strong");
+  total.textContent=money(order.total_amount);
+
+  heading.append(title,total);
+  card.append(heading);
+
+  const info=document.createElement("p");
+  info.className="muted";
   info.textContent=[
    order.phone||"No phone",order.email||"No email",order.city||"",
    order.payment_method||"",order.payment_status||"",
@@ -622,80 +658,125 @@ async function loadOrders(){
   card.append(info);
 
   const address=document.createElement("p");
-  address.textContent="Delivery: "+[order.delivery_address,order.city,order.district,order.postal_code].filter(Boolean).join(", ");
+  address.textContent="Delivery: "+[
+   order.delivery_address,order.city,order.district,order.postal_code
+  ].filter(Boolean).join(", ");
   card.append(address);
 
   if(order.customer_notes){
-   const note=document.createElement("p");note.textContent="Customer notes: "+order.customer_notes;card.append(note);
+   const note=document.createElement("p");
+   note.textContent="Customer notes: "+order.customer_notes;
+   card.append(note);
   }
 
   if(order.selected_bank||order.bank_transaction_reference){
-   const payment=document.createElement("p");payment.className="muted";
+   const payment=document.createElement("p");
+   payment.className="muted";
    payment.textContent="Bank: "+(order.selected_bank||"—")+" · Reference: "+(order.bank_transaction_reference||"—");
    card.append(payment);
   }
 
   const items=order.store_order_items||[];
-  const itemBox=document.createElement("div");itemBox.style.margin="12px 0";
-  if(!items.length)itemBox.textContent="No product items linked to this order.";
-  else items.forEach(it=>{
-   const line=document.createElement("div");line.className="itemline";
-   line.textContent=`${it.product_name} × ${it.quantity} — ${money(Number(it.unit_price)*Number(it.quantity))}`;
-   if(it.is_customised&&it.customisation_details)appendCustomisationDetails(line,it.customisation_details);
-   itemBox.append(line);
-  });
+  const itemBox=document.createElement("div");
+  itemBox.style.margin="12px 0";
+
+  if(!items.length){
+   itemBox.textContent="No product items linked to this order.";
+  }else{
+   items.forEach(it=>{
+    const line=document.createElement("div");
+    line.className="itemline";
+    line.textContent=`${it.product_name} × ${it.quantity} — ${money(Number(it.unit_price)*Number(it.quantity))}`;
+
+    if(it.is_customised&&it.customisation_details){
+     appendCustomisationDetails(line,it.customisation_details);
+    }
+    itemBox.append(line);
+   });
+  }
+
   card.append(itemBox);
 
-  const totals=document.createElement("div");totals.className="tracking-panel";
-  const sub=document.createElement("div");sub.className="summary-line";
+  const totals=document.createElement("div");
+  totals.className="tracking-panel";
+
+  const sub=document.createElement("div");
+  sub.className="summary-line";
   sub.textContent="Product subtotal: "+money(order.total_amount);
-  const fee=document.createElement("div");fee.className="summary-line";
+
+  const fee=document.createElement("div");
+  fee.className="summary-line";
   fee.textContent="Delivery fee: payable directly to courier";
-  totals.append(sub,fee);card.append(totals);
+
+  totals.append(sub,fee);
+  card.append(totals);
 
   const tracking=trackingCache.get(order.id);
-  const panel=document.createElement("div");panel.className="tracking-panel";
-  const th=document.createElement("strong");th.textContent="DELIVERY TRACKING";
+  const panel=document.createElement("div");
+  panel.className="tracking-panel";
+
+  const th=document.createElement("strong");
+  th.textContent="DELIVERY TRACKING";
   panel.append(th);
 
   if(tracking){
-   const trackInfo=document.createElement("p");trackInfo.className="muted";
+   const trackInfo=document.createElement("p");
+   trackInfo.className="muted";
    trackInfo.textContent="Customer Order ID: "+(tracking.tracking_id||order.order_number||"—");
    panel.append(trackInfo);
 
-   const grid=document.createElement("div");grid.className="tracking-grid";
+   const grid=document.createElement("div");
+   grid.className="tracking-grid";
+
    const courier=addField(grid,"ASSIGN COURIER",makeSelect(COURIERS,tracking.courier||"Pending assignment",true));
    const status=addField(grid,"DELIVERY STATUS",makeSelect(ORDER_STATUSES,statusValueFromTracking(tracking.status,order.order_status),true));
    const reference=addField(grid,"COURIER REFERENCE NUMBER",makeInput(tracking.courier_reference,"text","Enter courier reference"));
    const location=addField(grid,"CURRENT LOCATION",makeInput(tracking.location,"text","Enter current parcel location"));
    const estimated=addField(grid,"ESTIMATED DELIVERY",makeInput(toDateInput(tracking.estimated_delivery),"date"));
    const note=addField(grid,"DELIVERY UPDATE / NOTE",makeTextarea(tracking.note,"Example: Parcel handed over to courier"));
+
    panel.append(grid);
 
-   const save=document.createElement("button");save.className="btn";
+   const save=document.createElement("button");
+   save.className="btn";
    save.textContent="SAVE DELIVERY TRACKING";
+
    save.onclick=()=>saveOrderTracking({
     order,tracking,courier:courier.value,status:status.value,
     reference:reference.value.trim(),location:location.value.trim(),
     estimated:estimated.value,note:note.value.trim(),button:save
    });
+
    panel.append(save);
 
-   const customerHint=document.createElement("p");customerHint.className="muted";
+   const customerHint=document.createElement("p");
+   customerHint.className="muted";
    customerHint.textContent="Customers can enter this Order ID in the Track Order section on the main Zyra.lk website.";
    panel.append(customerHint);
   }else{
-   const warning=document.createElement("p");warning.className="muted";
+   const warning=document.createElement("p");
+   warning.className="muted";
    warning.textContent="No linked tracking record was found. This order may have been created before tracking integration.";
    panel.append(warning);
   }
 
   card.append(panel);
 
-  const invoice=document.createElement("button");invoice.className="btn secondary";
-  invoice.style.marginTop="12px";invoice.textContent="PRINT / SAVE INVOICE";
+  const actions=document.createElement("div");
+  actions.className="order-actions";
+
+  const invoice=document.createElement("button");
+  invoice.className="btn secondary";
+  invoice.textContent="PRINT / SAVE INVOICE";
   invoice.onclick=()=>printInvoice(order);
-  card.append(invoice);
+
+  const remove=document.createElement("button");
+  remove.className="btn danger";
+  remove.textContent="REMOVE ORDER";
+  remove.onclick=()=>removeOrder(order,remove);
+
+  actions.append(invoice,remove);
+  card.append(actions);
 
   root.append(card);
  });
@@ -729,31 +810,123 @@ async function saveOrderTracking({
 
  if(!confirm("Save delivery updates?\n\nOrder: "+order.order_number+"\nCourier: "+courier+"\nStatus: "+status))return;
 
- button.disabled=true;button.textContent="SAVING...";
+ button.disabled=true;
+ button.textContent="SAVING...";
+
  try{
   const trackingUpdate={
-   courier,courier_reference:reference||null,
+   courier,
+   courier_reference:reference||null,
    status:TRACKING_LABELS[status]||"Pending",
-   location:location||null,note:note||null,
+   location:location||null,
+   note:note||null,
    estimated_delivery:estimated||null,
    updated_at:new Date().toISOString()
   };
 
   const {error:trackingError}=await sb.from("zyra_orders")
    .update(trackingUpdate).eq("id",tracking.id).eq("store_order_id",order.id);
+
   if(trackingError)throw new Error("Tracking update failed: "+trackingError.message);
 
   const {error:orderError}=await sb.from("store_orders")
    .update({order_status:mapStoreOrderStatus(status)}).eq("id",order.id);
+
   if(orderError)throw new Error("Tracking was updated, but store order status could not be updated: "+orderError.message);
 
   alert("Delivery tracking saved successfully!\n\nOrder ID: "+tracking.tracking_id+"\nCourier: "+courier+"\nStatus: "+(TRACKING_LABELS[status]||"Pending"));
   await loadOrders();
+
  }catch(error){
   alert(error instanceof Error?error.message:"Could not update delivery tracking.");
   await loadOrders();
  }finally{
-  button.disabled=false;button.textContent="SAVE DELIVERY TRACKING";
+  button.disabled=false;
+  button.textContent="SAVE DELIVERY TRACKING";
+ }
+}
+
+/*
+ REMOVE ORDER
+ Deletes the tracking record first, then order items,
+ then the main store order.
+ Each step checks for errors.
+*/
+
+async function removeOrder(order,button){
+ const orderId=order.id;
+ const orderNumber=order.order_number||orderId;
+ const customerName=order.customer_name||"Customer";
+
+ const confirmed=confirm(
+  "PERMANENTLY REMOVE THIS ORDER?\n\n"+
+  "Order: "+orderNumber+"\n"+
+  "Customer: "+customerName+"\n\n"+
+  "This will remove the linked tracking record, order items and store order.\n"+
+  "This action cannot be undone."
+ );
+
+ if(!confirmed)return;
+
+ const secondConfirm=confirm(
+  "Final confirmation:\n\n"+
+  "Are you sure you want to permanently delete order "+orderNumber+"?"
+ );
+
+ if(!secondConfirm)return;
+
+ button.disabled=true;
+ button.textContent="REMOVING...";
+
+ try{
+  // Step 1: Delete linked Zyra tracking record(s).
+  const {error:trackingError}=await sb.from("zyra_orders")
+   .delete()
+   .eq("store_order_id",orderId);
+
+  if(trackingError){
+   throw new Error(
+    "Could not remove the tracking record. The order has NOT been removed.\n"+
+    trackingError.message
+   );
+  }
+
+  // Step 2: Delete linked store order items.
+  const {error:itemError}=await sb.from("store_order_items")
+   .delete()
+   .eq("order_id",orderId);
+
+  if(itemError){
+   throw new Error(
+    "Tracking record was removed, but order items could not be removed. "+
+    "The main order is still present.\n"+itemError.message
+   );
+  }
+
+  // Step 3: Delete the main store order.
+  const {error:orderError}=await sb.from("store_orders")
+   .delete()
+   .eq("id",orderId);
+
+  if(orderError){
+   throw new Error(
+    "Tracking and order items were removed, but the main order could not be deleted.\n"+
+    orderError.message
+   );
+  }
+
+  trackingCache.delete(orderId);
+
+  alert("Order "+orderNumber+" was successfully removed.");
+
+  await loadOrders();
+
+ }catch(error){
+  alert(error instanceof Error?error.message:"Could not remove this order.");
+  await loadOrders();
+ }finally{
+  button.disabled=false;
+  button.textContent="REMOVE ORDER";
  }
 }
 
@@ -765,11 +938,16 @@ function escapeHtml(s){
 
 function printInvoice(o){
  const items=o.store_order_items||[];
+
  const rows=items.map(i=>{
   const details=parseCustomisationDetails(i.customisation_details);
+
   const customText=i.is_customised
-   ?Object.entries(details).map(([k,v])=>escapeHtml(k)+": "+escapeHtml(typeof v==="object"?JSON.stringify(v):v)).join("<br>")
+   ?Object.entries(details).map(([k,v])=>
+    escapeHtml(k)+": "+escapeHtml(typeof v==="object"?JSON.stringify(v):v)
+   ).join("<br>")
    :"";
+
   return `<tr>
    <td>${escapeHtml(i.product_name)}${customText?'<br><small>'+customText+'</small>':""}</td>
    <td>${Number(i.quantity)}</td>
@@ -779,7 +957,11 @@ function printInvoice(o){
  }).join("");
 
  const w=window.open("","_blank");
- if(!w){alert("Please allow pop-ups to print invoices.");return;}
+
+ if(!w){
+  alert("Please allow pop-ups to print invoices.");
+  return;
+ }
 
  w.document.write(`<!doctype html>
  <html><head><title>Invoice ${escapeHtml(o.order_number)}</title>
@@ -808,6 +990,7 @@ function printInvoice(o){
  <p>Thank you for shopping with Zyra.lk.</p>
  <script>window.onload=()=>window.print();<\/script>
  </body></html>`);
+
  w.document.close();
 }
 
@@ -816,50 +999,92 @@ function printInvoice(o){
 async function loadProducts(){
  const {data,error}=await sb.from("store_products")
   .select("*").order("created_at",{ascending:false});
- if(error){el("productMessage").textContent="Could not load products: "+error.message;return;}
+
+ if(error){
+  el("productMessage").textContent="Could not load products: "+error.message;
+  return;
+ }
+
+ // Full product data is preserved for editing.
  productCache=data||[];
- const body=el("productsBody");body.replaceChildren();
+
+ const body=el("productsBody");
+ body.replaceChildren();
 
  productCache.forEach(p=>{
   const tr=document.createElement("tr");
-  [p.name,money(p.price),p.category||"—",p.stock_quantity,
-   p.is_customisable?"Yes":"No",p.is_active?"Yes":"No"].forEach(v=>{
-   const td=document.createElement("td");td.textContent=v;tr.append(td);
+
+  [
+   p.name,money(p.price),p.category||"—",p.stock_quantity,
+   p.is_customisable?"Yes":"No",p.is_active?"Yes":"No"
+  ].forEach(v=>{
+   const td=document.createElement("td");
+   td.textContent=v;
+   tr.append(td);
   });
+
   const action=document.createElement("td");
-  const edit=document.createElement("button");edit.className="btn light";
-  edit.textContent="EDIT";edit.onclick=()=>editProduct(p.id);
-  action.append(edit);tr.append(action);body.append(tr);
+
+  const edit=document.createElement("button");
+  edit.className="btn light";
+  edit.textContent="EDIT";
+  edit.onclick=()=>editProduct(p.id);
+
+  action.append(edit);
+  tr.append(action);
+  body.append(tr);
  });
- try{await loadManualProductOptions();}
- catch(error){el("manualOrderMessage").textContent="Could not load manual order products: "+error.message;}
+
+ try{
+  await loadManualProductOptions();
+ }catch(error){
+  el("manualOrderMessage").textContent=
+   "Could not load manual order products: "+error.message;
+ }
+
  if(!el("manualItems").children.length)addManualItem();
 }
 
 function editProduct(id){
- const p=productCache.find(x=>x.id===id);if(!p)return;
+ const p=productCache.find(x=>x.id===id);
+ if(!p)return;
+
  const f=el("productForm");
- ["id","name","price","category","image_url","description","stock_quantity"].forEach(k=>{
+
+ [
+  "id","name","price","category","image_url",
+  "description","stock_quantity"
+ ].forEach(k=>{
   f.elements[k].value=p[k]??"";
  });
+
  f.elements.is_customisable.checked=!!p.is_customisable;
  f.elements.is_active.checked=!!p.is_active;
+
  el("productMessage").textContent="Editing: "+p.name;
- el("productForm").scrollIntoView({behavior:"smooth",block:"start"});
+
+ el("productForm").scrollIntoView({
+  behavior:"smooth",
+  block:"start"
+ });
 }
 
 function resetProductForm(){
  el("productForm").reset();
+
  const f=el("productForm");
  f.elements.id.value="";
  f.elements.stock_quantity.value=0;
  f.elements.is_active.checked=true;
+
  el("productMessage").textContent="";
 }
 
 el("productForm").addEventListener("submit",async e=>{
  e.preventDefault();
- const f=e.target,id=f.elements.id.value;
+
+ const f=e.target;
+ const id=f.elements.id.value;
  const price=Number(f.elements.price.value);
  const stock=Number(f.elements.stock_quantity.value);
 
@@ -869,7 +1094,8 @@ el("productForm").addEventListener("submit",async e=>{
  }
 
  const payload={
-  name:f.elements.name.value.trim(),price,
+  name:f.elements.name.value.trim(),
+  price,
   category:f.elements.category.value.trim()||null,
   image_url:f.elements.image_url.value.trim()||null,
   description:f.elements.description.value.trim()||null,
@@ -882,7 +1108,11 @@ el("productForm").addEventListener("submit",async e=>{
   ?await sb.from("store_products").update(payload).eq("id",id)
   :await sb.from("store_products").insert(payload);
 
- if(result.error){el("productMessage").textContent=result.error.message;return;}
+ if(result.error){
+  el("productMessage").textContent=result.error.message;
+  return;
+ }
+
  el("productMessage").textContent="Product saved successfully.";
  resetProductForm();
  await loadProducts();
