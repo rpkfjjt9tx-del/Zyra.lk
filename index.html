@@ -1,582 +1,201 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zyra.lk | Exclusive Collection</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-:root {
-  --wine: #842d40;
-  --cream: #faf7f2;
-  --dark: #292522;
-  --muted: #82766f;
-  --white: #ffffff;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  background: var(--cream);
-  color: var(--dark);
-}
-
-button, input, select, textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-header {
-  background: white;
-  padding: 18px 6%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  border-bottom: 1px solid #eee;
-}
-
-.logo {
-  color: var(--wine);
-  font-family: Georgia, serif;
-  font-size: 28px;
-  letter-spacing: 3px;
-  font-weight: bold;
-}
-
-.nav {
-  display: flex;
-  gap: 22px;
-  align-items: center;
-}
-
-.nav a {
-  text-decoration: none;
-  color: var(--dark);
-  font-size: 13px;
-}
-
-.cart-button {
-  border: 1px solid var(--wine);
-  background: white;
-  color: var(--wine);
-  padding: 10px 16px;
-}
-
-.hero {
-  min-height: 390px;
-  background: #eee4dc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 50px 20px;
-}
-
-.hero h1 {
-  font-family: Georgia, serif;
-  font-size: clamp(34px, 6vw, 58px);
-  margin-bottom: 15px;
-}
-
-.hero p {
-  color: #655a53;
-  margin-bottom: 25px;
-  line-height: 1.7;
-}
-
-.primary-button {
-  background: var(--wine);
-  color: white;
-  border: none;
-  padding: 14px 28px;
-}
-
-.section {
-  padding: 55px 6%;
-}
-
-.section-title {
-  text-align: center;
-  font-family: Georgia, serif;
-  font-size: 32px;
-  margin-bottom: 12px;
-}
-
-.section-subtitle {
-  text-align: center;
-  color: var(--muted);
-  margin-bottom: 30px;
-  font-size: 14px;
-}
-
-.toolbar {
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 28px;
-}
-
-.toolbar input, .toolbar select {
-  padding: 12px;
-  border: 1px solid #ddd;
-  background: white;
-  min-width: 180px;
-}
-
-.products {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 22px;
-}
-
-.product-card {
-  background: white;
-  overflow: hidden;
-}
-
-.product-image {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  display: block;
-  background: #eee9e4;
-}
-
-.product-info {
-  padding: 16px;
-}
-
-.product-info h3 {
-  font-size: 15px;
-  margin-bottom: 8px;
-}
-
-.product-info p {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-
-.price {
-  color: var(--wine);
-  font-weight: bold;
-  margin-bottom: 14px;
-}
-
-.add-button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  background: var(--dark);
-  color: white;
-}
-
-.add-button:hover {
-  background: var(--wine);
-}
-
-.empty {
-  text-align: center;
-  padding: 35px;
-  color: var(--muted);
-  grid-column: 1 / -1;
-}
-
-.benefits {
-  background: #eee5dc;
-  padding: 35px 6%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  text-align: center;
-  gap: 20px;
-}
-
-.benefits h3 {
-  font-family: Georgia, serif;
-  margin-bottom: 8px;
-}
-
-.benefits p {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-footer {
-  background: var(--dark);
-  color: white;
-  padding: 35px 6%;
-  text-align: center;
-}
-
-footer p {
-  font-size: 13px;
-  margin-top: 10px;
-  color: #ddd;
-}
-
-/* Cart and checkout */
-
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  background: rgba(0,0,0,.55);
-  overflow-y: auto;
-  padding: 25px 12px;
-}
-
-.modal-content {
-  background: white;
-  max-width: 560px;
-  margin: 25px auto;
-  padding: 25px;
-  border-radius: 3px;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 22px;
-}
-
-.close {
-  border: none;
-  background: transparent;
-  font-size: 25px;
-}
-
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.cart-item button {
-  border: none;
-  background: transparent;
-  color: var(--wine);
-}
-
-.cart-total {
-  font-weight: bold;
-  text-align: right;
-  margin: 20px 0;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 7px;
-  font-size: 13px;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  background: white;
-}
-
-.form-group textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.checkout-button {
-  width: 100%;
-  background: var(--wine);
-  color: white;
-  border: none;
-  padding: 14px;
-}
-
-.message {
-  margin-top: 15px;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-@media(max-width: 900px) {
-  .products {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media(max-width: 600px) {
-  .products {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .product-image {
-    height: 190px;
-  }
-
-  .product-info {
-    padding: 11px;
-  }
-
-  .nav {
-    gap: 10px;
-  }
-
-  .nav a {
-    display: none;
-  }
-
-  .benefits {
-    grid-template-columns: 1fr;
-  }
-
-  .section {
-    padding: 40px 4%;
-  }
+:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:var(--cream);color:var(--dark)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{background:#fff;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid #eee}
+.logo{color:var(--wine);font:bold 28px Georgia,serif;letter-spacing:3px}
+.nav{display:flex;gap:22px;align-items:center}
+.nav a{color:var(--dark);text-decoration:none;font-size:13px}
+.cart-button{border:1px solid var(--wine);background:#fff;color:var(--wine);padding:10px 16px}
+.hero{min-height:390px;background:#eee4dc;display:grid;place-items:center;text-align:center;padding:50px 20px}
+.hero h1{font:clamp(34px,6vw,58px) Georgia,serif;margin-bottom:15px}
+.hero p{color:#655a53;margin-bottom:25px;line-height:1.7}
+.primary,.checkout-button{background:var(--wine);color:#fff;border:0;padding:14px 28px}
+.section{padding:55px 6%}
+.section-title{text-align:center;font:32px Georgia,serif;margin-bottom:12px}
+.section-subtitle{text-align:center;color:var(--muted);margin-bottom:30px;font-size:14px}
+.toolbar{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:28px}
+.toolbar input,.toolbar select{padding:12px;border:1px solid #ddd;background:#fff;min-width:180px}
+.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.product-card{background:#fff;overflow:hidden}
+.product-image{width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4}
+.product-info{padding:16px}
+.product-info h3{font-size:15px;margin-bottom:8px}
+.product-info p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:10px}
+.price{color:var(--wine);font-weight:bold;margin-bottom:14px}
+.add-button{width:100%;padding:12px;border:0;background:var(--dark);color:#fff}
+.empty{text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
+.benefits{background:#eee5dc;padding:35px 6%;display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:20px}
+.benefits h3{font:20px Georgia,serif;margin-bottom:8px}
+.benefits p{font-size:13px;color:var(--muted)}
+footer{background:var(--dark);color:#fff;padding:35px 6%;text-align:center}
+footer p{font-size:13px;margin-top:10px;color:#ddd}
+.modal{display:none;position:fixed;inset:0;z-index:30;background:#0009;overflow-y:auto;padding:25px 12px}
+.modal-content{background:#fff;max-width:600px;margin:25px auto;padding:25px;border-radius:3px}
+.modal-header{display:flex;justify-content:space-between;margin-bottom:22px}
+.close{border:0;background:transparent;font-size:25px}
+.cart-item{padding:14px 0;border-bottom:1px solid #eee}
+.cart-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.cart-row button{border:0;background:transparent;color:var(--wine);padding:5px}
+.cart-item textarea{width:100%;margin-top:9px;padding:9px;border:1px solid #ddd;min-height:55px}
+.cart-total{font-weight:bold;text-align:right;margin:20px 0}
+.form-group{margin-bottom:15px}
+.form-group label{display:block;margin-bottom:7px;font-size:13px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px;border:1px solid #ddd;background:#fff}
+.form-group textarea{min-height:80px;resize:vertical}
+.checkout-button{width:100%}
+.checkout-button:disabled{opacity:.6;cursor:wait}
+.message{margin-top:15px;font-size:13px;line-height:1.6}
+.muted{color:var(--muted);font-size:12px}
+@media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){
+.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product-image{height:190px}
+.product-info{padding:11px}
+.nav{gap:10px}
+.nav a{display:none}
+.benefits{grid-template-columns:1fr}
+.section{padding:40px 4%}
 }
 </style>
 </head>
-
 <body>
 
 <header>
-  <div class="logo">ZYRA.LK</div>
-
-  <nav class="nav">
-    <a href="#home">HOME</a>
-    <a href="#products">COLLECTION</a>
-    <button class="cart-button" onclick="openCart()">
-      BAG (<span id="cartCount">0</span>)
-    </button>
-  </nav>
+<div class="logo">ZYRA.LK</div>
+<nav class="nav">
+<a href="#home">HOME</a>
+<a href="#products">COLLECTION</a>
+<button class="cart-button" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button>
+</nav>
 </header>
 
 <section class="hero" id="home">
-  <div>
-    <h1>Elegance in Every Detail</h1>
-    <p>
-      Discover exclusive designs created to make
-      every detail feel special.
-    </p>
-    <a href="#products">
-      <button class="primary-button">EXPLORE COLLECTION</button>
-    </a>
-  </div>
+<div>
+<h1>Elegance in Every Detail</h1>
+<p>Discover exclusive designs created to make every detail feel special.</p>
+<a href="#products"><button class="primary">EXPLORE COLLECTION</button></a>
+</div>
 </section>
 
 <section class="section" id="products">
-
-  <h2 class="section-title">Our Collection</h2>
-  <p class="section-subtitle">
-    Carefully selected pieces, exclusively for you.
-  </p>
-
-  <div class="toolbar">
-    <input
-      type="search"
-      id="searchInput"
-      placeholder="Search products..."
-      oninput="filterProducts()"
-    >
-
-    <select id="categoryFilter" onchange="filterProducts()">
-      <option value="">All Collections</option>
-    </select>
-  </div>
-
-  <div class="products" id="productList">
-    <div class="empty">Loading collection...</div>
-  </div>
-
+<h2 class="section-title">Our Collection</h2>
+<p class="section-subtitle">Carefully selected pieces, exclusively for you.</p>
+<div class="toolbar">
+<input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
+<select id="categoryFilter" onchange="filterProducts()">
+<option value="">All Collections</option>
+</select>
+</div>
+<div class="products" id="productList">
+<div class="empty">Loading collection...</div>
+</div>
 </section>
 
 <section class="benefits">
-  <div>
-    <h3>Exclusive Designs</h3>
-    <p>Thoughtfully selected collections.</p>
-  </div>
-
-  <div>
-    <h3>Islandwide Delivery</h3>
-    <p>Delivering across Sri Lanka.</p>
-  </div>
-
-  <div>
-    <h3>Personalised Orders</h3>
-    <p>Special pieces made meaningful.</p>
-  </div>
+<div><h3>Exclusive Designs</h3><p>Thoughtfully selected collections.</p></div>
+<div><h3>Islandwide Delivery</h3><p>Delivering across Sri Lanka.</p></div>
+<div><h3>Personalised Orders</h3><p>Special pieces made meaningful.</p></div>
 </section>
 
 <footer>
-  <h2 class="logo">ZYRA.LK</h2>
-  <p>Exclusive Collection</p>
-  <p>Islandwide Delivery</p>
-  <p>© 2026 Zyra.lk. All rights reserved.</p>
+<h2 class="logo">ZYRA.LK</h2>
+<p>Exclusive Collection</p>
+<p>Islandwide Delivery</p>
+<p>© 2026 Zyra.lk. All rights reserved.</p>
 </footer>
 
-<!-- CART MODAL -->
-
 <div class="modal" id="cartModal">
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h2>Your Shopping Bag</h2>
-      <button class="close" onclick="closeCart()">×</button>
-    </div>
-
-    <div id="cartItems"></div>
-
-    <div class="cart-total" id="cartTotal">
-      Total: LKR 0
-    </div>
-
-    <button class="checkout-button" onclick="showCheckout()">
-      PROCEED TO CHECKOUT
-    </button>
-
-  </div>
+<div class="modal-content">
+<div class="modal-header">
+<h2>Your Shopping Bag</h2>
+<button class="close" onclick="closeCart()">×</button>
 </div>
-
-<!-- CHECKOUT MODAL -->
+<div id="cartItems"></div>
+<div class="cart-total" id="cartTotal">Total: LKR 0</div>
+<button class="checkout-button" onclick="showCheckout()">PROCEED TO CHECKOUT</button>
+</div>
+</div>
 
 <div class="modal" id="checkoutModal">
-  <div class="modal-content">
-
-    <div class="modal-header">
-      <h2>Checkout</h2>
-      <button class="close" onclick="closeCheckout()">×</button>
-    </div>
-
-    <form id="checkoutForm">
-
-      <div class="form-group">
-        <label>Full Name *</label>
-        <input name="customer_name" required>
-      </div>
-
-      <div class="form-group">
-        <label>Email Address</label>
-        <input name="customer_email" type="email">
-      </div>
-
-      <div class="form-group">
-        <label>WhatsApp / Phone Number *</label>
-        <input name="customer_phone" type="tel" required>
-      </div>
-
-      <div class="form-group">
-        <label>Delivery Address *</label>
-        <textarea name="delivery_address" required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>District *</label>
-        <input name="district" required>
-      </div>
-
-      <div class="form-group">
-        <label>Payment Method *</label>
-        <select name="payment_method" required>
-          <option value="">Select payment method</option>
-          <option value="Cash on Delivery">Cash on Delivery</option>
-          <option value="Bank Transfer">Bank Transfer</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Customization / Special Instructions</label>
-        <textarea name="customization_details"></textarea>
-      </div>
-
-      <div class="cart-total" id="checkoutTotal"></div>
-
-      <button class="checkout-button" type="submit" id="placeOrderButton">
-        PLACE ORDER
-      </button>
-
-      <p class="message" id="checkoutMessage"></p>
-
-    </form>
-  </div>
+<div class="modal-content">
+<div class="modal-header">
+<h2>Checkout</h2>
+<button class="close" onclick="closeCheckout()">×</button>
+</div>
+<form id="checkoutForm">
+<div class="form-group">
+<label>Full Name *</label>
+<input name="customer_name" required maxlength="150">
+</div>
+<div class="form-group">
+<label>Email Address</label>
+<input name="email" type="email" maxlength="254">
+</div>
+<div class="form-group">
+<label>WhatsApp / Phone Number *</label>
+<input name="phone" type="tel" required maxlength="40">
+</div>
+<div class="form-group">
+<label>Delivery Address *</label>
+<textarea name="delivery_address" required maxlength="1000"></textarea>
+</div>
+<div class="form-group">
+<label>City / District *</label>
+<input name="city" required maxlength="120">
+</div>
+<div class="form-group">
+<label>Payment Method *</label>
+<select name="payment_method" required>
+<option value="">Select payment method</option>
+<option value="Cash on Delivery">Cash on Delivery</option>
+<option value="Bank Transfer">Bank Transfer</option>
+</select>
+</div>
+<div class="form-group">
+<label>Order Notes (optional)</label>
+<textarea name="customer_notes" maxlength="1500" placeholder="Any delivery or order instructions..."></textarea>
+</div>
+<div class="cart-total" id="checkoutTotal"></div>
+<button class="checkout-button" type="submit" id="placeOrderButton">PLACE ORDER</button>
+<p class="message" id="checkoutMessage" role="status"></p>
+</form>
+</div>
 </div>
 
-<!-- ORDER SUCCESS MODAL -->
-
 <div class="modal" id="successModal">
-  <div class="modal-content" style="text-align:center">
-
-    <h2>Thank You!</h2>
-    <p style="margin:20px 0">
-      Your order has been submitted successfully.
-    </p>
-
-    <p id="trackingNumber" style="font-weight:bold;color:#842d40"></p>
-
-    <button class="primary-button" onclick="finishOrder()">
-      CONTINUE SHOPPING
-    </button>
-
-  </div>
+<div class="modal-content" style="text-align:center">
+<h2>Thank You!</h2>
+<p style="margin:20px 0">Your order has been submitted successfully.</p>
+<p id="trackingNumber" style="font-weight:bold;color:#842d40"></p>
+<p class="muted" style="margin:12px 0">Please keep your order number for reference.</p>
+<button class="primary" onclick="finishOrder()">CONTINUE SHOPPING</button>
+</div>
 </div>
 
 <script>
-// ======================================
-// SUPABASE CONFIGURATION
-// ======================================
-
-const SUPABASE_URL =
-  "https://rouysaipjmzmvoegtign.supabase.co";
-
-const SUPABASE_ANON_KEY =
-  "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
+const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_EXISTING_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+const PRODUCT_TABLE = "store_products";
+const STORAGE_BUCKET = "product-images";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-// ======================================
-// CONFIGURATION
-// ======================================
-
-// Change these only if your actual database
-// uses different table or column names.
-
-const PRODUCT_TABLE = "products";
-
-// If image_url contains a Storage object path
-// rather than a complete URL, set your bucket name.
-const STORAGE_BUCKET = "product-images";
-
 let products = [];
 let cart = [];
-
-// ======================================
-// HELPERS
-// ======================================
 
 function formatPrice(value) {
   return Number(value || 0).toLocaleString("en-LK");
@@ -584,87 +203,61 @@ function formatPrice(value) {
 
 function getImageURL(image) {
   if (!image) return "";
+  if (/^https?:\/\//i.test(image)) return image;
 
-  if (
-    image.startsWith("https://") ||
-    image.startsWith("http://") ||
-    image.startsWith("data:")
-  ) {
-    return image;
-  }
-
-  const { data } = supabaseClient.storage
+  return supabaseClient.storage
     .from(STORAGE_BUCKET)
-    .getPublicUrl(image);
-
-  return data.publicUrl;
+    .getPublicUrl(image).data.publicUrl;
 }
-
-// ======================================
-// LOAD PRODUCTS
-// ======================================
 
 async function loadProducts() {
   const list = document.getElementById("productList");
-
-  list.innerHTML = '<div class="empty">Loading products...</div>';
+  list.textContent = "Loading products...";
 
   const { data, error } = await supabaseClient
     .from(PRODUCT_TABLE)
-    .select("*");
+    .select("id,name,description,category,price,image_url,is_customisable,is_active")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Product loading error:", error);
-    list.innerHTML =
-      '<div class="empty">Unable to load products. Please check your database settings.</div>';
+    console.error(error);
+    list.textContent = "Unable to load products. Please try again later.";
     return;
   }
 
-  products = (data || []).filter(product =>
-    product.is_active !== false
-  );
-
+  products = data || [];
   displayCategories();
   displayProducts(products);
 }
 
-// ======================================
-// DISPLAY CATEGORIES
-// ======================================
-
 function displayCategories() {
   const select = document.getElementById("categoryFilter");
-
-  const categories = [
-    ...new Set(
-      products
-        .map(product => product.category)
-        .filter(Boolean)
-    )
-  ];
+  const selected = select.value;
 
   select.innerHTML = '<option value="">All Collections</option>';
 
-  categories.forEach(category => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    select.appendChild(option);
-  });
-}
+  [...new Set(products.map(p => p.category).filter(Boolean))]
+    .sort()
+    .forEach(category => {
+      const option = document.createElement("option");
+      option.value = category;
+      option.textContent = category;
+      select.appendChild(option);
+    });
 
-// ======================================
-// DISPLAY PRODUCTS
-// ======================================
+  select.value = selected;
+}
 
 function displayProducts(items) {
   const list = document.getElementById("productList");
-
   list.replaceChildren();
 
   if (!items.length) {
-    list.innerHTML =
-      '<div class="empty">No products found.</div>';
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "No products found.";
+    list.appendChild(empty);
     return;
   }
 
@@ -674,124 +267,97 @@ function displayProducts(items) {
 
     const img = document.createElement("img");
     img.className = "product-image";
-    img.alt = product.name || "Zyra product";
+    img.alt = product.name;
+    img.loading = "lazy";
     img.src = getImageURL(product.image_url);
-
-    img.onerror = () => {
-      img.alt = "Product image unavailable";
-      img.removeAttribute("src");
-    };
+    img.onerror = () => img.removeAttribute("src");
 
     const info = document.createElement("div");
     info.className = "product-info";
 
     const name = document.createElement("h3");
-    name.textContent = product.name || "Untitled Product";
+    name.textContent = product.name;
 
-    const description = document.createElement("p");
-    description.textContent = product.description || "";
+    const desc = document.createElement("p");
+    desc.textContent = product.description || "";
 
     const price = document.createElement("div");
     price.className = "price";
-    price.textContent =
-      "LKR " + formatPrice(product.price);
+    price.textContent = "LKR " + formatPrice(product.price);
 
-    const button = document.createElement("button");
-    button.className = "add-button";
-    button.textContent = "ADD TO BAG";
+    const btn = document.createElement("button");
+    btn.className = "add-button";
+    btn.textContent = "ADD TO BAG";
+    btn.onclick = () => addToCart(product.id);
 
-    button.addEventListener("click", () => {
-      addToCart(product.id);
-    });
+    info.append(name, desc, price);
 
-    info.append(name, description, price, button);
+    if (product.is_customisable) {
+      const note = document.createElement("p");
+      note.textContent = "Customisable";
+      note.style.color = "var(--wine)";
+      info.appendChild(note);
+    }
+
+    info.appendChild(btn);
     card.append(img, info);
     list.appendChild(card);
   });
 }
 
-// ======================================
-// SEARCH AND FILTER
-// ======================================
-
 function filterProducts() {
-  const search = document
-    .getElementById("searchInput")
-    .value.toLowerCase();
+  const search = document.getElementById("searchInput").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
 
-  const category =
-    document.getElementById("categoryFilter").value;
-
-  const filtered = products.filter(product => {
-    const matchesSearch =
-      (product.name || "").toLowerCase().includes(search);
-
-    const matchesCategory =
-      !category || product.category === category;
-
-    return matchesSearch && matchesCategory;
-  });
-
-  displayProducts(filtered);
+  displayProducts(products.filter(p =>
+    (p.name || "").toLowerCase().includes(search) &&
+    (!category || p.category === category)
+  ));
 }
 
-// ======================================
-// SHOPPING CART
-// ======================================
-
-function addToCart(productId) {
-  const product = products.find(
-    item => String(item.id) === String(productId)
-  );
-
+function addToCart(id) {
+  const product = products.find(x => x.id === id);
   if (!product) return;
 
-  const existing = cart.find(
-    item => String(item.id) === String(productId)
-  );
+  const found = cart.find(x => x.id === id);
 
-  if (existing) {
-    existing.quantity++;
+  if (found) {
+    found.quantity++;
   } else {
     cart.push({
       id: product.id,
       name: product.name,
       price: Number(product.price),
-      quantity: 1
+      quantity: 1,
+      is_customisable: !!product.is_customisable,
+      customisation: ""
     });
   }
 
   updateCart();
 }
 
-function removeFromCart(productId) {
-  cart = cart.filter(
-    item => String(item.id) !== String(productId)
-  );
-
+function removeFromCart(id) {
+  cart = cart.filter(x => x.id !== id);
   updateCart();
 }
 
-function updateQuantity(productId, amount) {
-  const item = cart.find(
-    item => String(item.id) === String(productId)
-  );
-
+function updateQuantity(id, delta) {
+  const item = cart.find(x => x.id === id);
   if (!item) return;
 
-  item.quantity += amount;
+  item.quantity += delta;
 
-  if (item.quantity <= 0) {
-    removeFromCart(productId);
+  if (item.quantity < 1) {
+    removeFromCart(id);
   } else {
     updateCart();
   }
 }
 
 function getTotal() {
-  return cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+  return cart.reduce((sum, item) =>
+    sum + item.price * item.quantity, 0
   );
 }
 
@@ -800,7 +366,6 @@ function updateCart() {
     cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const container = document.getElementById("cartItems");
-
   container.replaceChildren();
 
   if (!cart.length) {
@@ -811,18 +376,21 @@ function updateCart() {
     const row = document.createElement("div");
     row.className = "cart-item";
 
-    const details = document.createElement("div");
-    details.textContent =
+    const line = document.createElement("div");
+    line.className = "cart-row";
+
+    const detail = document.createElement("span");
+    detail.textContent =
       `${item.name} × ${item.quantity} — LKR ${formatPrice(item.price * item.quantity)}`;
 
-    const controls = document.createElement("div");
+    const controls = document.createElement("span");
 
     const minus = document.createElement("button");
     minus.textContent = "−";
     minus.onclick = () => updateQuantity(item.id, -1);
 
     const plus = document.createElement("button");
-    plus.textContent = " + ";
+    plus.textContent = "+";
     plus.onclick = () => updateQuantity(item.id, 1);
 
     const remove = document.createElement("button");
@@ -830,17 +398,24 @@ function updateCart() {
     remove.onclick = () => removeFromCart(item.id);
 
     controls.append(minus, plus, remove);
-    row.append(details, controls);
+    line.append(detail, controls);
+    row.appendChild(line);
+
+    if (item.is_customisable) {
+      const area = document.createElement("textarea");
+      area.placeholder = "Enter customisation details for " + item.name;
+      area.maxLength = 1000;
+      area.value = item.customisation;
+      area.oninput = () => item.customisation = area.value;
+      row.appendChild(area);
+    }
+
     container.appendChild(row);
   });
 
   document.getElementById("cartTotal").textContent =
     "Total: LKR " + formatPrice(getTotal());
 }
-
-// ======================================
-// MODALS
-// ======================================
 
 function openCart() {
   document.getElementById("cartModal").style.display = "block";
@@ -871,17 +446,12 @@ function closeCheckout() {
 function finishOrder() {
   cart = [];
   updateCart();
-
   document.getElementById("successModal").style.display = "none";
 }
 
-// ======================================
-// SUBMIT CUSTOMER ORDER
-// ======================================
-
-document.getElementById("checkoutForm")
-  .addEventListener("submit", async function(event) {
-
+document.getElementById("checkoutForm").addEventListener(
+  "submit",
+  async function(event) {
     event.preventDefault();
 
     if (!cart.length) {
@@ -899,73 +469,56 @@ document.getElementById("checkoutForm")
     try {
       const form = new FormData(this);
 
-      const trackingId =
-        "ZYR-" + crypto.randomUUID().replace(/-/g, "")
-          .substring(0, 10).toUpperCase();
-
-      const orderItems = cart.map(item => ({
-        product_id: item.id,
-        product_name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        subtotal: item.price * item.quantity
-      }));
-
-      const order = {
-        tracking_id: trackingId,
-        customer_name: form.get("customer_name"),
-        customer_phone: form.get("customer_phone"),
-        customer_whatsapp: form.get("customer_phone"),
-        delivery_address: form.get("delivery_address"),
-        district: form.get("district"),
-        order_items: orderItems,
-        total_amount: getTotal(),
-        payment_method: form.get("payment_method"),
-        payment_status: "Pending",
-        customization_details: {
-          instructions: form.get("customization_details"),
-          customer_email: form.get("customer_email")
+      const payload = {
+        customer: {
+          customer_name: String(form.get("customer_name") || "").trim(),
+          email: String(form.get("email") || "").trim() || null,
+          phone: String(form.get("phone") || "").trim(),
+          delivery_address: String(form.get("delivery_address") || "").trim(),
+          city: String(form.get("city") || "").trim(),
+          payment_method: String(form.get("payment_method") || ""),
+          customer_notes: String(form.get("customer_notes") || "").trim()
         },
-        status: "Order Confirmed"
+        items: cart.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          customisation_details: item.customisation.trim()
+            ? { instructions: item.customisation.trim() }
+            : null
+        }))
       };
 
-      const { data, error } = await supabaseClient
-        .from("zyra_orders")
-        .insert(order)
-        .select("tracking_id")
-        .single();
+      const { data, error } = await supabaseClient.functions.invoke(
+        "place-order",
+        { body: payload }
+      );
 
       if (error) throw error;
 
-      document.getElementById("checkoutModal").style.display = "none";
+      if (!data || !data.order_number) {
+        throw new Error(data?.error || "The server did not return an order number.");
+      }
 
+      document.getElementById("checkoutModal").style.display = "none";
       document.getElementById("trackingNumber").textContent =
-        "Your tracking number: " + data.tracking_id;
+        "Your store order number: " + data.order_number;
 
       document.getElementById("successModal").style.display = "block";
-
       this.reset();
 
-    } catch (error) {
-      console.error("Order submission error:", error);
-
+    } catch (err) {
+      console.error("Order submission error:", err);
       message.textContent =
-        "We couldn't submit your order. Please check the details or contact Zyra.lk.";
-
+        err.message || "We couldn't submit your order. Please contact Zyra.lk.";
     } finally {
       button.disabled = false;
       button.textContent = "PLACE ORDER";
     }
-});
-
-// ======================================
-// INITIALIZE
-// ======================================
+  }
+);
 
 loadProducts();
 updateCart();
-
 </script>
-
 </body>
 </html>
