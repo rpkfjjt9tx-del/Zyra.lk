@@ -1,1457 +1,524 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zyra.lk | Admin Dashboard</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zyra.lk | Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-:root {
-  --wine: #842d40;
-  --cream: #faf7f2;
-  --dark: #292522;
-  --muted: #82766f;
-  --white: #fff;
-  --border: #e9e2dc;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  background: var(--cream);
-  color: var(--dark);
-}
-
-button, input, select, textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* LOGIN */
-
-.login-screen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  background: white;
-  padding: 35px;
-  box-shadow: 0 5px 30px rgba(0,0,0,.06);
-}
-
-.logo {
-  color: var(--wine);
-  font-family: Georgia, serif;
-  font-size: 29px;
-  letter-spacing: 3px;
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-.login-card h2 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-family: Georgia, serif;
-}
-
-/* LAYOUT */
-
-.layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 240px;
-  background: var(--dark);
-  color: white;
-  padding: 25px 16px;
-  flex-shrink: 0;
-}
-
-.sidebar .logo {
-  margin-bottom: 35px;
-}
-
-.sidebar button {
-  width: 100%;
-  text-align: left;
-  padding: 13px;
-  margin-bottom: 7px;
-  border: none;
-  background: transparent;
-  color: white;
-  border-radius: 3px;
-}
-
-.sidebar button:hover,
-.sidebar button.active {
-  background: var(--wine);
-}
-
-.main {
-  flex: 1;
-  min-width: 0;
-  padding: 30px;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  gap: 15px;
-}
-
-.topbar h1 {
-  font-family: Georgia, serif;
-  font-size: 29px;
-}
-
-.panel {
-  display: none;
-}
-
-.panel.active {
-  display: block;
-}
-
-/* CARDS */
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  margin-bottom: 25px;
-}
-
-.stat-card {
-  background: white;
-  padding: 23px;
-  border: 1px solid var(--border);
-}
-
-.stat-card p {
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.stat-card h2 {
-  font-family: Georgia, serif;
-  font-size: 26px;
-  color: var(--wine);
-}
-
-.card {
-  background: white;
-  padding: 23px;
-  border: 1px solid var(--border);
-  margin-bottom: 22px;
-}
-
-.card h2 {
-  font-family: Georgia, serif;
-  font-size: 22px;
-  margin-bottom: 20px;
-}
-
-/* FORMS */
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-label {
-  display: block;
-  font-size: 13px;
-  margin-bottom: 7px;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border);
-  background: white;
-  outline-color: var(--wine);
-}
-
-textarea {
-  min-height: 85px;
-  resize: vertical;
-}
-
-.btn {
-  padding: 12px 19px;
-  border: none;
-  background: var(--wine);
-  color: white;
-  margin-right: 5px;
-  margin-bottom: 5px;
-}
-
-.btn.secondary {
-  background: var(--dark);
-}
-
-.btn.danger {
-  background: #a33c3c;
-}
-
-.btn.light {
-  background: #eee7e1;
-  color: var(--dark);
-}
-
-/* TABLES */
-
-.table-wrap {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 650px;
-}
-
-th, td {
-  padding: 13px;
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-  font-size: 13px;
-}
-
-th {
-  background: #f7f3ef;
-}
-
-td img {
-  width: 55px;
-  height: 55px;
-  object-fit: cover;
-}
-
-.status {
-  display: inline-block;
-  background: #eee7e1;
-  padding: 6px 9px;
-  font-size: 11px;
-}
-
-/* SEARCH */
-
-.search {
-  max-width: 350px;
-  margin-bottom: 18px;
-}
-
-/* MOBILE */
-
-@media(max-width: 900px) {
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media(max-width: 650px) {
-  .layout {
-    display: block;
-  }
-
-  .sidebar {
-    width: 100%;
-    padding: 12px;
-  }
-
-  .sidebar .logo {
-    margin-bottom: 12px;
-  }
-
-  .sidebar button {
-    width: auto;
-    display: inline-block;
-    padding: 10px;
-    font-size: 12px;
-  }
-
-  .main {
-    padding: 16px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-group.full {
-    grid-column: auto;
-  }
-
-  .topbar h1 {
-    font-size: 22px;
-  }
+:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1200px;margin:auto;padding:24px}
+.brand{color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:2px}
+.panel{background:#fff;padding:20px;margin:18px 0;border:1px solid #eee}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+.btn{border:0;background:var(--wine);color:#fff;padding:11px 16px}
+.btn.secondary{background:var(--dark)}
+.btn.light{background:#eee;color:var(--dark)}
+input,select,textarea{padding:11px;border:1px solid #ddd;width:100%;background:white}
+.field{margin:10px 0}
+.field label{display:block;font-size:13px;margin-bottom:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{background:#f7f1ec;padding:16px}
+.stat strong{display:block;font-size:23px;color:var(--wine);margin-top:8px}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}
+th{background:#faf7f2}
+.hidden{display:none!important}
+.muted{color:var(--muted);font-size:13px}
+.order-card{border:1px solid #eee;padding:15px;margin:12px 0}
+.itemline{padding:8px 0;border-bottom:1px solid #eee}
+.status{font-weight:bold;color:var(--wine)}
+.message{margin:10px 0;color:var(--wine);white-space:pre-wrap}
+@media(max-width:650px){
+.wrap{padding:12px}
+.stats{grid-template-columns:1fr}
+.panel{padding:14px}
 }
 </style>
 </head>
-
 <body>
+<div class="wrap">
 
-<!-- LOGIN -->
+<header class="row">
+<div class="brand">ZYRA.LK · ADMIN</div>
+<div style="text-align:right">
+<button id="logoutBtn" class="btn secondary hidden" onclick="logout()">LOG OUT</button>
+</div>
+</header>
 
-<section class="login-screen" id="loginScreen">
-
-  <div class="login-card">
-
-    <div class="logo">ZYRA.LK</div>
-
-    <h2>Admin Login</h2>
-
-    <form id="loginForm">
-
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="loginEmail" required>
-      </div>
-
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="loginPassword" required>
-      </div>
-
-      <button class="btn" style="width:100%" type="submit">
-        LOGIN
-      </button>
-
-      <p id="loginMessage"></p>
-
-    </form>
-
-  </div>
-
+<section id="loginPanel" class="panel">
+<h2>Admin Login</h2>
+<p class="muted">Sign in with the Supabase Auth account that has been authorised as a Zyra admin.</p>
+<form id="loginForm">
+<div class="field">
+<label>Email</label>
+<input name="email" type="email" required>
+</div>
+<div class="field">
+<label>Password</label>
+<input name="password" type="password" required>
+</div>
+<button class="btn">SIGN IN</button>
+</form>
+<p id="loginMessage" class="message"></p>
 </section>
 
-<!-- ADMIN DASHBOARD -->
-
-<div class="layout hidden" id="dashboard">
-
-  <aside class="sidebar">
-
-    <div class="logo">ZYRA.LK</div>
-
-    <button class="active" onclick="showPanel('overview',this)">
-      Dashboard
-    </button>
-
-    <button onclick="showPanel('products',this)">
-      Products
-    </button>
-
-    <button onclick="showPanel('orders',this)">
-      All Orders
-    </button>
-
-    <button onclick="showPanel('manual',this)">
-      Add WhatsApp Order
-    </button>
-
-    <button onclick="showPanel('invoices',this)">
-      Invoices
-    </button>
-
-    <button onclick="logout()">
-      Logout
-    </button>
-
-  </aside>
-
-  <main class="main">
-
-    <div class="topbar">
-      <div>
-        <h1 id="pageTitle">Dashboard</h1>
-        <p style="color:#82766f;font-size:13px">
-          Zyra.lk Management Portal
-        </p>
-      </div>
-
-      <button class="btn" onclick="refreshDashboard()">
-        REFRESH
-      </button>
-    </div>
-
-    <!-- OVERVIEW -->
-
-    <section class="panel active" id="overview">
-
-      <div class="stats">
-
-        <div class="stat-card">
-          <p>Total Orders</p>
-          <h2 id="totalOrders">0</h2>
-        </div>
-
-        <div class="stat-card">
-          <p>Pending Orders</p>
-          <h2 id="pendingOrders">0</h2>
-        </div>
-
-        <div class="stat-card">
-          <p>Products</p>
-          <h2 id="totalProducts">0</h2>
-        </div>
-
-        <div class="stat-card">
-          <p>Total Order Value</p>
-          <h2 id="totalRevenue">0</h2>
-        </div>
-
-      </div>
-
-      <div class="card">
-        <h2>Recent Orders</h2>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Tracking ID</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody id="recentOrders"></tbody>
-          </table>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- PRODUCTS -->
-
-    <section class="panel" id="products">
-
-      <div class="card">
-
-        <h2>Add / Edit Product</h2>
-
-        <form id="productForm">
-
-          <input type="hidden" id="productId">
-
-          <div class="form-grid">
-
-            <div class="form-group">
-              <label>Product Name *</label>
-              <input id="productName" required>
-            </div>
-
-            <div class="form-group">
-              <label>Price (LKR) *</label>
-              <input id="productPrice" type="number" min="0" required>
-            </div>
-
-            <div class="form-group">
-              <label>Category</label>
-              <input id="productCategory">
-            </div>
-
-            <div class="form-group">
-              <label>Image URL or Storage Path</label>
-              <input id="productImage">
-            </div>
-
-            <div class="form-group full">
-              <label>Description</label>
-              <textarea id="productDescription"></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Active Product</label>
-              <select id="productActive">
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-
-          </div>
-
-          <button class="btn" type="submit">
-            SAVE PRODUCT
-          </button>
-
-          <button class="btn light" type="button" onclick="resetProductForm()">
-            CLEAR
-          </button>
-
-          <p id="productMessage"></p>
-
-        </form>
-
-      </div>
-
-      <div class="card">
-
-        <h2>Product Inventory</h2>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="productTable"></tbody>
-          </table>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- ALL ORDERS -->
-
-    <section class="panel" id="orders">
-
-      <div class="card">
-
-        <h2>Order Management</h2>
-
-        <input
-          class="search"
-          id="orderSearch"
-          placeholder="Search customer or tracking ID..."
-          oninput="displayOrders()"
-        >
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Tracking ID</th>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="orderTable"></tbody>
-          </table>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- MANUAL ORDERS -->
-
-    <section class="panel" id="manual">
-
-      <div class="card">
-
-        <h2>Manually Add WhatsApp Order</h2>
-
-        <p style="color:#82766f;font-size:13px;margin-bottom:20px">
-          Enter customer details for orders received through WhatsApp.
-        </p>
-
-        <form id="manualOrderForm">
-
-          <div class="form-grid">
-
-            <div class="form-group">
-              <label>Customer Name *</label>
-              <input name="customer_name" required>
-            </div>
-
-            <div class="form-group">
-              <label>Email Address</label>
-              <input name="customer_email" type="email">
-            </div>
-
-            <div class="form-group">
-              <label>Phone Number *</label>
-              <input name="customer_phone" required>
-            </div>
-
-            <div class="form-group">
-              <label>District *</label>
-              <input name="district" required>
-            </div>
-
-            <div class="form-group full">
-              <label>Delivery Address *</label>
-              <textarea name="delivery_address" required></textarea>
-            </div>
-
-            <div class="form-group">
-              <label>Product Name *</label>
-              <input name="product_name" required>
-            </div>
-
-            <div class="form-group">
-              <label>Quantity *</label>
-              <input name="quantity" type="number" min="1" value="1" required>
-            </div>
-
-            <div class="form-group">
-              <label>Unit Price (LKR) *</label>
-              <input name="unit_price" type="number" min="0" required>
-            </div>
-
-            <div class="form-group">
-              <label>Delivery Fee (LKR)</label>
-              <input name="delivery_fee" type="number" min="0" value="0">
-            </div>
-
-            <div class="form-group">
-              <label>Payment Method *</label>
-              <select name="payment_method" required>
-                <option value="Cash on Delivery">Cash on Delivery</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Payment Status</label>
-              <select name="payment_status">
-                <option value="Pending">Pending</option>
-                <option value="Paid">Paid</option>
-              </select>
-            </div>
-
-            <div class="form-group full">
-              <label>Customization Details</label>
-              <textarea name="customization_details"></textarea>
-            </div>
-
-          </div>
-
-          <button class="btn" type="submit" id="manualSubmit">
-            CREATE ORDER
-          </button>
-
-          <p id="manualMessage"></p>
-
-        </form>
-
-      </div>
-
-    </section>
-
-    <!-- INVOICES -->
-
-    <section class="panel" id="invoices">
-
-      <div class="card">
-
-        <h2>Invoice Management</h2>
-
-        <p style="font-size:13px;color:#82766f;margin-bottom:20px">
-          Find an order and prepare its printable invoice.
-        </p>
-
-        <div class="table-wrap">
-          <table>
-
-            <thead>
-              <tr>
-                <th>Tracking ID</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Invoice</th>
-              </tr>
-            </thead>
-
-            <tbody id="invoiceTable"></tbody>
-
-          </table>
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
+<main id="dashboard" class="hidden">
+
+<section class="stats">
+<div class="stat">Total store orders<strong id="statOrders">0</strong></div>
+<div class="stat">Pending orders<strong id="statPending">0</strong></div>
+<div class="stat">Store sales<strong id="statSales">LKR 0</strong></div>
+</section>
+
+<section class="panel">
+<div class="row">
+<div>
+<h2>Store Orders</h2>
+<p class="muted">These are shopping website orders, not delivery-tracking records.</p>
+</div>
+<button class="btn light" onclick="loadOrders()">REFRESH</button>
+</div>
+<p id="ordersMessage" class="message"></p>
+<div id="ordersList"></div>
+</section>
+
+<section class="panel">
+<h2>Store Products</h2>
+<p class="muted">Manage products in store_products. Deactivate products instead of deleting them to preserve order history.</p>
+
+<form id="productForm">
+<input type="hidden" name="id">
+
+<div class="row">
+<div class="field">
+<label>Product name *</label>
+<input name="name" required maxlength="200">
+</div>
+<div class="field">
+<label>Price (LKR) *</label>
+<input name="price" type="number" min="0" step="0.01" required>
+</div>
+</div>
+
+<div class="row">
+<div class="field">
+<label>Category</label>
+<input name="category">
+</div>
+<div class="field">
+<label>Image URL or storage path</label>
+<input name="image_url">
+</div>
+</div>
+
+<div class="field">
+<label>Description</label>
+<textarea name="description"></textarea>
+</div>
+
+<div class="row">
+<div class="field">
+<label>Stock quantity</label>
+<input name="stock_quantity" type="number" min="0" value="0" required>
+</div>
+<div class="field">
+<label><input style="width:auto" name="is_customisable" type="checkbox"> Customisable</label>
+<label><input style="width:auto" name="is_active" type="checkbox" checked> Active</label>
+</div>
+</div>
+
+<button class="btn">SAVE PRODUCT</button>
+<button type="button" class="btn light" onclick="resetProductForm()">CLEAR</button>
+<p id="productMessage" class="message"></p>
+</form>
+
+<div class="tablewrap">
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Price</th>
+<th>Category</th>
+<th>Stock</th>
+<th>Customisable</th>
+<th>Active</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="productsBody"></tbody>
+</table>
+</div>
+</section>
+</main>
 </div>
 
 <script>
+const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
+const SUPABASE_ANON_KEY="PASTE_YOUR_EXISTING_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
 
-// ======================================
-// SUPABASE CONFIGURATION
-// ======================================
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let productCache=[];
 
-const SUPABASE_URL =
-  "https://rouysaipjmzmvoegtign.supabase.co";
+const money=n=>"LKR "+Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
+const el=id=>document.getElementById(id);
 
-const SUPABASE_ANON_KEY =
-  "YOUR_EXISTING_SUPABASE_PUBLISHABLE_KEY";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-// ======================================
-// TABLE SETTINGS
-// ======================================
-
-const PRODUCT_TABLE = "products";
-const ORDER_TABLE = "zyra_orders";
-
-let allOrders = [];
-let allProducts = [];
-
-// ======================================
-// HELPERS
-// ======================================
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[c]);
+function showDashboard(show){
+  el("loginPanel").classList.toggle("hidden",show);
+  el("dashboard").classList.toggle("hidden",!show);
+  el("logoutBtn").classList.toggle("hidden",!show);
 }
 
-function money(value) {
-  return Number(value || 0).toLocaleString("en-LK");
+async function checkSession(){
+  const {data}=await sb.auth.getSession();
+  if(data.session){
+    showDashboard(true);
+    await refreshAll();
+  }else{
+    showDashboard(false);
+  }
 }
 
-function imageURL(value) {
-  if (!value) return "";
+el("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const f=new FormData(e.target);
+  el("loginMessage").textContent="Signing in...";
 
-  if (/^https?:\/\//i.test(value)) return value;
+  const {error}=await sb.auth.signInWithPassword({
+    email:f.get("email"),
+    password:f.get("password")
+  });
 
-  return supabaseClient.storage
-    .from("product-images")
-    .getPublicUrl(value).data.publicUrl;
-}
-
-function makeTrackingId() {
-  return "ZYR-" +
-    crypto.randomUUID().replace(/-/g, "")
-      .substring(0, 10).toUpperCase();
-}
-
-// ======================================
-// AUTHENTICATION
-// ======================================
-
-async function checkSession() {
-  const { data, error } =
-    await supabaseClient.auth.getSession();
-
-  if (error) {
-    console.error(error);
+  if(error){
+    el("loginMessage").textContent=error.message;
     return;
   }
 
-  if (data.session) {
-    showDashboard();
-  } else {
-    showLogin();
+  el("loginMessage").textContent="";
+  showDashboard(true);
+  await refreshAll();
+});
+
+async function logout(){
+  await sb.auth.signOut();
+  showDashboard(false);
+}
+
+async function refreshAll(){
+  await Promise.all([loadOrders(),loadProducts()]);
+}
+
+async function loadOrders(){
+  el("ordersMessage").textContent="Loading orders...";
+
+  const {data,error}=await sb
+    .from("store_orders")
+    .select("*,store_order_items(*)")
+    .order("created_at",{ascending:false})
+    .limit(200);
+
+  if(error){
+    el("ordersMessage").textContent="Could not load orders: "+error.message;
+    return;
   }
-}
 
-function showLogin() {
-  document.getElementById("loginScreen").classList.remove("hidden");
-  document.getElementById("dashboard").classList.add("hidden");
-}
+  const orders=data||[];
 
-function showDashboard() {
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
+  el("statOrders").textContent=orders.length;
+  el("statPending").textContent=orders.filter(
+    o=>(o.order_status||"pending").toLowerCase()==="pending"
+  ).length;
 
-  refreshDashboard();
-}
+  el("statSales").textContent=money(
+    orders.reduce((s,o)=>s+Number(o.total_amount||0),0)
+  );
 
-document.getElementById("loginForm")
-  .addEventListener("submit", async event => {
+  const root=el("ordersList");
+  root.replaceChildren();
+  el("ordersMessage").textContent="";
 
-    event.preventDefault();
+  if(!orders.length){
+    root.textContent="No store orders have been placed yet.";
+    return;
+  }
 
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
+  orders.forEach(order=>{
+    const card=document.createElement("article");
+    card.className="order-card";
 
-    const message = document.getElementById("loginMessage");
+    const h=document.createElement("div");
+    h.className="row";
 
-    message.textContent = "Signing in...";
+    const title=document.createElement("h3");
+    title.textContent=order.order_number+" · "+order.customer_name;
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+    const total=document.createElement("strong");
+    total.textContent=money(order.total_amount);
 
-    if (error) {
-      message.textContent = error.message;
-      return;
+    h.append(title,total);
+    card.appendChild(h);
+
+    const info=document.createElement("p");
+    info.className="muted";
+    info.textContent=
+      `${order.phone} · ${order.email||"No email"} · ${order.city} · ${order.payment_method} · ${new Date(order.created_at).toLocaleString()}`;
+    card.appendChild(info);
+
+    const address=document.createElement("p");
+    address.textContent="Delivery: "+order.delivery_address;
+    card.appendChild(address);
+
+    if(order.customer_notes){
+      const note=document.createElement("p");
+      note.textContent="Order notes: "+order.customer_notes;
+      card.appendChild(note);
     }
 
-    showDashboard();
-  });
+    const items=order.store_order_items||[];
+    const itemBox=document.createElement("div");
+    itemBox.style.margin="12px 0";
 
-async function logout() {
-  await supabaseClient.auth.signOut();
-  showLogin();
-}
+    if(!items.length){
+      itemBox.textContent="No product items linked to this order.";
+    }else{
+      items.forEach(it=>{
+        const line=document.createElement("div");
+        line.className="itemline";
+        line.textContent=
+          `${it.product_name} × ${it.quantity} — ${money(Number(it.unit_price)*Number(it.quantity))}`;
 
-// ======================================
-// NAVIGATION
-// ======================================
+        if(it.is_customised&&it.customisation_details){
+          const detail=document.createElement("div");
+          detail.className="muted";
+          detail.textContent="Customisation: "+JSON.stringify(it.customisation_details);
+          line.appendChild(detail);
+        }
 
-function showPanel(panelId, button) {
-
-  document.querySelectorAll(".panel").forEach(panel => {
-    panel.classList.remove("active");
-  });
-
-  document.getElementById(panelId).classList.add("active");
-
-  document.querySelectorAll(".sidebar button").forEach(btn => {
-    btn.classList.remove("active");
-  });
-
-  if (button) button.classList.add("active");
-
-  const titles = {
-    overview: "Dashboard",
-    products: "Products",
-    orders: "All Orders",
-    manual: "Add WhatsApp Order",
-    invoices: "Invoices"
-  };
-
-  document.getElementById("pageTitle").textContent =
-    titles[panelId] || "Dashboard";
-}
-
-// ======================================
-// LOAD DASHBOARD
-// ======================================
-
-async function refreshDashboard() {
-  await Promise.all([
-    loadOrders(),
-    loadProducts()
-  ]);
-
-  updateStats();
-}
-
-async function loadOrders() {
-
-  const { data, error } = await supabaseClient
-    .from(ORDER_TABLE)
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Orders error:", error);
-    alert("Unable to load orders: " + error.message);
-    return;
-  }
-
-  allOrders = data || [];
-
-  displayOrders();
-  displayRecentOrders();
-  displayInvoices();
-}
-
-async function loadProducts() {
-
-  const { data, error } = await supabaseClient
-    .from(PRODUCT_TABLE)
-    .select("*")
-    .order("id", { ascending: false });
-
-  if (error) {
-    console.error("Products error:", error);
-    return;
-  }
-
-  allProducts = data || [];
-
-  displayProducts();
-}
-
-// ======================================
-// STATISTICS
-// ======================================
-
-function updateStats() {
-
-  document.getElementById("totalOrders").textContent =
-    allOrders.length;
-
-  document.getElementById("pendingOrders").textContent =
-    allOrders.filter(order =>
-      String(order.status || "").toLowerCase() === "pending"
-    ).length;
-
-  document.getElementById("totalProducts").textContent =
-    allProducts.length;
-
-  const revenue = allOrders.reduce((sum, order) => {
-    return sum + Number(order.total_amount || 0);
-  }, 0);
-
-  document.getElementById("totalRevenue").textContent =
-    "LKR " + money(revenue);
-}
-
-// ======================================
-// PRODUCTS
-// ======================================
-
-function displayProducts() {
-
-  const table = document.getElementById("productTable");
-
-  table.innerHTML = "";
-
-  allProducts.forEach(product => {
-
-    const row = document.createElement("tr");
-
-    const image = imageURL(product.image_url);
-
-    row.innerHTML = `
-      <td>
-        ${image ? `<img src="${escapeHTML(image)}" alt="">` : "No image"}
-      </td>
-
-      <td>${escapeHTML(product.name)}</td>
-      <td>${escapeHTML(product.category)}</td>
-      <td>LKR ${money(product.price)}</td>
-
-      <td>
-        <button class="btn light" onclick="editProduct('${escapeHTML(product.id)}')">
-          Edit
-        </button>
-
-        <button class="btn danger" onclick="deleteProduct('${escapeHTML(product.id)}')">
-          Delete
-        </button>
-      </td>
-    `;
-
-    table.appendChild(row);
-  });
-}
-
-document.getElementById("productForm")
-  .addEventListener("submit", async event => {
-
-    event.preventDefault();
-
-    const id = document.getElementById("productId").value;
-
-    const product = {
-      name: document.getElementById("productName").value.trim(),
-      price: Number(document.getElementById("productPrice").value),
-      category: document.getElementById("productCategory").value.trim(),
-      image_url: document.getElementById("productImage").value.trim(),
-      description: document.getElementById("productDescription").value.trim(),
-      is_active: document.getElementById("productActive").value === "true"
-    };
-
-    const result = id
-      ? await supabaseClient.from(PRODUCT_TABLE).update(product).eq("id", id)
-      : await supabaseClient.from(PRODUCT_TABLE).insert(product);
-
-    if (result.error) {
-      document.getElementById("productMessage").textContent =
-        result.error.message;
-      return;
+        itemBox.appendChild(line);
+      });
     }
 
-    document.getElementById("productMessage").textContent =
-      "Product saved successfully.";
+    card.appendChild(itemBox);
 
-    resetProductForm();
-    await loadProducts();
-    updateStats();
+    const actions=document.createElement("div");
+    actions.className="row";
+
+    const status=document.createElement("select");
+
+    ["pending","confirmed","processing","shipped","completed","cancelled"]
+      .forEach(s=>{
+        const op=document.createElement("option");
+        op.value=s;
+        op.textContent=s;
+        status.appendChild(op);
+      });
+
+    status.value=order.order_status||"pending";
+
+    const save=document.createElement("button");
+    save.className="btn";
+    save.textContent="UPDATE STATUS";
+    save.onclick=()=>updateOrderStatus(order.id,status.value,save);
+
+    const invoice=document.createElement("button");
+    invoice.className="btn secondary";
+    invoice.textContent="PRINT INVOICE";
+    invoice.onclick=()=>printInvoice(order);
+
+    actions.append(status,save,invoice);
+    card.appendChild(actions);
+    root.appendChild(card);
   });
-
-function editProduct(id) {
-
-  const product = allProducts.find(
-    item => String(item.id) === String(id)
-  );
-
-  if (!product) return;
-
-  document.getElementById("productId").value = product.id;
-  document.getElementById("productName").value = product.name || "";
-  document.getElementById("productPrice").value = product.price || "";
-  document.getElementById("productCategory").value = product.category || "";
-  document.getElementById("productImage").value = product.image_url || "";
-  document.getElementById("productDescription").value = product.description || "";
-
-  document.getElementById("productActive").value =
-    String(product.is_active !== false);
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function resetProductForm() {
-  document.getElementById("productForm").reset();
-  document.getElementById("productId").value = "";
-}
+async function updateOrderStatus(id,status,button){
+  button.disabled=true;
 
-async function deleteProduct(id) {
+  const {error}=await sb
+    .from("store_orders")
+    .update({order_status:status})
+    .eq("id",id);
 
-  if (!confirm("Are you sure you want to delete this product?")) return;
+  button.disabled=false;
 
-  const { error } = await supabaseClient
-    .from(PRODUCT_TABLE)
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
+  if(error){
+    alert("Status update failed: "+error.message);
+  }else{
+    await loadOrders();
   }
-
-  await loadProducts();
-  updateStats();
 }
 
-// ======================================
-// ORDER DISPLAY
-// ======================================
-
-function displayOrders() {
-
-  const search = document.getElementById("orderSearch")
-    .value.toLowerCase();
-
-  const table = document.getElementById("orderTable");
-
-  table.innerHTML = "";
-
-  allOrders.filter(order => {
-
-    const text = [
-      order.tracking_id,
-      order.customer_name,
-      order.customer_phone
-    ].join(" ").toLowerCase();
-
-    return text.includes(search);
-
-  }).forEach(order => {
-
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-      <td>${escapeHTML(order.tracking_id)}</td>
-      <td>${escapeHTML(order.customer_name)}</td>
-      <td>${escapeHTML(order.customer_phone)}</td>
-      <td>LKR ${money(order.total_amount)}</td>
-      <td><span class="status">${escapeHTML(order.status)}</span></td>
-      <td>
-        <button class="btn light"
-          onclick="changeOrderStatus('${escapeHTML(order.id)}')">
-          Status
-        </button>
-
-        <button class="btn secondary"
-          onclick="printInvoice('${escapeHTML(order.id)}')">
-          Invoice
-        </button>
-      </td>
-    `;
-
-    table.appendChild(row);
-  });
-}
-
-function displayRecentOrders() {
-
-  const table = document.getElementById("recentOrders");
-
-  table.innerHTML = "";
-
-  allOrders.slice(0, 5).forEach(order => {
-
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-      <td>${escapeHTML(order.tracking_id)}</td>
-      <td>${escapeHTML(order.customer_name)}</td>
-      <td>LKR ${money(order.total_amount)}</td>
-      <td>${escapeHTML(order.status)}</td>
-    `;
-
-    table.appendChild(row);
-  });
-}
-
-// ======================================
-// UPDATE ORDER STATUS
-// ======================================
-
-async function changeOrderStatus(id) {
-
-  const order = allOrders.find(
-    item => String(item.id) === String(id)
-  );
-
-  if (!order) return;
-
-  const status = prompt(
-    "Enter new order status:\nOrder Confirmed\nProcessing\nReady to Dispatch\nShipped\nDelivered\nCancelled",
-    order.status || "Processing"
-  );
-
-  if (!status || !status.trim()) return;
-
-  const { error } = await supabaseClient
-    .from(ORDER_TABLE)
-    .update({ status: status.trim() })
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  alert("Order status updated.");
-
-  await loadOrders();
-  updateStats();
-}
-
-// ======================================
-// MANUAL WHATSAPP ORDER
-// ======================================
-
-document.getElementById("manualOrderForm")
-  .addEventListener("submit", async event => {
-
-    event.preventDefault();
-
-    const form = new FormData(event.target);
-
-    const button = document.getElementById("manualSubmit");
-    const message = document.getElementById("manualMessage");
-
-    button.disabled = true;
-    button.textContent = "SAVING ORDER...";
-
-    try {
-
-      const quantity = Number(form.get("quantity"));
-      const unitPrice = Number(form.get("unit_price"));
-      const deliveryFee = Number(form.get("delivery_fee") || 0);
-
-      if (
-        !Number.isInteger(quantity) ||
-        quantity < 1 ||
-        !Number.isFinite(unitPrice) ||
-        unitPrice < 0 ||
-        !Number.isFinite(deliveryFee) ||
-        deliveryFee < 0
-      ) {
-        throw new Error("Please enter valid quantity and prices.");
-      }
-
-      const trackingId = makeTrackingId();
-
-      const order = {
-
-        tracking_id: trackingId,
-
-        customer_name: form.get("customer_name"),
-        customer_phone: form.get("customer_phone"),
-        customer_whatsapp: form.get("customer_phone"),
-
-        delivery_address: form.get("delivery_address"),
-        district: form.get("district"),
-
-        order_items: [{
-          product_name: form.get("product_name"),
-          quantity: quantity,
-          unit_price: unitPrice,
-          subtotal: quantity * unitPrice
-        }],
-
-        total_amount: quantity * unitPrice + deliveryFee,
-
-        payment_method: form.get("payment_method"),
-        payment_status: form.get("payment_status"),
-
-        customization_details: {
-          instructions: form.get("customization_details"),
-          customer_email: form.get("customer_email"),
-          delivery_fee: deliveryFee
-        },
-
-        status: "Order Confirmed"
-      };
-
-      const { data, error } = await supabaseClient
-        .from(ORDER_TABLE)
-        .insert(order)
-        .select("tracking_id")
-        .single();
-
-      if (error) throw error;
-
-      message.textContent =
-        "Order saved successfully. Tracking ID: " + data.tracking_id;
-
-      event.target.reset();
-
-      await loadOrders();
-      updateStats();
-
-    } catch (error) {
-
-      console.error(error);
-
-      message.textContent =
-        "Unable to save order: " + error.message;
-
-    } finally {
-
-      button.disabled = false;
-      button.textContent = "CREATE ORDER";
-    }
-  });
-
-// ======================================
-// INVOICES
-// ======================================
-
-function displayInvoices() {
-
-  const table = document.getElementById("invoiceTable");
-
-  table.innerHTML = "";
-
-  allOrders.forEach(order => {
-
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-      <td>${escapeHTML(order.tracking_id)}</td>
-      <td>${escapeHTML(order.customer_name)}</td>
-      <td>LKR ${money(order.total_amount)}</td>
-      <td>
-        <button class="btn secondary"
-          onclick="printInvoice('${escapeHTML(order.id)}')">
-          PRINT INVOICE
-        </button>
-      </td>
-    `;
-
-    table.appendChild(row);
-  });
-}
-
-function printInvoice(id) {
-
-  const order = allOrders.find(
-    item => String(item.id) === String(id)
-  );
-
-  if (!order) return;
-
-  const items = Array.isArray(order.order_items)
-    ? order.order_items
-    : [];
-
-  const custom = order.customization_details;
-
-  const customData =
-    custom && typeof custom === "object" ? custom : {};
-
-  const deliveryFee = Number(customData.delivery_fee || 0);
-
-  const itemRows = items.map(item => `
-    <tr>
-      <td>${escapeHTML(item.product_name || item.name)}</td>
-      <td>${Number(item.quantity || 1)}</td>
-      <td>LKR ${money(item.unit_price || item.price)}</td>
-      <td>LKR ${money(item.subtotal || 0)}</td>
-    </tr>
-  `).join("");
-
-  const printWindow = window.open("", "_blank");
-
-  if (!printWindow) {
+function printInvoice(o){
+  const rows=(o.store_order_items||[]).map(i=>
+    `<tr>
+      <td>${escapeHtml(i.product_name)}</td>
+      <td>${i.quantity}</td>
+      <td>${money(i.unit_price)}</td>
+      <td>${money(Number(i.quantity)*Number(i.unit_price))}</td>
+    </tr>`
+  ).join("");
+
+  const w=window.open("","_blank");
+
+  if(!w){
     alert("Please allow pop-ups to print invoices.");
     return;
   }
 
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Zyra.lk Invoice</title>
-
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          padding: 40px;
-          color: #292522;
-        }
-
-        h1 {
-          color: #842d40;
-          letter-spacing: 3px;
-        }
-
-        .top {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 30px;
-        }
-
-        th, td {
-          border-bottom: 1px solid #ddd;
-          padding: 13px;
-          text-align: left;
-        }
-
-        .total {
-          text-align: right;
-          margin-top: 25px;
-          font-weight: bold;
-          font-size: 20px;
-        }
-
-        @media print {
-          button { display: none; }
-        }
-      </style>
-    </head>
-
-    <body>
-
-      <div class="top">
-        <div>
-          <h1>ZYRA.LK</h1>
-          <p>Exclusive Collection</p>
-        </div>
-
-        <div>
-          <h2>INVOICE</h2>
-          <p>Invoice: ${escapeHTML(order.tracking_id)}</p>
-          <p>Date: ${escapeHTML(order.created_at || "")}</p>
-        </div>
-      </div>
-
-      <hr>
-
-      <h3>Customer Details</h3>
-
-      <p>${escapeHTML(order.customer_name)}</p>
-      <p>${escapeHTML(order.customer_phone)}</p>
-      <p>${escapeHTML(order.delivery_address)}</p>
-      <p>${escapeHTML(order.district)}</p>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Subtotal</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          ${itemRows}
-        </tbody>
-      </table>
-
-      <div class="total">
-        Delivery Fee: LKR ${money(deliveryFee)}<br><br>
-        Total: LKR ${money(order.total_amount)}
-      </div>
-
-      <p style="margin-top:40px">
-        Thank you for shopping with Zyra.lk.
-      </p>
-
-      <button onclick="window.print()">PRINT INVOICE</button>
-
-    </body>
-    </html>
+  w.document.write(`
+  <!doctype html>
+  <html>
+  <head>
+  <title>Invoice ${escapeHtml(o.order_number)}</title>
+  <style>
+  body{font-family:Arial;padding:30px;color:#292522}
+  h1{color:#842d40}
+  table{width:100%;border-collapse:collapse;margin-top:25px}
+  td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+  .total{text-align:right;font-weight:bold;margin-top:20px}
+  </style>
+  </head>
+  <body>
+  <h1>ZYRA.LK</h1>
+  <h2>Order Invoice</h2>
+  <p>
+  <b>Order:</b> ${escapeHtml(o.order_number)}<br>
+  <b>Date:</b> ${new Date(o.created_at).toLocaleString()}<br>
+  <b>Customer:</b> ${escapeHtml(o.customer_name)}<br>
+  <b>Phone:</b> ${escapeHtml(o.phone)}<br>
+  <b>Address:</b> ${escapeHtml(o.delivery_address)}, ${escapeHtml(o.city)}<br>
+  <b>Payment:</b> ${escapeHtml(o.payment_method)}
+  </p>
+  <table>
+  <thead>
+  <tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr>
+  </thead>
+  <tbody>${rows}</tbody>
+  </table>
+  <p class="total">Order total: ${money(o.total_amount)}</p>
+  <p>Thank you for shopping with Zyra.lk.</p>
+  <script>window.onload=()=>window.print()<\/script>
+  </body>
+  </html>
   `);
 
-  printWindow.document.close();
+  w.document.close();
 }
 
-// ======================================
-// START
-// ======================================
+function escapeHtml(s){
+  return String(s??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c]));
+}
 
-supabaseClient.auth.onAuthStateChange(
-  (event, session) => {
-    if (session) {
-      showDashboard();
-    } else {
-      showLogin();
-    }
+async function loadProducts(){
+  const {data,error}=await sb
+    .from("store_products")
+    .select("*")
+    .order("created_at",{ascending:false});
+
+  if(error){
+    el("productMessage").textContent="Could not load products: "+error.message;
+    return;
   }
-);
+
+  productCache=data||[];
+  const body=el("productsBody");
+  body.replaceChildren();
+
+  productCache.forEach(p=>{
+    const tr=document.createElement("tr");
+
+    [p.name,money(p.price),p.category||"—",p.stock_quantity,
+     p.is_customisable?"Yes":"No",p.is_active?"Yes":"No"]
+    .forEach(v=>{
+      const td=document.createElement("td");
+      td.textContent=v;
+      tr.appendChild(td);
+    });
+
+    const action=document.createElement("td");
+    const edit=document.createElement("button");
+    edit.className="btn light";
+    edit.textContent="EDIT";
+    edit.onclick=()=>editProduct(p.id);
+
+    action.appendChild(edit);
+    tr.appendChild(action);
+    body.appendChild(tr);
+  });
+}
+
+function editProduct(id){
+  const p=productCache.find(x=>x.id===id);
+  if(!p)return;
+
+  const f=el("productForm");
+
+  ["id","name","price","category","image_url","description","stock_quantity"]
+    .forEach(k=>f.elements[k].value=p[k]??"");
+
+  f.elements.is_customisable.checked=!!p.is_customisable;
+  f.elements.is_active.checked=!!p.is_active;
+
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
+
+function resetProductForm(){
+  el("productForm").reset();
+  el("productForm").elements.id.value="";
+  el("productForm").elements.stock_quantity.value=0;
+  el("productForm").elements.is_active.checked=true;
+  el("productMessage").textContent="";
+}
+
+el("productForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  const f=e.target;
+  const id=f.elements.id.value;
+
+  const payload={
+    name:f.elements.name.value.trim(),
+    price:Number(f.elements.price.value),
+    category:f.elements.category.value.trim()||null,
+    image_url:f.elements.image_url.value.trim()||null,
+    description:f.elements.description.value.trim()||null,
+    stock_quantity:Number(f.elements.stock_quantity.value),
+    is_customisable:f.elements.is_customisable.checked,
+    is_active:f.elements.is_active.checked
+  };
+
+  const result=id
+    ?await sb.from("store_products").update(payload).eq("id",id)
+    :await sb.from("store_products").insert(payload);
+
+  if(result.error){
+    el("productMessage").textContent=result.error.message;
+    return;
+  }
+
+  el("productMessage").textContent="Product saved.";
+  resetProductForm();
+  await loadProducts();
+});
+
+sb.auth.onAuthStateChange((_event,session)=>{
+  if(!session)showDashboard(false);
+});
 
 checkSession();
-
 </script>
-
 </body>
 </html>
