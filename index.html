@@ -10,7 +10,25 @@
 @media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}@media(max-width:650px){header{padding:13px 4%}.nav{gap:8px}.nav a{display:none}.brand{font-size:23px}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.product-image{height:185px}.product-info{padding:10px}.benefits{grid-template-columns:1fr}.section{padding:40px 4%}.form-grid,.custom-fields{grid-template-columns:1fr}.form-group.full,.custom-fields .wide{grid-column:auto}.modal-content{padding:17px}.hero{min-height:330px}}
 </style></head>
 <body>
-<header><a class="brand" href="#home" style="text-decoration:none"><img src="ZYRA-LOGO.PNG" alt="Zyra.lk" onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<span class=\"brand-fallback\">ZYRA.LK</span>')"></a><nav class="nav"><a href="#home">HOME</a><a href="#products">COLLECTION</a><a href="#tracking">TRACK ORDER</a><button class="cart-button" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button></nav></header>
+
+<header>
+  <a class="brand" href="#home" style="text-decoration:none">
+    <img
+      src="ZYRA-LOGO.PNG"
+      alt="Zyra.lk"
+      onerror="this.outerHTML='<span class=&quot;brand-fallback&quot;>ZYRA.LK</span>'"
+    >
+  </a>
+
+  <nav class="nav">
+    <a href="#home">HOME</a>
+    <a href="#products">COLLECTION</a>
+    <a href="#tracking">TRACK ORDER</a>
+    <button class="cart-button" onclick="openCart()">
+      BAG (<span id="cartCount">0</span>)
+    </button>
+  </nav>
+</header>
 <section class="hero" id="home"><div><h1>Elegance in Every Detail</h1><p>Discover exclusive designs and personalised pieces created to make every detail feel special.</p><a href="#products"><button class="btn">EXPLORE COLLECTION</button></a></div></section>
 <section class="section" id="products"><h2 class="section-title">Our Collection</h2><p class="section-subtitle">Thoughtfully selected pieces, exclusively for you.</p><div class="toolbar"><input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()"><select id="categoryFilter" onchange="filterProducts()"><option value="">All Collections</option></select></div><div class="products" id="productList"><div class="empty">Loading collection...</div></div></section>
 <section class="section" id="tracking"><h2 class="section-title">Track Your Delivery</h2><p class="section-subtitle">Enter the tracking ID provided by Zyra.</p><div class="tracking"><input id="trackingId" placeholder="Enter tracking ID"><button class="btn" style="width:100%" onclick="trackDelivery()">TRACK ORDER</button><div id="trackingResult" class="tracking-result" hidden></div></div></section>
