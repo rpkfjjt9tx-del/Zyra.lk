@@ -84,7 +84,7 @@ th{background:#faf7f2}
 <section class="stats">
   <div class="stat">Total store orders<strong id="statOrders">0</strong></div>
   <div class="stat">Pending orders<strong id="statPending">0</strong></div>
-  <div class="stat">Store sales<strong id="statSales">LKR 0</strong></div>
+  <div class="stat">Store sales<strong id="statSales">LKR 0.00</strong></div>
 </section>
 
 <section class="panel">
@@ -169,7 +169,7 @@ th{background:#faf7f2}
 <section class="panel">
   <div class="row">
     <div><h2>Store Orders</h2><p class="muted">Customer information, products, payment and delivery tracking.</p></div>
-    <button class="btn light" onclick="loadOrders()">REFRESH</button>
+    <button class="btn light" onclick="refreshAll()">REFRESH</button>
   </div>
   <p id="ordersMessage" class="message"></p>
   <div id="ordersList"></div>
@@ -411,8 +411,59 @@ async function logout(){
  showDashboard(false);
 }
 
+/* DASHBOARD STATISTICS
+   Calculate from store_orders independently of the 200 orders
+   displayed in the order list.
+*/
+
+async function loadDashboardStats(){
+ try{
+  let allOrders=[];
+  let from=0;
+  const pageSize=1000;
+
+  while(true){
+   const {data,error}=await sb.from("store_orders")
+    .select("id,total_amount,order_status")
+    .order("created_at",{ascending:false})
+    .range(from,from+pageSize-1);
+
+   if(error)throw error;
+
+   const page=data||[];
+   allOrders=allOrders.concat(page);
+
+   if(page.length<pageSize)break;
+   from+=pageSize;
+  }
+
+  const totalOrders=allOrders.length;
+
+  const pendingOrders=allOrders.filter(
+   o=>(o.order_status||"pending").toLowerCase()==="pending"
+  ).length;
+
+  const storeSales=allOrders.reduce(
+   (sum,o)=>sum+Number(o.total_amount||0),0
+  );
+
+  el("statOrders").textContent=totalOrders;
+  el("statPending").textContent=pendingOrders;
+  el("statSales").textContent=money(storeSales);
+
+ }catch(error){
+  console.error("Dashboard statistics error:",error);
+  el("ordersMessage").textContent=
+   "Could not refresh dashboard statistics: "+error.message;
+ }
+}
+
 async function refreshAll(){
- await Promise.all([loadOrders(),loadProducts()]);
+ await Promise.all([
+  loadOrders(),
+  loadProducts(),
+  loadDashboardStats()
+ ]);
 }
 
 async function loadTrackingRecords(orders){
@@ -743,6 +794,7 @@ async function createManualOrder(event){
     "\nPlease check the order before trying again.";
 
    await loadOrders();
+   await loadDashboardStats();
    return;
   }
 
@@ -751,6 +803,7 @@ async function createManualOrder(event){
   form.reset();
   resetManualOrder();
   await loadOrders();
+  await loadDashboardStats();
 
  }catch(error){
   message.textContent=error instanceof Error
@@ -781,16 +834,6 @@ async function loadOrders(){
 
  const orders=data||[];
  const trackingError=await loadTrackingRecords(orders);
-
- el("statOrders").textContent=orders.length;
-
- el("statPending").textContent=orders.filter(
-  o=>(o.order_status||"pending").toLowerCase()==="pending"
- ).length;
-
- el("statSales").textContent=money(
-  orders.reduce((s,o)=>s+Number(o.total_amount||0),0)
- );
 
  const root=el("ordersList");
  root.replaceChildren();
@@ -1047,6 +1090,7 @@ async function loadOrders(){
 
   root.append(card);
  });
+
 }
 
 /* SAVE PAYMENT STATUS */
@@ -1097,6 +1141,7 @@ async function savePaymentStatus(order,newStatus,button){
 
   alert("Payment status updated successfully.");
   await loadOrders();
+  await loadDashboardStats();
 
  }catch(error){
   alert("Could not update payment status: "+error.message);
@@ -1201,6 +1246,7 @@ async function saveOrderTracking({
   );
 
   await loadOrders();
+  await loadDashboardStats();
 
  }catch(error){
   alert(error instanceof Error
@@ -1208,13 +1254,14 @@ async function saveOrderTracking({
    :"Could not update delivery tracking.");
 
   await loadOrders();
+  await loadDashboardStats();
  }finally{
   button.disabled=false;
   button.textContent="SAVE DELIVERY TRACKING";
  }
 }
 
-/* REMOVE ORDER — UPDATED */
+/* REMOVE ORDER — WITH DELETE VERIFICATION AND STATS REFRESH */
 
 async function removeOrder(order,button){
  const orderId=order.id;
@@ -1245,7 +1292,7 @@ async function removeOrder(order,button){
  button.textContent="REMOVING...";
 
  try{
-  // Delete tracking records linked by store_order_id.
+  // Delete tracking records connected to this store order.
   const {error:trackingError1}=await sb.from("zyra_orders")
    .delete()
    .eq("store_order_id",orderId);
@@ -1257,8 +1304,7 @@ async function removeOrder(order,button){
    );
   }
 
-  // Also remove a tracking record matching the order number.
-  // This handles older records whose store_order_id may be missing.
+  // Also remove an older tracking record matching the order number.
   if(trackingId){
    const {error:trackingError2}=await sb.from("zyra_orders")
     .delete()
@@ -1272,7 +1318,7 @@ async function removeOrder(order,button){
    }
   }
 
-  // Delete order items.
+  // Delete product line items linked to the order.
   const {error:itemError}=await sb.from("store_order_items")
    .delete()
    .eq("order_id",orderId);
@@ -1284,15 +1330,25 @@ async function removeOrder(order,button){
    );
   }
 
-  // Delete the main store order.
-  const {error:orderError}=await sb.from("store_orders")
+  // Delete the main store order and ask Supabase to return the deleted row.
+  const {data:deletedOrders,error:orderError}=await sb.from("store_orders")
    .delete()
-   .eq("id",orderId);
+   .eq("id",orderId)
+   .select("id");
 
   if(orderError){
    throw new Error(
-    "Tracking and order items were removed, but the main order could not be deleted: "+
-    orderError.message
+    "Could not delete the main store order: "+orderError.message
+   );
+  }
+
+  // A successful response with no returned row means the deletion
+  // was not confirmed. This can happen because of RLS permissions.
+  if(!deletedOrders||deletedOrders.length===0){
+   throw new Error(
+    "Supabase did not confirm that this store order was deleted. "+
+    "The deletion may be blocked by Row Level Security (RLS) permissions. "+
+    "Check the DELETE and SELECT policies for store_orders."
    );
   }
 
@@ -1301,12 +1357,14 @@ async function removeOrder(order,button){
   alert(
    "Order successfully removed!\n\n"+
    "Order ID: "+orderNumber+
-   "\nTracking record: Removed"+
+   "\nTracking records: Removed"+
    "\nOrder items: Removed"+
    "\nStore order: Removed"
   );
 
+  // Reload both the order list and dashboard totals after deletion.
   await loadOrders();
+  await loadDashboardStats();
 
  }catch(error){
   console.error("Order deletion error:",error);
@@ -1314,10 +1372,11 @@ async function removeOrder(order,button){
   alert(
    "ORDER DELETION ERROR\n\n"+
    (error.message||"Could not remove this order.")+
-   "\n\nPlease refresh your orders and check the database."
+   "\n\nRefresh the orders and check the database."
   );
 
   await loadOrders();
+  await loadDashboardStats();
 
  }finally{
   button.disabled=false;
