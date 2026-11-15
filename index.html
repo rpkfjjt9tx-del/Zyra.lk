@@ -1,38 +1,39 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zyra.lk | Exclusive Collection</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:var(--cream);color:var(--dark)}
-button,input,select,textarea{font:inherit}button{cursor:pointer}
-header{background:#fff;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid #eee}
-.logo{color:var(--wine);font:bold 28px Georgia,serif;letter-spacing:3px}
-.nav{display:flex;gap:22px;align-items:center}
-.nav a{color:var(--dark);text-decoration:none;font-size:13px}
-.cart-button{border:1px solid var(--wine);background:#fff;color:var(--wine);padding:10px 16px}
+:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f;--line:#e9e1dc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{background:#fff;padding:16px 6%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line)}
+.brand{color:var(--wine);font:bold 27px Georgia,serif;letter-spacing:3px}
+.brand img{display:block;max-height:48px;max-width:190px;object-fit:contain}
+.nav{display:flex;gap:20px;align-items:center}
+.nav a{color:var(--dark);text-decoration:none;font-size:12px}
+.btn,.checkout-button{background:var(--wine);color:#fff;border:0;padding:12px 18px}
+.cart-button{background:#fff;color:var(--wine);border:1px solid var(--wine);padding:10px 15px}
 .hero{min-height:390px;background:#eee4dc;display:grid;place-items:center;text-align:center;padding:50px 20px}
-.hero h1{font:clamp(34px,6vw,58px) Georgia,serif;margin-bottom:15px}
-.hero p{color:#655a53;margin-bottom:25px;line-height:1.7}
-.primary,.checkout-button{background:var(--wine);color:#fff;border:0;padding:14px 28px}
+.hero h1{font:clamp(36px,6vw,60px) Georgia,serif;margin:0 0 14px}
+.hero p{color:#655a53;margin:0 auto 24px;line-height:1.8;max-width:580px}
 .section{padding:55px 6%}
-.section-title{text-align:center;font:32px Georgia,serif;margin-bottom:12px}
-.section-subtitle{text-align:center;color:var(--muted);margin-bottom:30px;font-size:14px}
-.toolbar{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:28px}
+.section-title{text-align:center;font:32px Georgia,serif;margin-bottom:10px}
+.section-subtitle{text-align:center;color:var(--muted);margin-bottom:28px;font-size:14px}
+.toolbar{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:25px}
 .toolbar input,.toolbar select{padding:12px;border:1px solid #ddd;background:#fff;min-width:180px}
-.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
-.product-card{background:#fff;overflow:hidden}
+.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.product-card{background:#fff;border:1px solid var(--line)}
 .product-image{width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4}
-.product-info{padding:16px}
-.product-info h3{font-size:15px;margin-bottom:8px}
-.product-info p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:10px}
-.price{color:var(--wine);font-weight:bold;margin-bottom:14px}
+.product-info{padding:15px}
+.product-info h3{font-size:15px;margin:0 0 8px}
+.product-info p{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 10px}
+.price{color:var(--wine);font-weight:bold;margin:0 0 13px}
 .add-button{width:100%;padding:12px;border:0;background:var(--dark);color:#fff}
 .empty{text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
 .benefits{background:#eee5dc;padding:35px 6%;display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:20px}
@@ -40,763 +41,892 @@ header{background:#fff;padding:18px 6%;display:flex;justify-content:space-betwee
 .benefits p{font-size:13px;color:var(--muted)}
 footer{background:var(--dark);color:#fff;padding:35px 6%;text-align:center}
 footer p{font-size:13px;margin-top:10px;color:#ddd}
-.modal{display:none;position:fixed;inset:0;z-index:30;background:#0009;overflow-y:auto;padding:25px 12px}
-.modal-content{background:#fff;max-width:650px;margin:25px auto;padding:25px;border-radius:3px}
-.modal-header{display:flex;justify-content:space-between;margin-bottom:22px}
-.close{border:0;background:transparent;font-size:25px}
-.cart-item{padding:14px 0;border-bottom:1px solid #eee}
+.modal{display:none;position:fixed;inset:0;z-index:30;background:#0009;overflow-y:auto;padding:22px 12px}
+.modal-content{background:#fff;max-width:680px;margin:20px auto;padding:24px;border-radius:3px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.close{border:0;background:transparent;font-size:26px}
+.cart-item{padding:14px 0;border-bottom:1px solid var(--line)}
 .cart-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
 .cart-row button{border:0;background:transparent;color:var(--wine);padding:5px}
-.cart-total{font-weight:bold;text-align:right;margin:20px 0}
-.form-group{margin-bottom:15px}
-.form-group label{display:block;margin-bottom:7px;font-size:13px}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px;border:1px solid #ddd;background:#fff}
-.form-group textarea{min-height:80px;resize:vertical}
+.custom-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.custom-fields input,.custom-fields textarea,.custom-fields select{width:100%;padding:10px;border:1px solid #ddd}
+.custom-fields .wide{grid-column:1/-1}
+.cart-total{font-weight:bold;text-align:right;margin:18px 0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.form-group{margin-bottom:14px}
+.form-group.full{grid-column:1/-1}
+.form-group label{display:block;margin-bottom:6px;font-size:13px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:11px;border:1px solid #ddd;background:#fff}
+.form-group textarea{min-height:70px;resize:vertical}
 .checkout-button{width:100%}
 .checkout-button:disabled{opacity:.6;cursor:wait}
-.message{margin-top:15px;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.message{margin-top:12px;font-size:13px;line-height:1.6;white-space:pre-wrap}
 .muted{color:var(--muted);font-size:12px}
-.custom-fields{background:#faf7f2;padding:14px;margin-top:12px}
-.custom-fields h4{color:var(--wine);margin-bottom:10px}
-.custom-fields input,.custom-fields textarea,.custom-fields select{width:100%;padding:10px;border:1px solid #ddd;margin:5px 0 10px;background:#fff}
-.photo-preview{font-size:12px;color:var(--muted);margin:5px 0 10px}
+.bank-box{display:none;background:#f7f1ec;padding:14px;margin:8px 0 16px;font-size:13px;line-height:1.7}
+.status-result{padding:14px;background:#f1e8e4;margin-top:12px;line-height:1.7}
+.tracking{max-width:600px;margin:0 auto}
+.tracking input{width:100%;padding:12px;border:1px solid #ddd;margin:8px 0}
+.tracking-result{background:#fff;padding:15px;margin-top:12px;white-space:pre-wrap}
+.fine{font-size:11px;color:var(--muted);line-height:1.6}
+.photo-upload{grid-column:1/-1;border:1px dashed #cbb8ae;background:#fcfaf8;padding:12px;margin-top:8px}
+.photo-upload label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.photo-upload input{width:100%;font-size:13px}
+.photo-help{font-size:11px;color:var(--muted);line-height:1.5;margin-top:7px}
+.image-placeholder{height:250px;display:grid;place-items:center;background:#eee9e4;color:#82766f;font-size:12px;letter-spacing:.5px}
+.brand-fallback{font:bold 27px Georgia,serif;letter-spacing:3px;color:var(--wine)}
 @media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:600px){
-.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.product-image{height:190px}.product-info{padding:11px}
-.nav{gap:10px}.nav a{display:none}
+@media(max-width:650px){
+header{padding:13px 4%}
+.nav{gap:8px}
+.nav a{display:none}
+.brand{font-size:23px}
+.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.product-image,.image-placeholder{height:185px}
+.product-info{padding:10px}
 .benefits{grid-template-columns:1fr}
 .section{padding:40px 4%}
+.form-grid,.custom-fields{grid-template-columns:1fr}
+.form-group.full,.custom-fields .wide{grid-column:auto}
 .modal-content{padding:17px}
+.hero{min-height:330px}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">ZYRA.LK</div>
-  <nav class="nav">
-    <a href="#home">HOME</a>
-    <a href="#products">COLLECTION</a>
-    <button class="cart-button" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button>
-  </nav>
+<a class="brand" href="#home" style="text-decoration:none">
+<img src="ZYRA-LOGO.PNG" alt="Zyra.lk" onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<span class=&quot;brand-fallback&quot;>ZYRA.LK</span>')">
+</a>
+<nav class="nav">
+<a href="#home">HOME</a>
+<a href="#products">COLLECTION</a>
+<a href="#tracking">TRACK ORDER</a>
+<button class="cart-button" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button>
+</nav>
 </header>
 
 <section class="hero" id="home">
-  <div>
-    <h1>Elegance in Every Detail</h1>
-    <p>Discover exclusive designs created to make every detail feel special.</p>
-    <a href="#products"><button class="primary">EXPLORE COLLECTION</button></a>
-  </div>
+<div>
+<h1>Elegance in Every Detail</h1>
+<p>Discover exclusive designs and personalised pieces created to make every detail feel special.</p>
+<a href="#products"><button class="btn">EXPLORE COLLECTION</button></a>
+</div>
 </section>
 
 <section class="section" id="products">
-  <h2 class="section-title">Our Collection</h2>
-  <p class="section-subtitle">Carefully selected pieces, exclusively for you.</p>
-  <div class="toolbar">
-    <input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
-    <select id="categoryFilter" onchange="filterProducts()">
-      <option value="">All Collections</option>
-    </select>
-  </div>
-  <div class="products" id="productList">
-    <div class="empty">Loading collection...</div>
-  </div>
+<h2 class="section-title">Our Collection</h2>
+<p class="section-subtitle">Thoughtfully selected pieces, exclusively for you.</p>
+<div class="toolbar">
+<input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
+<select id="categoryFilter" onchange="filterProducts()">
+<option value="">All Collections</option>
+</select>
+</div>
+<div class="products" id="productList">
+<div class="empty">Loading collection...</div>
+</div>
+</section>
+
+<section class="section" id="tracking">
+<h2 class="section-title">Track Your Delivery</h2>
+<p class="section-subtitle">Enter the tracking ID provided by Zyra.</p>
+<div class="tracking">
+<input id="trackingId" placeholder="Enter tracking ID">
+<button class="btn" style="width:100%" onclick="trackDelivery()">TRACK ORDER</button>
+<div id="trackingResult" class="tracking-result" hidden></div>
+</div>
 </section>
 
 <section class="benefits">
-  <div><h3>Exclusive Designs</h3><p>Thoughtfully selected collections.</p></div>
-  <div><h3>Islandwide Delivery</h3><p>Delivering across Sri Lanka.</p></div>
-  <div><h3>Personalised Orders</h3><p>Special pieces made meaningful.</p></div>
+<div><h3>Exclusive Designs</h3><p>Thoughtfully selected collections.</p></div>
+<div><h3>Islandwide Delivery</h3><p>Delivering across Sri Lanka.</p></div>
+<div><h3>Personalised Orders</h3><p>Special pieces made meaningful.</p></div>
 </section>
 
 <footer>
-  <h2 class="logo">ZYRA.LK</h2>
-  <p>Exclusive Collection</p>
-  <p>Islandwide Delivery</p>
-  <p>© 2026 Zyra.lk. All rights reserved.</p>
+<div class="brand" style="color:#fff">ZYRA.LK</div>
+<p>Exclusive Collection · Islandwide Delivery</p>
+<p>© 2026 Zyra.lk. All rights reserved.</p>
 </footer>
 
 <div class="modal" id="cartModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Your Shopping Bag</h2>
-      <button class="close" onclick="closeCart()">×</button>
-    </div>
-    <div id="cartItems"></div>
-    <div class="cart-total" id="cartTotal">Total: LKR 0</div>
-    <button class="checkout-button" onclick="showCheckout()">PROCEED TO CHECKOUT</button>
-  </div>
+<div class="modal-content">
+<div class="modal-header">
+<h2>Your Shopping Bag</h2>
+<button class="close" onclick="closeModal('cartModal')">×</button>
+</div>
+<div id="cartItems"></div>
+<div class="cart-total" id="cartTotal">Total: LKR 0</div>
+<button class="checkout-button" onclick="showCheckout()">PROCEED TO CHECKOUT</button>
+</div>
 </div>
 
 <div class="modal" id="checkoutModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Checkout</h2>
-      <button class="close" onclick="closeCheckout()">×</button>
-    </div>
+<div class="modal-content">
+<div class="modal-header">
+<h2>Checkout</h2>
+<button class="close" onclick="closeModal('checkoutModal')">×</button>
+</div>
 
-    <form id="checkoutForm">
-      <div class="form-group">
-        <label>Full Name *</label>
-        <input name="customer_name" required maxlength="150">
-      </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input name="email" type="email" maxlength="254">
-      </div>
-      <div class="form-group">
-        <label>WhatsApp / Phone Number *</label>
-        <input name="phone" type="tel" required maxlength="15" placeholder="07XXXXXXXX">
-      </div>
-      <div class="form-group">
-        <label>Delivery Address *</label>
-        <textarea name="delivery_address" required maxlength="1000"></textarea>
-      </div>
-      <div class="form-group">
-        <label>District *</label>
-        <input name="district" required maxlength="100">
-      </div>
-      <div class="form-group">
-        <label>City *</label>
-        <input name="city" required maxlength="120">
-      </div>
-      <div class="form-group">
-        <label>Postal Code *</label>
-        <input name="postal_code" required inputmode="numeric" pattern="[0-9]{5}" maxlength="5" placeholder="5 digit postal code">
-      </div>
-      <div class="form-group">
-        <label>Payment Method *</label>
-        <select name="payment_method" id="paymentMethod" required onchange="toggleBankFields()">
-          <option value="">Select payment method</option>
-          <option value="COD">Cash on Delivery</option>
-          <option value="Bank Transfer">Bank Transfer</option>
-        </select>
-      </div>
-
-      <div id="bankFields" class="hidden">
-        <div class="form-group">
-          <label>Bank *</label>
-          <select name="selected_bank" id="selectedBank">
-            <option value="">Select your bank</option>
-            <option value="Bank of Ceylon">Bank of Ceylon</option>
-            <option value="People's Bank">People's Bank</option>
-            <option value="Commercial Bank">Commercial Bank</option>
-            <option value="Sampath Bank">Sampath Bank</option>
-            <option value="HNB">HNB</option>
-            <option value="NSB">NSB</option>
-            <option value="Seylan Bank">Seylan Bank</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Transaction Reference *</label>
-          <input name="bank_transaction_reference" id="transactionReference" maxlength="150">
-        </div>
-        <div class="form-group">
-          <label>Payment Slip *</label>
-          <input type="file" id="paymentSlip" accept="image/*,.pdf">
-          <p class="muted">Upload your bank transfer receipt.</p>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Order Notes (optional)</label>
-        <textarea name="customer_notes" maxlength="1500" placeholder="Any delivery or order instructions..."></textarea>
-      </div>
-
-      <div class="cart-total" id="checkoutTotal"></div>
-      <button class="checkout-button" type="submit" id="placeOrderButton">PLACE ORDER</button>
-      <p class="message" id="checkoutMessage" role="status"></p>
-    </form>
-  </div>
+<form id="checkoutForm">
+<div class="form-grid">
+<div class="form-group">
+<label>Full Name *</label>
+<input name="customer_name" required maxlength="150" autocomplete="name">
+</div>
+<div class="form-group">
+<label>Email Address</label>
+<input name="email" type="email" maxlength="254" autocomplete="email">
+</div>
+<div class="form-group full">
+<label>Mobile Number *</label>
+<input name="phone" type="tel" required maxlength="10" minlength="10" pattern="07[0-9]{8}" inputmode="numeric" placeholder="0771234567">
+<small class="fine">Enter exactly 10 digits, including the first 0.</small>
+</div>
+<div class="form-group full">
+<label>Delivery Address *</label>
+<textarea name="delivery_address" required maxlength="1000"></textarea>
+</div>
+<div class="form-group">
+<label>District *</label>
+<select name="district" required>
+<option value="">Select district</option>
+<option>Ampara</option><option>Anuradhapura</option><option>Badulla</option>
+<option>Batticaloa</option><option>Colombo</option><option>Galle</option>
+<option>Gampaha</option><option>Hambantota</option><option>Jaffna</option>
+<option>Kalutara</option><option>Kandy</option><option>Kegalle</option>
+<option>Kilinochchi</option><option>Kurunegala</option><option>Mannar</option>
+<option>Matale</option><option>Matara</option><option>Monaragala</option>
+<option>Mullaitivu</option><option>Nuwara Eliya</option><option>Polonnaruwa</option>
+<option>Puttalam</option><option>Ratnapura</option><option>Trincomalee</option>
+<option>Vavuniya</option>
+</select>
+</div>
+<div class="form-group">
+<label>City / Town *</label>
+<input name="city" required maxlength="120">
+</div>
+<div class="form-group">
+<label>Postal Code *</label>
+<input name="postal_code" required maxlength="5" minlength="5" pattern="[0-9]{5}" inputmode="numeric" placeholder="5-digit postal code">
+</div>
+<div class="form-group">
+<label>Payment Method *</label>
+<select name="payment_method" id="paymentMethod" required>
+<option value="">Select payment method</option>
+<option value="Cash on Delivery">Cash on Delivery</option>
+<option value="Bank Transfer">Bank Transfer</option>
+</select>
+</div>
+<div class="form-group full" id="bankGroup" style="display:none">
+<label>Select Bank *</label>
+<select name="selected_bank" id="selectedBank">
+<option value="">Select bank</option>
+<option>Commercial Bank</option>
+<option>Nations Trust Bank</option>
+<option>Amana Bank PLC</option>
+<option>HNB</option>
+</select>
+<div class="bank-box" id="bankDetails"></div>
+</div>
+<div class="form-group full" id="referenceGroup" style="display:none">
+<label>Bank Transaction Reference</label>
+<input name="bank_transaction_reference" maxlength="120" placeholder="Enter transaction reference">
+</div>
+<div class="form-group full">
+<label>Order Notes (optional)</label>
+<textarea name="customer_notes" maxlength="1500" placeholder="Any delivery or order instructions..."></textarea>
+</div>
+</div>
+<p class="fine">For bank transfers, payment remains pending until Zyra verifies it. Add your bank transaction reference if available.</p>
+<div class="cart-total" id="checkoutTotal"></div>
+<button class="checkout-button" type="submit" id="placeOrderButton">PLACE ORDER</button>
+<p class="message" id="checkoutMessage" role="status"></p>
+</form>
+</div>
 </div>
 
 <div class="modal" id="successModal">
-  <div class="modal-content" style="text-align:center">
-    <h2>Thank You!</h2>
-    <p style="margin:20px 0">Your order has been submitted successfully.</p>
-    <p id="trackingNumber" style="font-weight:bold;color:#842d40"></p>
-    <p class="muted" style="margin:12px 0">Please keep your order number for reference.</p>
-    <button class="primary" onclick="finishOrder()">CONTINUE SHOPPING</button>
-  </div>
+<div class="modal-content" style="text-align:center">
+<h2>Thank You!</h2>
+<p style="margin:20px 0">Your order has been submitted successfully.</p>
+<p id="trackingNumber" style="font-weight:bold;color:#842d40"></p>
+<p class="muted" style="margin:12px 0">Please keep your order number for reference.</p>
+<button class="btn" onclick="finishOrder()">CONTINUE SHOPPING</button>
+</div>
 </div>
 
 <script>
-const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
-const SUPABASE_ANON_KEY = "PASTE_YOUR_EXISTING_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
-const PRODUCT_TABLE = "store_products";
-const CUSTOMER_BUCKET = "customer-photos";
-const PAYMENT_BUCKET = "payment-slips";
+const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
+const PRODUCT_TABLE="store_products";
+const STORAGE_BUCKET="Product -image";
+const CUSTOMER_PHOTO_BUCKET="customer-photos";
+const PHOTO_MAX_BYTES=5*1024*1024;
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let products = [];
-let cart = [];
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-function formatPrice(value) {
-  return Number(value || 0).toLocaleString("en-LK");
+let products=[];
+let cart=[];
+
+const $=id=>document.getElementById(id);
+const money=n=>Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
+
+function normaliseProductName(name){
+return String(name||"").toLowerCase().replace(/[^a-z0-9]/g,"");
 }
 
-function getImageURL(image) {
-  if (!image) return "";
-  if (/^https?:\/\//i.test(image)) return image;
-  return supabaseClient.storage.from("product-images").getPublicUrl(image).data.publicUrl;
+/* PHOTO UPLOAD PRODUCT RECOGNITION */
+function isPhotoProduct(name){
+const n=normaliseProductName(name);
+
+return (
+n.includes("photoroll") ||
+n.includes("photoprojection") ||
+n.includes("eyeengraved") ||
+n.includes("engravedeye") ||
+n.includes("iengraved")
+);
 }
 
-function normalName(value) {
-  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+/* REQUIRED PHOTO COUNT */
+function photoCountFor(name){
+const n=normaliseProductName(name);
+
+if(n.includes("photoroll"))return 10;
+
+if(
+n.includes("photoprojection") ||
+n.includes("eyeengraved") ||
+n.includes("engravedeye") ||
+n.includes("iengraved")
+)return 1;
+
+return 0;
 }
 
-function productPhotoCount(name) {
-  const n = normalName(name);
-  if (n.includes("customize photo roll") || n.includes("customise photo roll") || n === "photo roll") return 10;
-  if (
-    n.includes("eye engraved bracelet") ||
-    n.includes("eye engraved necklace") ||
-    n.includes("photo projection bracelet rope") ||
-    n.includes("photo projection bracelet")
-  ) return 1;
-  return 0;
+function isCustomPhoneCase(name){
+const n=normaliseProductName(name);
+return n.includes("customisedphonecase") ||
+n.includes("customizedphonecase") ||
+n.includes("customphonecase");
 }
 
-function isNoPersonalisationProduct(name) {
-  const n = normalName(name);
-  return n.includes("rapunzel 360 necklace") || n === "heart necklace";
+function imageUrlForProduct(p){
+const raw=p.image_url||p.image_path||p.image||"";
+if(!raw)return "";
+if(/^https?:\/\//i.test(raw))return raw;
+return db.storage.from(STORAGE_BUCKET).getPublicUrl(raw).data.publicUrl;
 }
 
-function customisationType(name) {
-  const n = normalName(name);
-  if (isNoPersonalisationProduct(name)) return "none";
-  if (n.includes("initial couple ring")) return "initial_ring";
-  if (n.includes("double layered name necklace")) return "double_layer";
-  if (n.includes("name necklace with design") || n.includes("infinity")) return "infinity";
-  if (n.includes("couple name necklace")) return "couple";
-  if (n.includes("name necklace with bst")) return "birthstone";
-  if (n.includes("name bracelet necklace combo")) return "combo";
-  if (n.includes("customised ring") || n.includes("customized ring")) return "ring";
-  if (n.includes("name bracelet")) return n.includes("arabic") ? "bracelet_arabic" : "bracelet";
-  if (n.includes("name necklace")) return n.includes("arabic") ? "necklace_arabic" : "necklace";
-  return "instructions";
+function safeFileExt(file){
+const ext=(file.name.split(".").pop()||"").toLowerCase();
+return ["jpg","jpeg","png","webp"].includes(ext)?ext:"jpg";
 }
 
-function makeField(label, key, max, type = "text", placeholder = "") {
-  return {label, key, max, type, placeholder};
+async function loadProducts(){
+const root=$("productList");
+root.textContent="Loading collection...";
+
+let result=await db.from(PRODUCT_TABLE)
+.select("*").eq("is_active",true)
+.order("created_at",{ascending:false});
+
+if(result.error){
+console.error("Product query with sorting failed:",result.error);
+result=await db.from(PRODUCT_TABLE)
+.select("*").eq("is_active",true);
 }
 
-function fieldsForProduct(name) {
-  switch (customisationType(name)) {
-    case "necklace":
-    case "necklace_arabic":
-      return [makeField("Name", "name", 8)];
-    case "bracelet":
-    case "bracelet_arabic":
-      return [makeField("Name", "name", 8)];
-    case "combo":
-      return [
-        makeField("Bracelet Name", "bracelet_name", 8),
-        makeField("Necklace Name", "necklace_name", 8)
-      ];
-    case "birthstone":
-      return [
-        makeField("Name", "name", 12),
-        {label:"Birthstone Month",key:"birthstone_month",type:"month"}
-      ];
-    case "infinity":
-      return [
-        makeField("First Name", "name_one", 6),
-        makeField("Second Name", "name_two", 6),
-        makeField("Special Date (DD.MM.YY)", "special_date", 6, "date6")
-      ];
-    case "couple":
-      return [
-        makeField("First Name", "first_name", 6),
-        makeField("Second Name", "second_name", 6)
-      ];
-    case "double_layer":
-      return [
-        makeField("First Layer Name", "first_layer_name", 8),
-        makeField("Second Layer Name", "second_layer_name", 8)
-      ];
-    case "initial_ring":
-      return [
-        makeField("First Box Initial", "first_box_initial", 1),
-        makeField("Second Box Initial", "second_box_initial", 1)
-      ];
-    case "ring":
-      return [makeField("Name", "name", 6)];
-    case "none":
-      return [];
-    default:
-      return [makeField("Customisation Instructions", "instructions", 250, "textarea")];
-  }
+if(result.error){
+console.error("Product loading failed:",result.error);
+root.textContent="Unable to load products: "+result.error.message+
+" ("+(result.error.code||"no code")+"). Check the store_products SELECT permission and table names.";
+return;
 }
 
-function displayCategories() {
-  const select = document.getElementById("categoryFilter");
-  const selected = select.value;
-  select.innerHTML = '<option value="">All Collections</option>';
-  [...new Set(products.map(p => p.category).filter(Boolean))].sort().forEach(category => {
-    const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
-    select.appendChild(option);
-  });
-  select.value = selected;
-}
-
-async function loadProducts() {
-  const list = document.getElementById("productList");
-  list.textContent = "Loading products...";
-  const {data,error} = await supabaseClient
-    .from(PRODUCT_TABLE)
-    .select("id,name,description,category,price,image_url,is_customisable,is_active,created_at")
-    .eq("is_active", true)
-    .order("created_at", {ascending:false});
-
-  if (error) {
-    console.error(error);
-    list.textContent = "Unable to load products. Please try again later.";
-    return;
-  }
-  products = data || [];
-  displayCategories();
-  displayProducts(products);
-}
-
-function displayProducts(items) {
-  const list = document.getElementById("productList");
-  list.replaceChildren();
-
-  if (!items.length) {
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent = "No products found.";
-    list.appendChild(empty);
-    return;
-  }
-
-  items.forEach(product => {
-    const card = document.createElement("article");
-    card.className = "product-card";
-
-    const img = document.createElement("img");
-    img.className = "product-image";
-    img.alt = product.name;
-    img.loading = "lazy";
-    img.src = getImageURL(product.image_url);
-    img.onerror = () => img.removeAttribute("src");
-
-    const info = document.createElement("div");
-    info.className = "product-info";
-
-    const name = document.createElement("h3");
-    name.textContent = product.name;
-
-    const desc = document.createElement("p");
-    desc.textContent = product.description || "";
-
-    const price = document.createElement("div");
-    price.className = "price";
-    price.textContent = "LKR " + formatPrice(product.price);
-
-    const btn = document.createElement("button");
-    btn.className = "add-button";
-    btn.textContent = "ADD TO BAG";
-    btn.onclick = () => addToCart(product.id);
-
-    info.append(name, desc, price);
-    if (product.is_customisable) {
-      const note = document.createElement("p");
-      note.textContent = "Customisable";
-      note.style.color = "var(--wine)";
-      info.appendChild(note);
-    }
-    info.appendChild(btn);
-    card.append(img, info);
-    list.appendChild(card);
-  });
-}
-
-function filterProducts() {
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const category = document.getElementById("categoryFilter").value;
-  displayProducts(products.filter(p =>
-    (p.name || "").toLowerCase().includes(search) &&
-    (!category || p.category === category)
-  ));
-}
-
-function addToCart(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-
-  const found = cart.find(x => x.id === id);
-  if (found) {
-    found.quantity++;
-  } else {
-    cart.push({
-      id:p.id,
-      name:p.name,
-      price:Number(p.price),
-      quantity:1,
-      is_customisable:!!p.is_customisable,
-      customisation:{},
-      photoFiles:[]
-    });
-  }
-  updateCart();
-}
-
-function removeFromCart(id) {
-  cart = cart.filter(x => x.id !== id);
-  updateCart();
-}
-
-function updateQuantity(id, delta) {
-  const item = cart.find(x => x.id === id);
-  if (!item) return;
-  item.quantity += delta;
-  if (item.quantity < 1) removeFromCart(id);
-  else updateCart();
-}
-
-function getTotal() {
-  return cart.reduce((sum,item) => sum + item.price * item.quantity, 0);
-}
-
-function renderCustomFields(item, row) {
-  const photoCount = productPhotoCount(item.name);
-  const type = customisationType(item.name);
-  if ((!item.is_customisable || type === "none") && !photoCount) return;
-
-  const box = document.createElement("div");
-  box.className = "custom-fields";
-
-  const heading = document.createElement("h4");
-  heading.textContent = "Personalisation — " + item.name;
-  box.appendChild(heading);
-
-  if (item.is_customisable && type !== "none") {
-    fieldsForProduct(item.name).forEach(field => {
-      const label = document.createElement("label");
-      label.textContent = field.label;
-      label.style.display = "block";
-      label.style.fontSize = "13px";
-
-      let input;
-      if (field.type === "textarea") {
-        input = document.createElement("textarea");
-      } else if (field.type === "month") {
-        input = document.createElement("select");
-        input.innerHTML = '<option value="">Select month</option>' +
-          ["January","February","March","April","May","June","July","August","September","October","November","December"]
-          .map(m => `<option value="${m}">${m}</option>`).join("");
-      } else {
-        input = document.createElement("input");
-        input.type = "text";
-        input.maxLength = field.max;
-        if (field.type === "date6") {
-          input.inputMode = "numeric";
-          input.placeholder = "DDMMYY";
-        } else {
-          input.placeholder = field.placeholder || field.label;
-        }
-      }
-
-      input.value = item.customisation[field.key] || "";
-      input.oninput = () => {
-        let value = input.value.trim();
-        if (field.type === "date6") value = value.replace(/\D/g,"").slice(0,6);
-        item.customisation[field.key] = value;
-      };
-      input.onchange = () => item.customisation[field.key] = input.value.trim();
-
-      box.append(label,input);
-    });
-  }
-
-  if (photoCount) {
-    const label = document.createElement("label");
-    label.textContent = `Upload ${photoCount} photo${photoCount > 1 ? "s" : ""} for ${item.name}`;
-    label.style.display = "block";
-    label.style.fontSize = "13px";
-
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.multiple = photoCount > 1;
-    input.onchange = () => {
-      const files = Array.from(input.files || []);
-      if (files.length !== photoCount) {
-        alert(`Please select exactly ${photoCount} photo${photoCount > 1 ? "s" : ""}.`);
-        input.value = "";
-        item.photoFiles = [];
-      } else {
-        item.photoFiles = files;
-      }
-      preview.textContent = item.photoFiles.length
-        ? item.photoFiles.map(f => f.name).join(", ")
-        : "No photos selected.";
-    };
-
-    const preview = document.createElement("p");
-    preview.className = "photo-preview";
-    preview.textContent = item.photoFiles.length
-      ? item.photoFiles.map(f => f.name).join(", ")
-      : "No photos selected.";
-
-    box.append(label,input,preview);
-  }
-
-  row.appendChild(box);
-}
-
-function updateCart() {
-  document.getElementById("cartCount").textContent =
-    cart.reduce((sum,item) => sum + item.quantity, 0);
-
-  const container = document.getElementById("cartItems");
-  container.replaceChildren();
-
-  if (!cart.length) {
-    container.textContent = "Your shopping bag is empty.";
-  }
-
-  cart.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "cart-item";
-
-    const line = document.createElement("div");
-    line.className = "cart-row";
-
-    const detail = document.createElement("span");
-    detail.textContent =
-      `${item.name} × ${item.quantity} — LKR ${formatPrice(item.price * item.quantity)}`;
-
-    const controls = document.createElement("span");
-
-    const minus = document.createElement("button");
-    minus.textContent = "−";
-    minus.onclick = () => updateQuantity(item.id,-1);
-
-    const plus = document.createElement("button");
-    plus.textContent = "+";
-    plus.onclick = () => updateQuantity(item.id,1);
-
-    const remove = document.createElement("button");
-    remove.textContent = "Remove";
-    remove.onclick = () => removeFromCart(item.id);
-
-    controls.append(minus,plus,remove);
-    line.append(detail,controls);
-    row.appendChild(line);
-
-    renderCustomFields(item,row);
-    container.appendChild(row);
-  });
-
-  document.getElementById("cartTotal").textContent =
-    "Total: LKR " + formatPrice(getTotal());
-}
-
-function openCart() {
-  document.getElementById("cartModal").style.display = "block";
-}
-function closeCart() {
-  document.getElementById("cartModal").style.display = "none";
-}
-function showCheckout() {
-  if (!cart.length) {
-    alert("Please add a product to your bag first.");
-    return;
-  }
-  closeCart();
-  document.getElementById("checkoutTotal").textContent =
-    "Order Total: LKR " + formatPrice(getTotal());
-  document.getElementById("checkoutModal").style.display = "block";
-}
-function closeCheckout() {
-  document.getElementById("checkoutModal").style.display = "none";
-}
-function finishOrder() {
-  cart = [];
-  updateCart();
-  document.getElementById("successModal").style.display = "none";
-}
-function toggleBankFields() {
-  const bank = document.getElementById("paymentMethod").value === "Bank Transfer";
-  document.getElementById("bankFields").classList.toggle("hidden",!bank);
-  document.getElementById("selectedBank").required = bank;
-  document.getElementById("transactionReference").required = bank;
-  document.getElementById("paymentSlip").required = bank;
-}
-
-function validateCustomisation(item) {
-  const details = item.customisation || {};
-  const photoCount = productPhotoCount(item.name);
-  const type = customisationType(item.name);
-
-  if (item.is_customisable && type !== "none") {
-    for (const field of fieldsForProduct(item.name)) {
-      const value = String(details[field.key] || "").trim();
-      if (!value) throw new Error(`Please enter ${field.label} for ${item.name}.`);
-      if (field.max && value.length > field.max) {
-        throw new Error(`${field.label} for ${item.name} is too long.`);
-      }
-      if (field.type === "date6" && !/^\d{6}$/.test(value)) {
-        throw new Error("Please enter the special date as six digits: DDMMYY.");
-      }
-      details[field.key] = value;
-    }
-  }
-
-  if (photoCount && item.photoFiles.length !== photoCount) {
-    throw new Error(`Please upload exactly ${photoCount} photo(s) for ${item.name}.`);
-  }
-
-  if (photoCount === 10) {
-    details.photo_count = 10;
-    details.birthday_message = String(details.birthday_message || "").slice(0,200);
-  }
-
-  return details;
-}
-
-function safeFileName(name) {
-  return String(name || "upload").replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
-}
-
-async function uploadFile(bucket,path,file) {
-  const {error} = await supabaseClient.storage.from(bucket).upload(path,file,{
-    upsert:false,
-    contentType:file.type || "application/octet-stream"
-  });
-  if (error) throw error;
-  return path;
-}
-
-async function uploadItemPhotos(item,orderToken,index) {
-  const count = productPhotoCount(item.name);
-  if (!count) return null;
-
-  const paths = [];
-  for (let i=0;i<item.photoFiles.length;i++) {
-    const file = item.photoFiles[i];
-    const path = `${orderToken}/${index}_${i+1}_${Date.now()}_${safeFileName(file.name)}`;
-    paths.push(await uploadFile(CUSTOMER_BUCKET,path,file));
-  }
-
-  return {
-    photo_paths:paths,
-    photo_file_names:item.photoFiles.map(f => f.name),
-    photo_count:count,
-    ...(count === 1 ? {photo_path:paths[0]} : {})
-  };
-}
-
-document.getElementById("checkoutForm").addEventListener("submit",async function(event) {
-  event.preventDefault();
-  if (!cart.length) {
-    alert("Your shopping bag is empty.");
-    return;
-  }
-
-  const button = document.getElementById("placeOrderButton");
-  const message = document.getElementById("checkoutMessage");
-  button.disabled = true;
-  button.textContent = "SUBMITTING ORDER...";
-  message.textContent = "";
-
-  try {
-    const form = new FormData(this);
-    const paymentMethod = String(form.get("payment_method") || "");
-    const orderToken = `website_${Date.now()}_${Math.random().toString(36).slice(2,9)}`;
-
-    const customer = {
-      customer_name:String(form.get("customer_name") || "").trim(),
-      email:String(form.get("email") || "").trim() || null,
-      phone:String(form.get("phone") || "").trim(),
-      delivery_address:String(form.get("delivery_address") || "").trim(),
-      district:String(form.get("district") || "").trim(),
-      city:String(form.get("city") || "").trim(),
-      postal_code:String(form.get("postal_code") || "").trim(),
-      payment_method:paymentMethod,
-      selected_bank:paymentMethod === "Bank Transfer" ? String(form.get("selected_bank") || "") : null,
-      bank_transaction_reference:paymentMethod === "Bank Transfer" ? String(form.get("bank_transaction_reference") || "").trim() : null,
-      customer_notes:String(form.get("customer_notes") || "").trim() || null
-    };
-
-    if (!/^07\d{8}$/.test(customer.phone)) {
-      throw new Error("Please enter a valid Sri Lankan mobile number starting with 07.");
-    }
-    if (!/^\d{5}$/.test(customer.postal_code)) {
-      throw new Error("Please enter a valid 5-digit postal code.");
-    }
-
-    let paymentSlipPath = null;
-    let paymentSlipName = null;
-
-    if (paymentMethod === "Bank Transfer") {
-      const slip = document.getElementById("paymentSlip").files[0];
-      if (!slip) throw new Error("Please upload your bank transfer payment slip.");
-      if (!slip.type.startsWith("image/") && slip.type !== "application/pdf") {
-        throw new Error("Payment slip must be an image or PDF.");
-      }
-      const path = `${orderToken}/payment_${Date.now()}_${safeFileName(slip.name)}`;
-      paymentSlipPath = await uploadFile(PAYMENT_BUCKET,path,slip);
-      paymentSlipName = slip.name;
-    }
-
-    const items = [];
-    for (let i=0;i<cart.length;i++) {
-      const item = cart[i];
-      const details = validateCustomisation(item);
-      const photoDetails = await uploadItemPhotos(item,orderToken,i+1);
-      const customisationDetails = {
-        ...details,
-        ...(photoDetails || {})
-      };
-
-      items.push({
-        product_id:item.id,
-        quantity:item.quantity,
-        customisation_details:
-          Object.keys(customisationDetails).length ? customisationDetails : null
-      });
-    }
-
-    const payload = {
-      ...customer,
-      payment_slip_path:paymentSlipPath,
-      payment_slip_file_name:paymentSlipName,
-      items
-    };
-
-    const {data,error} = await supabaseClient.functions.invoke("place-order",{body:payload});
-    if (error) throw error;
-    if (!data || !data.order_number) {
-      throw new Error(data?.error || "The server did not return an order number.");
-    }
-
-    document.getElementById("checkoutModal").style.display = "none";
-    document.getElementById("trackingNumber").textContent =
-      "Your store order number: " + data.order_number;
-    document.getElementById("successModal").style.display = "block";
-    this.reset();
-    toggleBankFields();
-
-  } catch(err) {
-    console.error("Order submission error:",err);
-    message.textContent = err.message || "We couldn't submit your order. Please contact Zyra.lk.";
-  } finally {
-    button.disabled = false;
-    button.textContent = "PLACE ORDER";
-  }
+products=result.data||[];
+const cat=$("categoryFilter");
+const old=cat.value;
+cat.innerHTML='<option value="">All Collections</option>';
+
+[...new Set(products.map(p=>p.category).filter(Boolean))]
+.sort().forEach(c=>{
+const o=document.createElement("option");
+o.value=c;
+o.textContent=c;
+cat.append(o);
 });
 
+cat.value=old;
+renderProducts(products);
+}
+
+function renderProducts(items){
+const root=$("productList");
+root.replaceChildren();
+
+if(!items.length){
+root.innerHTML='<div class="empty">No products found.</div>';
+return;
+}
+
+items.forEach(p=>{
+const card=document.createElement("article");
+card.className="product-card";
+const src=imageUrlForProduct(p);
+
+if(src){
+const img=document.createElement("img");
+img.className="product-image";
+img.alt=p.name||"Zyra product";
+img.loading="lazy";
+img.src=src;
+img.onerror=()=>{
+const ph=document.createElement("div");
+ph.className="image-placeholder";
+ph.textContent="IMAGE UNAVAILABLE";
+img.replaceWith(ph);
+};
+card.append(img);
+}else{
+const ph=document.createElement("div");
+ph.className="image-placeholder";
+ph.textContent="IMAGE COMING SOON";
+card.append(ph);
+}
+
+const info=document.createElement("div");
+info.className="product-info";
+
+const h=document.createElement("h3");
+h.textContent=p.name||"Product";
+
+const d=document.createElement("p");
+d.textContent=p.description||"";
+
+const price=document.createElement("div");
+price.className="price";
+price.textContent="LKR "+money(p.price);
+
+const b=document.createElement("button");
+b.className="add-button";
+b.textContent="ADD TO BAG";
+b.onclick=()=>addToCart(p.id);
+
+info.append(h,d,price);
+
+if(p.is_customisable||isPhotoProduct(p.name)||isCustomPhoneCase(p.name)){
+const c=document.createElement("p");
+c.textContent=isPhotoProduct(p.name)?"Photo upload required":
+isCustomPhoneCase(p.name)?"Custom text — maximum 20 characters":"Customisable";
+c.style.color="var(--wine)";
+info.append(c);
+}
+
+info.append(b);
+card.append(info);
+root.append(card);
+});
+}
+
+function filterProducts(){
+const q=$("searchInput").value.toLowerCase();
+const c=$("categoryFilter").value;
+renderProducts(products.filter(p=>
+(p.name||"").toLowerCase().includes(q)&&
+(!c||p.category===c)
+));
+}
+
+function addToCart(id){
+const p=products.find(x=>x.id===id);
+if(!p)return;
+
+const found=cart.find(x=>x.id===id);
+if(found){
+found.quantity++;
+}else{
+cart.push({
+id:p.id,
+name:p.name,
+price:Number(p.price),
+quantity:1,
+is_customisable:!!p.is_customisable||isPhotoProduct(p.name)||isCustomPhoneCase(p.name),
+details:{},
+photoFiles:[]
+});
+}
+renderCart();
+openCart();
+}
+
+function removeItem(id){
+cart=cart.filter(x=>x.id!==id);
+renderCart();
+}
+
+function changeQty(id,delta){
+const x=cart.find(i=>i.id===id);
+if(!x)return;
+x.quantity+=delta;
+if(x.quantity<1)removeItem(id);
+else renderCart();
+}
+
+function total(){
+return cart.reduce((s,x)=>s+x.price*x.quantity,0);
+}
+
+function customField(item,key,label,placeholder,max=120,wide=false){
+const wrap=document.createElement("div");
+if(wide)wrap.className="wide";
+
+const input=document.createElement("input");
+input.placeholder=placeholder||label;
+input.maxLength=max;
+input.value=item.details[key]||"";
+input.setAttribute("aria-label",label);
+input.oninput=()=>item.details[key]=input.value;
+wrap.append(input);
+return wrap;
+}
+
+function photoUploadControl(item){
+const count=photoCountFor(item.name);
+if(!count)return null;
+
+const wrap=document.createElement("div");
+wrap.className="photo-upload";
+
+const label=document.createElement("label");
+label.textContent=count===10?
+"Upload exactly 10 photos *":
+"Upload your photo *";
+
+const input=document.createElement("input");
+input.type="file";
+input.accept="image/jpeg,image/png,image/webp";
+input.multiple=count>1;
+input.required=true;
+input.setAttribute("aria-label",label.textContent);
+
+input.onchange=()=>{
+const files=Array.from(input.files||[]);
+
+if(files.length>count){
+alert("Please select exactly "+count+" photo(s) for "+item.name+".");
+input.value="";
+item.photoFiles=[];
+return;
+}
+
+item.photoFiles=files;
+};
+
+const help=document.createElement("div");
+help.className="photo-help";
+help.textContent=count===10?
+"Select 10 photos. JPG, PNG or WEBP; maximum 5MB per photo.":
+"Select 1 clear photo. JPG, PNG or WEBP; maximum 5MB.";
+
+wrap.append(label,input,help);
+
+if(count===10){
+const msg=document.createElement("input");
+msg.type="text";
+msg.maxLength=200;
+msg.placeholder="Birthday message (optional)";
+msg.value=item.details.birthday_message||"";
+msg.style.width="100%";
+msg.style.marginTop="10px";
+msg.oninput=()=>item.details.birthday_message=msg.value;
+wrap.append(msg);
+}
+return wrap;
+}
+
+function renderCart(){
+$("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0);
+const root=$("cartItems");
+root.replaceChildren();
+
+if(!cart.length)root.textContent="Your shopping bag is empty.";
+
+cart.forEach(item=>{
+const box=document.createElement("div");
+box.className="cart-item";
+
+const row=document.createElement("div");
+row.className="cart-row";
+
+const label=document.createElement("strong");
+label.textContent=`${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
+
+const controls=document.createElement("span");
+
+[["−",()=>changeQty(item.id,-1)],["+",()=>changeQty(item.id,1)],["Remove",()=>removeItem(item.id)]].forEach(([t,fn])=>{
+const b=document.createElement("button");
+b.textContent=t;
+b.onclick=fn;
+controls.append(b);
+});
+
+row.append(label,controls);
+box.append(row);
+
+if(item.is_customisable||isPhotoProduct(item.name)||isCustomPhoneCase(item.name)){
+const fields=document.createElement("div");
+fields.className="custom-fields";
+const n=normaliseProductName(item.name);
+
+if(isCustomPhoneCase(item.name)){
+fields.append(
+customField(item,"custom_text","Phone case text","Enter your text — maximum 20 characters",20,true)
+);
+}
+else if(n.includes("initialcouplering")){
+fields.append(
+customField(item,"first_box_initial","First box initial","First box — 1 character",1),
+customField(item,"second_box_initial","Second box initial","Second box — 1 character",1)
+);
+}
+else if(n.includes("customisedring")||n.includes("customizedring")){
+fields.append(customField(item,"name","Ring name","Enter name — max 6 characters",6,true));
+}
+else if(n.includes("doublelayerednamenecklace")){
+fields.append(
+customField(item,"first_layer_name","First layer name","First layer — max 8 characters",8),
+customField(item,"second_layer_name","Second layer name","Second layer — max 8 characters",8)
+);
+}
+else if(n.includes("namenecklacewithbst")){
+fields.append(customField(item,"name","Name","Name — max 12 characters",12,true));
+
+const wrap=document.createElement("div");
+wrap.className="wide";
+const sel=document.createElement("select");
+sel.setAttribute("aria-label","Birthstone month");
+sel.innerHTML='<option value="">Select birthstone month</option>'+
+["January","February","March","April","May","June","July","August","September","October","November","December"]
+.map(m=>`<option value="${m}">${m}</option>`).join("");
+sel.value=item.details.birthstone_month||"";
+sel.onchange=()=>item.details.birthstone_month=sel.value;
+wrap.append(sel);
+fields.append(wrap);
+}
+else if(n.includes("namenecklacewithdesign")||n.includes("infinity")){
+fields.append(
+customField(item,"name_one","First name","First name — max 6 characters",6),
+customField(item,"name_two","Second name","Second name — max 6 characters",6),
+customField(item,"special_date","Special date","DDMMYY — 6 digits",6,true)
+);
+}
+else if(n.includes("couplenamenecklace")){
+fields.append(
+customField(item,"first_name","First name","First name — max 6 characters",6),
+customField(item,"second_name","Second name","Second name — max 6 characters",6)
+);
+}
+else if(n.includes("namebraceletnecklacecombo")||n.includes("namebraceletandnecklacecombo")){
+fields.append(
+customField(item,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),
+customField(item,"necklace_name","Necklace name","Necklace name — max 8 characters",8)
+);
+}
+else if(n.includes("namenecklace")||n.includes("namebracelet")){
+fields.append(customField(item,"name","Name to customise","Enter name — max 8 characters",8,true));
+}
+else if(!isPhotoProduct(item.name)){
+const t=document.createElement("textarea");
+t.className="wide";
+t.placeholder="Enter customisation details";
+t.value=item.details.instructions||"";
+t.maxLength=1000;
+t.oninput=()=>item.details.instructions=t.value;
+fields.append(t);
+}
+
+const photoControl=photoUploadControl(item);
+if(photoControl)fields.append(photoControl);
+box.append(fields);
+}
+
+root.append(box);
+});
+
+$("cartTotal").textContent="Total: LKR "+money(total());
+}
+
+function openCart(){
+$("cartModal").style.display="block";
+}
+
+function closeModal(id){
+$(id).style.display="none";
+}
+
+function showCheckout(){
+if(!cart.length){
+alert("Please add a product first.");
+return;
+}
+closeModal("cartModal");
+$("checkoutTotal").textContent="Order Total: LKR "+money(total());
+$("checkoutModal").style.display="block";
+}
+
+function finishOrder(){
+cart=[];
+renderCart();
+closeModal("successModal");
+}
+
+$("paymentMethod").addEventListener("change",()=>{
+const bank=$("paymentMethod").value==="Bank Transfer";
+$("bankGroup").style.display=bank?"block":"none";
+$("referenceGroup").style.display=bank?"block":"none";
+$("selectedBank").required=bank;
+});
+
+$("selectedBank").addEventListener("change",()=>{
+const v=$("selectedBank").value;
+const box=$("bankDetails");
+if(v){
+box.textContent="Please use the bank transfer details provided directly by Zyra.";
+box.style.display="block";
+}else{
+box.style.display="none";
+box.textContent="";
+}
+});
+
+async function uploadItemPhotos(item){
+const required=photoCountFor(item.name);
+if(!required)return null;
+
+const files=item.photoFiles||[];
+if(files.length!==required){
+throw new Error(item.name+": please upload exactly "+required+" photo(s).");
+}
+
+const paths=[];
+const names=[];
+
+for(let i=0;i<files.length;i++){
+const file=files[i];
+
+if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+throw new Error("Only JPG, PNG or WEBP photos are accepted.");
+}
+if(file.size>PHOTO_MAX_BYTES){
+throw new Error("Each photo must be 5MB or smaller.");
+}
+
+const ext=safeFileExt(file);
+const path=`customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-${i+1}.${ext}`;
+
+const {error}=await db.storage.from(CUSTOMER_PHOTO_BUCKET).upload(
+path,file,{contentType:file.type,upsert:false}
+);
+
+if(error){
+throw new Error("Photo upload failed for "+file.name+": "+error.message);
+}
+
+paths.push(path);
+names.push(file.name);
+}
+
+return {
+photo_path:paths[0],
+photo_paths:paths,
+photo_count:paths.length,
+photo_file_names:names
+};
+}
+
+$("checkoutForm").addEventListener("submit",async function(e){
+e.preventDefault();
+if(!cart.length)return;
+
+const form=new FormData(this);
+const phone=String(form.get("phone")||"").trim();
+const postal=String(form.get("postal_code")||"").trim();
+
+if(!/^07[0-9]{8}$/.test(phone)){
+alert("Enter a valid 10-digit Sri Lankan mobile number starting with 07.");
+return;
+}
+if(!/^[0-9]{5}$/.test(postal)){
+alert("Postal code must contain exactly 5 digits.");
+return;
+}
+
+for(const item of cart){
+const n=normaliseProductName(item.name);
+const d=item.details;
+
+if(isCustomPhoneCase(item.name)){
+const value=String(d.custom_text||"").trim();
+if(!value||value.length>20){
+alert("Customised Phone Case text must contain 1 to 20 characters.");
+return;
+}
+}
+
+if(n.includes("initialcouplering")&&
+(!d.first_box_initial||!d.second_box_initial||
+d.first_box_initial.length!==1||d.second_box_initial.length!==1)){
+alert("Initial Couple Ring requires one character in each box.");
+return;
+}
+
+if((n.includes("customisedring")||n.includes("customizedring"))&&
+(!d.name||d.name.trim().length>6)){
+alert("Customised Ring name must contain 1 to 6 characters.");
+return;
+}
+
+if(item.is_customisable&&!isPhotoProduct(item.name)&&!isCustomPhoneCase(item.name)){
+let required=[];
+
+if(n.includes("initialcouplering"))required=["first_box_initial","second_box_initial"];
+else if(n.includes("doublelayerednamenecklace"))required=["first_layer_name","second_layer_name"];
+else if(n.includes("namenecklacewithdesign")||n.includes("infinity"))required=["name_one","name_two","special_date"];
+else if(n.includes("couplenamenecklace"))required=["first_name","second_name"];
+else if(n.includes("namebraceletnecklacecombo")||n.includes("namebraceletandnecklacecombo"))required=["bracelet_name","necklace_name"];
+else if(n.includes("namenecklacewithbst"))required=["name","birthstone_month"];
+else if(n.includes("namenecklace")||n.includes("namebracelet")||n.includes("customisedring")||n.includes("customizedring"))required=["name"];
+else required=["instructions"];
+
+if(required.some(k=>!String(d[k]||"").trim())){
+alert("Please complete all customisation fields for "+item.name+".");
+return;
+}
+
+if((n.includes("namenecklacewithdesign")||n.includes("infinity"))&&!/^[0-9]{6}$/.test(d.special_date)){
+alert("Enter the special date as six digits in DDMMYY format.");
+return;
+}
+}
+
+if(isPhotoProduct(item.name)){
+const needed=photoCountFor(item.name);
+if((item.photoFiles||[]).length!==needed){
+alert(item.name+": please upload exactly "+needed+" photo(s) before checkout.");
+return;
+}
+}
+}
+
+const button=$("placeOrderButton");
+const msg=$("checkoutMessage");
+button.disabled=true;
+button.textContent="UPLOADING PHOTOS...";
+msg.textContent="";
+
+try{
+const selectedPayment=String(form.get("payment_method")||"");
+const orderItems=[];
+
+for(const item of cart){
+let details=item.is_customisable?{...item.details}:null;
+
+if(isPhotoProduct(item.name)){
+button.textContent="UPLOADING PHOTOS...";
+const photoMeta=await uploadItemPhotos(item);
+details={...(details||{}),...photoMeta};
+
+if(normaliseProductName(item.name).includes("photoroll")&&item.details.birthday_message){
+details.birthday_message=item.details.birthday_message;
+}
+}
+
+orderItems.push({
+product_id:item.id,
+quantity:item.quantity,
+customisation_details:details
+});
+}
+
+button.textContent="SUBMITTING ORDER...";
+
+const payload={
+customer_name:String(form.get("customer_name")||"").trim(),
+email:String(form.get("email")||"").trim()||null,
+phone,
+delivery_address:String(form.get("delivery_address")||"").trim(),
+city:String(form.get("city")||"").trim(),
+district:String(form.get("district")||"").trim(),
+postal_code:postal,
+payment_method:selectedPayment==="Cash on Delivery"?"COD":"Bank Transfer",
+selected_bank:String(form.get("selected_bank")||"").trim()||null,
+bank_transaction_reference:String(form.get("bank_transaction_reference")||"").trim()||null,
+customer_notes:String(form.get("customer_notes")||"").trim()||null,
+items:orderItems
+};
+
+const {data,error}=await db.functions.invoke("place-order",{body:payload});
+
+if(error)throw error;
+if(!data||!data.order_number){
+throw new Error(data?.error||"The server did not return an order number.");
+}
+
+closeModal("checkoutModal");
+$("trackingNumber").textContent="Your store order number: "+data.order_number;
+$("successModal").style.display="block";
+
+this.reset();
+$("bankGroup").style.display="none";
+$("referenceGroup").style.display="none";
+$("bankDetails").style.display="none";
+
+}catch(err){
+console.error(err);
+msg.textContent=err.message||"We couldn't submit your order. Please try again.";
+}finally{
+button.disabled=false;
+button.textContent="PLACE ORDER";
+}
+});
+
+async function trackDelivery(){
+const id=$("trackingId").value.trim();
+const box=$("trackingResult");
+box.hidden=false;
+box.textContent="Checking...";
+
+if(!id){
+box.textContent="Please enter your tracking ID.";
+return;
+}
+
+const {data,error}=await db.rpc("track_zyra_order",{p_tracking_id:id});
+
+if(error){
+box.textContent="Unable to check tracking: "+error.message;
+return;
+}
+
+const o=Array.isArray(data)?data[0]:data;
+
+if(!o||o.found===false||!o.tracking_id){
+box.textContent="No tracking record found. Please check your tracking ID.";
+return;
+}
+
+box.textContent=`Tracking ID: ${o.tracking_id}
+Status: ${o.status||"Not available"}
+Courier: ${o.courier||"Not assigned"}
+Location: ${o.location||"Not updated"}
+Estimated delivery: ${o.estimated_delivery||"Not available"}
+${o.note||""}`;
+}
+
 loadProducts();
-updateCart();
-toggleBankFields();
 </script>
 </body>
 </html>
