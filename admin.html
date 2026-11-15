@@ -157,7 +157,6 @@ header,.tabs,.no-print,#loginSection{display:none!important}
     <div id="recentOrders"></div>
   </section>
 
-  <!-- STORE ORDERS + MANUAL ORDER ENTRY -->
   <section id="orders" class="panel">
     <div class="section-heading">
       <h2>Store Orders</h2>
@@ -255,7 +254,6 @@ header,.tabs,.no-print,#loginSection{display:none!important}
     <div id="ordersList"></div>
   </section>
 
-  <!-- PRODUCTS -->
   <section id="products" class="panel">
     <div class="section-heading">
       <h2>Product Management</h2>
@@ -333,7 +331,6 @@ header,.tabs,.no-print,#loginSection{display:none!important}
     </div>
   </section>
 
-  <!-- PAYMENTS -->
   <section id="payments" class="panel">
     <div class="section-heading">
       <h2>Payment Verification</h2>
@@ -348,7 +345,6 @@ header,.tabs,.no-print,#loginSection{display:none!important}
     <div id="paymentsList"></div>
   </section>
 
-  <!-- EXPENSES -->
   <section id="expenses" class="panel">
     <div class="section-heading"><h2>Business Expenses</h2></div>
     <div class="card">
@@ -391,7 +387,6 @@ header,.tabs,.no-print,#loginSection{display:none!important}
     </div>
   </section>
 
-  <!-- REPORTS -->
   <section id="reports" class="panel">
     <div class="section-heading">
       <h2>Profit & Reports</h2>
@@ -626,6 +621,62 @@ async function updateOrderStatus(id,status,button) {
   }
 }
 
+/* PERMANENTLY DELETE STORE ORDER */
+async function deleteStoreOrder(orderId, orderNo, button) {
+  if (!orderId) {
+    alert("Order ID is missing.");
+    return;
+  }
+
+  const confirmed = confirm(
+    "PERMANENTLY DELETE ORDER?\n\n" +
+    "Order: " + orderNo + "\n\n" +
+    "This will permanently delete:\n" +
+    "• Store order details\n" +
+    "• Product details\n" +
+    "• Connected delivery tracking record\n\n" +
+    "This action cannot be undone.\n\n" +
+    "Are you sure?"
+  );
+
+  if (!confirmed) return;
+
+  button.disabled = true;
+  button.textContent = "DELETING...";
+
+  try {
+    const { data, error } = await db.rpc(
+      "delete_zyra_store_order",
+      { p_order_id: orderId }
+    );
+
+    if (error) throw error;
+
+    if (!data || !data.success) {
+      throw new Error("The order could not be deleted.");
+    }
+
+    alert(
+      "Order " +
+      (data.order_number || orderNo) +
+      " was permanently deleted."
+    );
+
+    await loadReports();
+
+  } catch (error) {
+    console.error("Delete order error:", error);
+
+    alert(
+      "Unable to delete order:\n" +
+      error.message
+    );
+
+    button.disabled = false;
+    button.textContent = "DELETE ORDER";
+  }
+}
+
 /* ORDER CARDS */
 function renderOrders() {
   const q=$("orderSearch").value.toLowerCase();
@@ -699,8 +750,24 @@ function makeOrderCard(o) {
   select.value=status;actions.append(select);
   const update=document.createElement("button");update.className="small-btn";update.textContent="UPDATE ORDER";
   update.onclick=()=>updateOrderStatus(o.id,select.value,update);actions.append(update);
-  const invoice=document.createElement("button");invoice.className="small-btn gray";invoice.textContent="PRINT INVOICE";
-  invoice.onclick=()=>printInvoice(o);actions.append(invoice);
+
+  const invoice=document.createElement("button");
+  invoice.className="small-btn gray";
+  invoice.textContent="PRINT INVOICE";
+  invoice.onclick=()=>printInvoice(o);
+  actions.append(invoice);
+
+  /* PERMANENT DELETE ORDER BUTTON */
+  const deleteBtn=document.createElement("button");
+  deleteBtn.className="small-btn red";
+  deleteBtn.textContent="DELETE ORDER";
+  deleteBtn.onclick=()=>deleteStoreOrder(
+    o.id,
+    orderNumber(o),
+    deleteBtn
+  );
+  actions.append(deleteBtn);
+
   card.append(actions);
   return card;
 }
