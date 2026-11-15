@@ -217,7 +217,6 @@ const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-// Keep the complete product records separate from the manual-order dropdown.
 let productCache=[];
 let manualProductCache=[];
 let trackingCache=new Map();
@@ -833,7 +832,6 @@ async function loadOrders(){
 
   card.append(info);
 
-  // PAYMENT STATUS CONTROL
   const paymentPanel=document.createElement("div");
   paymentPanel.className="tracking-panel";
 
@@ -1083,8 +1081,6 @@ async function savePaymentStatus(order,newStatus,button){
    payment_status:newStatus
   };
 
-  // Confirm a pending bank-transfer order after payment is verified.
-  // COD orders remain separately controlled.
   if(
    newStatus==="paid" &&
    String(order.payment_method||"").toLowerCase()==="bank transfer" &&
@@ -1218,12 +1214,15 @@ async function saveOrderTracking({
  }
 }
 
-/* REMOVE ORDER */
+/* REMOVE ORDER — UPDATED */
 
 async function removeOrder(order,button){
  const orderId=order.id;
  const orderNumber=order.order_number||orderId;
  const customerName=order.customer_name||"Customer";
+
+ const tracking=trackingCache.get(orderId);
+ const trackingId=tracking?.tracking_id||order.order_number;
 
  const confirmed=confirm(
   "PERMANENTLY REMOVE THIS ORDER?\n\n"+
@@ -1246,50 +1245,80 @@ async function removeOrder(order,button){
  button.textContent="REMOVING...";
 
  try{
-  const {error:trackingError}=await sb.from("zyra_orders")
+  // Delete tracking records linked by store_order_id.
+  const {error:trackingError1}=await sb.from("zyra_orders")
    .delete()
    .eq("store_order_id",orderId);
 
-  if(trackingError){
+  if(trackingError1){
    throw new Error(
-    "Could not remove the tracking record. The order has NOT been removed.\n"+
-    trackingError.message
+    "Could not remove linked tracking records: "+
+    trackingError1.message
    );
   }
 
+  // Also remove a tracking record matching the order number.
+  // This handles older records whose store_order_id may be missing.
+  if(trackingId){
+   const {error:trackingError2}=await sb.from("zyra_orders")
+    .delete()
+    .eq("tracking_id",trackingId);
+
+   if(trackingError2){
+    throw new Error(
+     "Could not remove the tracking ID record: "+
+     trackingError2.message
+    );
+   }
+  }
+
+  // Delete order items.
   const {error:itemError}=await sb.from("store_order_items")
    .delete()
    .eq("order_id",orderId);
 
   if(itemError){
    throw new Error(
-    "Tracking record was removed, but order items could not be removed. "+
-    "The main order is still present.\n"+itemError.message
+    "Tracking records were removed, but order items could not be removed: "+
+    itemError.message
    );
   }
 
+  // Delete the main store order.
   const {error:orderError}=await sb.from("store_orders")
    .delete()
    .eq("id",orderId);
 
   if(orderError){
    throw new Error(
-    "Tracking and order items were removed, but the main order could not be deleted.\n"+
+    "Tracking and order items were removed, but the main order could not be deleted: "+
     orderError.message
    );
   }
 
   trackingCache.delete(orderId);
 
-  alert("Order "+orderNumber+" was successfully removed.");
+  alert(
+   "Order successfully removed!\n\n"+
+   "Order ID: "+orderNumber+
+   "\nTracking record: Removed"+
+   "\nOrder items: Removed"+
+   "\nStore order: Removed"
+  );
+
   await loadOrders();
 
  }catch(error){
-  alert(error instanceof Error
-   ?error.message
-   :"Could not remove this order.");
+  console.error("Order deletion error:",error);
+
+  alert(
+   "ORDER DELETION ERROR\n\n"+
+   (error.message||"Could not remove this order.")+
+   "\n\nPlease refresh your orders and check the database."
+  );
 
   await loadOrders();
+
  }finally{
   button.disabled=false;
   button.textContent="REMOVE ORDER";
@@ -1394,7 +1423,6 @@ async function loadProducts(){
   return;
  }
 
- // This is the full product data used by the EDIT button.
  productCache=data||[];
 
  const body=el("productsBody");
@@ -1454,7 +1482,6 @@ function editProduct(id){
 
  const f=el("productForm");
 
- // Fill the existing product information into the form.
  f.elements.id.value=p.id;
  f.elements.name.value=p.name??"";
  f.elements.price.value=p.price??"";
@@ -1532,7 +1559,6 @@ el("productForm").addEventListener("submit",async e=>{
   let result;
 
   if(id){
-   // Update the existing row using its product ID.
    result=await sb.from("store_products")
     .update(payload)
     .eq("id",id)
