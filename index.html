@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,10 +16,7 @@
   --line:#e9e1dc;
 }
 *{box-sizing:border-box}
-body{
-  margin:0;background:var(--cream);color:var(--dark);
-  font-family:Arial,sans-serif;
-}
+body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 .zyra-header{
@@ -28,29 +24,18 @@ button{cursor:pointer}
   display:flex;align-items:center;justify-content:space-between;
   gap:20px;position:sticky;top:0;z-index:100;
   border-bottom:1px solid var(--line);
-  box-shadow:0 2px 12px rgba(40,25,25,.035);
+  box-shadow:0 2px 12px rgba(40,25,25,.035)
 }
 .zyra-brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
 .zyra-brand img{display:block;max-width:175px;max-height:48px;object-fit:contain}
-.zyra-brand-fallback{
-  display:none;color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:3px;
-}
+.zyra-brand-fallback{display:none;color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:3px}
 .zyra-nav{display:flex;align-items:center;gap:25px}
-.zyra-nav a{
-  color:var(--dark);text-decoration:none;font-size:11px;
-  letter-spacing:1.2px;font-weight:600;transition:color .2s;
-}
+.zyra-nav a{color:var(--dark);text-decoration:none;font-size:11px;letter-spacing:1.2px;font-weight:600;transition:color .2s}
 .zyra-nav a:hover{color:var(--wine)}
-.zyra-cart{
-  background:var(--wine);color:#fff;border:1px solid var(--wine);
-  padding:12px 18px;font-size:11px;letter-spacing:1px;
-}
+.zyra-cart{background:var(--wine);color:#fff;border:1px solid var(--wine);padding:12px 18px;font-size:11px;letter-spacing:1px}
 .zyra-cart:hover{background:#682132}
 .btn,.checkout-button{background:var(--wine);color:#fff;border:0;padding:12px 18px}
-.hero{
-  min-height:390px;background:#eee4dc;display:grid;place-items:center;
-  text-align:center;padding:50px 20px;
-}
+.hero{min-height:390px;background:#eee4dc;display:grid;place-items:center;text-align:center;padding:50px 20px}
 .hero h1{font:clamp(36px,6vw,60px) Georgia,serif;margin:0 0 14px}
 .hero p{color:#655a53;margin:0 auto 24px;line-height:1.8;max-width:580px}
 .section{padding:55px 6%}
@@ -60,28 +45,20 @@ button{cursor:pointer}
 .toolbar input,.toolbar select{padding:12px;border:1px solid #ddd;background:#fff;min-width:180px}
 .products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
 .product-card{background:#fff;border:1px solid var(--line)}
-.product-image{
-  width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4;
-}
+.product-image{width:100%;height:250px;object-fit:cover;display:block;background:#eee9e4}
 .product-info{padding:15px}
 .product-info h3{font-size:15px;margin:0 0 8px}
 .product-info p{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 10px}
 .price{color:var(--wine);font-weight:bold;margin:0 0 13px}
 .add-button{width:100%;padding:12px;border:0;background:var(--dark);color:#fff}
 .empty{text-align:center;padding:35px;color:var(--muted);grid-column:1/-1}
-.benefits{
-  background:#eee5dc;padding:35px 6%;display:grid;
-  grid-template-columns:repeat(3,1fr);text-align:center;gap:20px;
-}
+.benefits{background:#eee5dc;padding:35px 6%;display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:20px}
 .benefits h3{font:20px Georgia,serif;margin-bottom:8px}
 .benefits p{font-size:13px;color:var(--muted)}
 footer{background:var(--dark);color:#fff;padding:35px 6%;text-align:center}
 footer p{font-size:13px;margin-top:10px;color:#ddd}
 .footer-brand{font:bold 27px Georgia,serif;letter-spacing:3px}
-.modal{
-  display:none;position:fixed;inset:0;z-index:300;
-  background:#0009;overflow-y:auto;padding:22px 12px;
-}
+.modal{display:none;position:fixed;inset:0;z-index:300;background:#0009;overflow-y:auto;padding:22px 12px}
 .modal-content{background:#fff;max-width:680px;margin:20px auto;padding:24px;border-radius:3px}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .close{border:0;background:transparent;font-size:26px}
@@ -96,9 +73,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 .form-group{margin-bottom:14px}
 .form-group.full{grid-column:1/-1}
 .form-group label{display:block;margin-bottom:6px;font-size:13px}
-.form-group input,.form-group textarea,.form-group select{
-  width:100%;padding:11px;border:1px solid #ddd;background:#fff;
-}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:11px;border:1px solid #ddd;background:#fff}
 .form-group textarea{min-height:70px;resize:vertical}
 .checkout-button{width:100%}
 .checkout-button:disabled{opacity:.6;cursor:wait}
@@ -149,6 +124,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
       onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span class="zyra-brand-fallback">ZYRA.LK</span>
   </a>
+
   <nav class="zyra-nav">
     <a href="#home">HOME</a>
     <a href="#products">COLLECTION</a>
@@ -174,7 +150,9 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
       <option value="">All Collections</option>
     </select>
   </div>
-  <div class="products" id="productList"><div class="empty">Loading collection...</div></div>
+  <div class="products" id="productList">
+    <div class="empty">Loading collection...</div>
+  </div>
 </section>
 
 <section class="section" id="tracking">
@@ -199,6 +177,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
   <p>© 2026 Zyra.lk. All rights reserved.</p>
 </footer>
 
+<!-- SHOPPING BAG -->
 <div class="modal" id="cartModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -211,6 +190,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
   </div>
 </div>
 
+<!-- CHECKOUT -->
 <div class="modal" id="checkoutModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -224,10 +204,12 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
           <label>Full Name *</label>
           <input name="customer_name" required maxlength="150" autocomplete="name">
         </div>
+
         <div class="form-group">
           <label>Email Address</label>
           <input name="email" type="email" maxlength="254" autocomplete="email">
         </div>
+
         <div class="form-group full">
           <label>Mobile Number *</label>
           <input name="phone" type="tel" required maxlength="10" minlength="10"
@@ -235,10 +217,12 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
             placeholder="0771234567">
           <small class="fine">Enter exactly 10 digits, including the first 0. Example: 0771234567</small>
         </div>
+
         <div class="form-group full">
           <label>Delivery Address *</label>
           <textarea name="delivery_address" required maxlength="1000" autocomplete="street-address"></textarea>
         </div>
+
         <div class="form-group">
           <label>District *</label>
           <select name="district" required>
@@ -254,15 +238,18 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
             <option>Vavuniya</option>
           </select>
         </div>
+
         <div class="form-group">
           <label>City / Town *</label>
           <input name="city" required maxlength="120" autocomplete="address-level2">
         </div>
+
         <div class="form-group">
           <label>Postal Code *</label>
           <input name="postal_code" required maxlength="5" minlength="5"
             pattern="[0-9]{5}" inputmode="numeric" placeholder="5-digit postal code">
         </div>
+
         <div class="form-group">
           <label>Payment Method *</label>
           <select name="payment_method" id="paymentMethod" required>
@@ -273,6 +260,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
           <p id="paymentRestrictionMessage" class="fine"
             style="display:none;color:#842d40;margin-top:8px"></p>
         </div>
+
         <div class="form-group full" id="bankGroup" style="display:none">
           <label>Select Bank *</label>
           <select name="selected_bank" id="selectedBank">
@@ -284,27 +272,32 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
           </select>
           <div class="bank-box" id="bankDetails"></div>
         </div>
+
         <div class="form-group full" id="referenceGroup" style="display:none">
           <label>Bank Transaction Reference *</label>
           <input name="bank_transaction_reference" id="bankTransactionReference"
             maxlength="150" placeholder="Enter your bank transaction reference">
           <small class="fine">Enter the transaction reference for your bank transfer.</small>
         </div>
+
+        <!-- PAYMENT SLIP UPLOAD -->
         <div class="form-group full" id="paymentSlipGroup" style="display:none">
           <div class="payment-slip-upload">
             <label for="paymentSlip">Upload Bank Payment Slip *</label>
             <input type="file" id="paymentSlip"
-              accept="image/jpeg,image/png,image/webp,application/pdf">
+              accept="image/*,application/pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf">
             <div class="payment-slip-help">
-              Accepted formats: JPG, PNG, WEBP and PDF.
-              Maximum file size: 5MB.
+              Accepted formats: PDF and common photo formats, including JPG, PNG, WEBP, GIF and HEIC.
+              Maximum file size: 10 MB.
               Upload your payment receipt to complete your Bank Transfer order.
             </div>
+            <p id="paymentSlipFileName" class="fine"></p>
           </div>
         </div>
+
         <div class="form-group full">
           <label>Order Notes (optional)</label>
-          <textarea name="customer_notes" maxlength="1500"
+          <textarea name="customer_notes" maxlength="1000"
             placeholder="Any delivery or order instructions..."></textarea>
         </div>
       </div>
@@ -320,6 +313,7 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
   </div>
 </div>
 
+<!-- SUCCESS -->
 <div class="modal" id="successModal">
   <div class="modal-content" style="text-align:center">
     <h2>Thank You!</h2>
@@ -334,13 +328,23 @@ footer p{font-size:13px;margin-top:10px;color:#ddd}
 /* SUPABASE CONFIGURATION */
 
 const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
+const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_C-Q-HwV2D";
 
 const PRODUCT_TABLE="store_products";
 const STORAGE_BUCKET="Product -image";
-const PAYMENT_SLIP_MAX_BYTES=5*1024*1024;
-const ALLOWED_PAYMENT_SLIP_TYPES=[
-  "image/jpeg","image/png","image/webp","application/pdf"
+
+const PAYMENT_SLIP_MAX_BYTES=10*1024*1024;
+const CUSTOMER_PHOTO_BUCKET="customer-photos";
+const PHOTO_MAX_BYTES=5*1024*1024;
+
+const PAYMENT_SLIP_MIME_TYPES=[
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+  "application/pdf"
 ];
 
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
@@ -356,18 +360,22 @@ let products=[];
 let cart=[];
 
 const $=id=>document.getElementById(id);
-const money=n=>Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
 
-const CUSTOMER_PHOTO_BUCKET="customer-photos";
-const PHOTO_MAX_BYTES=5*1024*1024;
+const money=n=>Number(n||0).toLocaleString("en-LK",{
+  maximumFractionDigits:2
+});
 
 /* PRODUCT HELPERS */
 
 function isPhotoProduct(name){
   const n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
   const engravedEye=n.includes("engraved eye")||n.includes("eye engraved");
-  return n.includes("photo roll")||n.includes("photo projection")||
-    engravedEye||n.includes("i engraved")||n.includes("iron grade");
+
+  return n.includes("photo roll")||
+    n.includes("photo projection")||
+    engravedEye||
+    n.includes("i engraved")||
+    n.includes("iron grade");
 }
 
 function photoCountFor(name){
@@ -383,15 +391,27 @@ function isRegularNoPersonalisationProduct(name){
   return n.includes("rapunzel 360 necklace")||n.includes("heart necklace");
 }
 
+/* BANK TRANSFER ONLY PRODUCT LIST */
+
 const BANK_TRANSFER_ONLY_PRODUCTS=new Set([
-  "english name necklace","different font style name necklace",
-  "arabic name necklace","alternative design name necklace",
-  "double name couple necklace","name necklace with design",
-  "name bracelet english","name bracelet arabic",
-  "name bracelet and bracelet","name bracelet with bst",
-  "photo projection bracelet rope","photo projection bracelet",
-  "initial couple ring","customised ring","double layered name necklace",
-  "customise photo roll","engraved eye bracelet","engraved eye necklace",
+  "english name necklace",
+  "different font style name necklace",
+  "arabic name necklace",
+  "alternative design name necklace",
+  "double name couple necklace",
+  "name necklace with design",
+  "name bracelet english",
+  "name bracelet arabic",
+  "name bracelet and bracelet",
+  "name bracelet with bst",
+  "photo projection bracelet rope",
+  "photo projection bracelet",
+  "initial couple ring",
+  "customised ring",
+  "double layered name necklace",
+  "customise photo roll",
+  "engraved eye bracelet",
+  "engraved eye necklace",
   "customised phone case"
 ]);
 
@@ -399,6 +419,7 @@ function getProductPaymentOption(product){
   const saved=String(product.payment_option||"").toLowerCase();
   if(saved==="bank_transfer_only")return "bank_transfer_only";
   if(saved==="both")return "both";
+
   return BANK_TRANSFER_ONLY_PRODUCTS.has(normaliseProductName(product.name))
     ?"bank_transfer_only":"both";
 }
@@ -417,32 +438,41 @@ function updatePaymentOptions(){
   const codOption=Array.from(payment.options).find(
     option=>option.value==="Cash on Delivery"
   );
+
   const restricted=cartRequiresBankTransfer();
 
   if(codOption)codOption.disabled=restricted;
-  if(restricted&&payment.value==="Cash on Delivery")payment.value="Bank Transfer";
+
+  if(restricted&&payment.value==="Cash on Delivery"){
+    payment.value="Bank Transfer";
+  }
 
   const existing=$("paymentRestrictionMessage");
+
   if(existing){
     existing.textContent=restricted
       ?"Your bag contains a customised or Bank Transfer Only product. Cash on Delivery is unavailable for this order."
       :"";
     existing.style.display=restricted?"block":"none";
   }
+
   updatePaymentFields();
 }
 
 function updatePaymentFields(){
   const isBank=$("paymentMethod").value==="Bank Transfer";
+
   $("bankGroup").style.display=isBank?"block":"none";
   $("referenceGroup").style.display=isBank?"block":"none";
   $("paymentSlipGroup").style.display=isBank?"block":"none";
+
   $("selectedBank").required=isBank;
   $("bankTransactionReference").required=isBank;
   $("paymentSlip").required=isBank;
 
   if(!isBank){
     $("paymentSlip").value="";
+    $("paymentSlipFileName").textContent="";
     $("bankTransactionReference").value="";
     $("selectedBank").value="";
     $("bankDetails").style.display="none";
@@ -454,12 +484,13 @@ function imageUrlForProduct(p){
   const raw=p.image_url||p.image_path||p.image||"";
   if(!raw)return "";
   if(/^https?:\/\//i.test(raw))return raw;
+
   return db.storage.from(STORAGE_BUCKET).getPublicUrl(raw).data.publicUrl;
 }
 
 function safeFileExt(file){
   const ext=(file.name.split(".").pop()||"").toLowerCase();
-  return ["jpg","jpeg","png","webp","pdf"].includes(ext)?ext:"jpg";
+  return ["jpg","jpeg","png","webp","pdf","gif","heic","heif"].includes(ext)?ext:"jpg";
 }
 
 /* LOAD PRODUCTS */
@@ -468,8 +499,10 @@ async function loadProducts(){
   const root=$("productList");
   root.textContent="Loading collection...";
 
-  let result=await db.from(PRODUCT_TABLE).select("*")
-    .eq("is_active",true).order("created_at",{ascending:false});
+  let result=await db.from(PRODUCT_TABLE)
+    .select("*")
+    .eq("is_active",true)
+    .order("created_at",{ascending:false});
 
   if(result.error){
     console.error("Product query with sorting failed:",result.error);
@@ -485,13 +518,16 @@ async function loadProducts(){
   }
 
   products=result.data||[];
+
   const cat=$("categoryFilter");
   const old=cat.value;
   cat.innerHTML='<option value="">All Collections</option>';
 
   [...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{
     const o=document.createElement("option");
-    o.value=c;o.textContent=c;cat.append(o);
+    o.value=c;
+    o.textContent=c;
+    cat.append(o);
   });
 
   cat.value=old;
@@ -512,6 +548,7 @@ function renderProducts(items){
   items.forEach(p=>{
     const card=document.createElement("article");
     card.className="product-card";
+
     const src=imageUrlForProduct(p);
 
     if(src){
@@ -520,12 +557,14 @@ function renderProducts(items){
       img.alt=p.name||"Zyra product";
       img.loading="lazy";
       img.src=src;
+
       img.onerror=()=>{
         const ph=document.createElement("div");
         ph.className="image-placeholder";
         ph.textContent="IMAGE UNAVAILABLE";
         img.replaceWith(ph);
       };
+
       card.append(img);
     }else{
       const ph=document.createElement("div");
@@ -570,6 +609,7 @@ function renderProducts(items){
 function filterProducts(){
   const q=$("searchInput").value.toLowerCase();
   const c=$("categoryFilter").value;
+
   renderProducts(products.filter(p=>
     (p.name||"").toLowerCase().includes(q)&&(!c||p.category===c)
   ));
@@ -582,14 +622,19 @@ function addToCart(id){
   if(!p)return;
 
   const found=cart.find(x=>x.id===id);
+
   if(found){
     found.quantity++;
   }else{
     cart.push({
-      id:p.id,name:p.name,price:Number(p.price),quantity:1,
+      id:p.id,
+      name:p.name,
+      price:Number(p.price),
+      quantity:1,
       payment_option:getProductPaymentOption(p),
       is_customisable:!!p.is_customisable||isPhotoProduct(p.name),
-      details:{},photoFiles:[]
+      details:{},
+      photoFiles:[]
     });
   }
 
@@ -605,6 +650,7 @@ function removeItem(id){
 function changeQty(id,delta){
   const x=cart.find(i=>i.id===id);
   if(!x)return;
+
   x.quantity+=delta;
   if(x.quantity<1)removeItem(id);
   else renderCart();
@@ -625,13 +671,14 @@ function customField(item,key,label,placeholder,max=120,wide=false){
   input.maxLength=max;
   input.value=item.details[key]||"";
   input.setAttribute("aria-label",label);
-  input.oninput=()=>{item.details[key]=input.value;};
 
+  input.oninput=()=>{item.details[key]=input.value;};
   wrap.append(input);
+
   return wrap;
 }
 
-/* PHOTO UPLOAD CONTROL */
+/* CUSTOMER PHOTO UPLOAD CONTROL */
 
 function photoUploadControl(item){
   const count=photoCountFor(item.name);
@@ -652,12 +699,14 @@ function photoUploadControl(item){
 
   input.onchange=()=>{
     const files=Array.from(input.files||[]);
+
     if(files.length!==count){
       alert("Please select exactly "+count+" photo(s) for "+item.name+".");
       input.value="";
       item.photoFiles=[];
       return;
     }
+
     item.photoFiles=files;
   };
 
@@ -688,6 +737,7 @@ function photoUploadControl(item){
 
 function renderCart(){
   $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0);
+
   const root=$("cartItems");
   root.replaceChildren();
 
@@ -701,18 +751,15 @@ function renderCart(){
     row.className="cart-row";
 
     const label=document.createElement("strong");
-    label.textContent=
-      `${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
+    label.textContent=`${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
 
     const controls=document.createElement("span");
 
-    [
-      ["−",()=>changeQty(item.id,-1)],
-      ["+",()=>changeQty(item.id,1)],
-      ["Remove",()=>removeItem(item.id)]
-    ].forEach(([t,fn])=>{
+    [["−",()=>changeQty(item.id,-1)],["+",()=>changeQty(item.id,1)],["Remove",()=>removeItem(item.id)]].forEach(([t,fn])=>{
       const b=document.createElement("button");
-      b.textContent=t;b.onclick=fn;controls.append(b);
+      b.textContent=t;
+      b.onclick=fn;
+      controls.append(b);
     });
 
     row.append(label,controls);
@@ -729,7 +776,7 @@ function renderCart(){
           customField(item,"second_box_initial","Second box initial","Second box — 1 character",1)
         );
       }
-      else if(n.includes("customised ring")){
+      else if(n.includes("customised ring")||n.includes("customized ring")){
         fields.append(customField(item,"name","Ring name","Enter name — max 6 characters",6,true));
       }
       else if(n.includes("double layered name necklace")){
@@ -738,19 +785,22 @@ function renderCart(){
           customField(item,"second_layer_name","Second layer name","Second layer — max 8 characters",8)
         );
       }
-      else if(n.includes("name necklace with bst")){
+      else if(n.includes("name necklace with bst")||n.includes("birthstone")){
         fields.append(customField(item,"name","Name","Name — max 12 characters",12,true));
+
         const wrap=document.createElement("div");
         wrap.className="wide";
+
         const sel=document.createElement("select");
         sel.setAttribute("aria-label","Birthstone month");
         sel.innerHTML='<option value="">Select birthstone month</option>'+
-          ["January","February","March","April","May","June","July","August",
-           "September","October","November","December"]
-            .map(m=>`<option value="${m}">${m}</option>`).join("");
+          ["January","February","March","April","May","June","July","August","September","October","November","December"]
+          .map(m=>`<option value="${m}">${m}</option>`).join("");
+
         sel.value=item.details.birthstone_month||"";
         sel.onchange=()=>{item.details.birthstone_month=sel.value;};
-        wrap.append(sel);fields.append(wrap);
+        wrap.append(sel);
+        fields.append(wrap);
       }
       else if(n.includes("name necklace with design")||n.includes("infinity")){
         fields.append(
@@ -765,8 +815,7 @@ function renderCart(){
           customField(item,"second_name","Second name","Second name — max 6 characters",6)
         );
       }
-      else if(n.includes("name bracelet & necklace combo")||
-              n.includes("name bracelet and necklace combo")){
+      else if(n.includes("bracelet necklace combo")||n.includes("bracelet and necklace")){
         fields.append(
           customField(item,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),
           customField(item,"necklace_name","Necklace name","Necklace name — max 8 characters",8)
@@ -787,6 +836,7 @@ function renderCart(){
 
       const photoControl=photoUploadControl(item);
       if(photoControl)fields.append(photoControl);
+
       box.append(fields);
     }
 
@@ -803,7 +853,11 @@ function openCart(){$("cartModal").style.display="block";}
 function closeModal(id){$(id).style.display="none";}
 
 function showCheckout(){
-  if(!cart.length){alert("Please add a product first.");return;}
+  if(!cart.length){
+    alert("Please add a product first.");
+    return;
+  }
+
   updatePaymentOptions();
   closeModal("cartModal");
   $("checkoutTotal").textContent="Order Total: LKR "+money(total());
@@ -838,24 +892,42 @@ $("selectedBank").addEventListener("change",()=>{
   }
 });
 
+$("paymentSlip").addEventListener("change",()=>{
+  const file=$("paymentSlip").files[0];
+  $("paymentSlipFileName").textContent=file
+    ?"Selected receipt: "+file.name
+    :"";
+});
+
 /* VALIDATE PAYMENT SLIP */
 
 function validatePaymentSlip(file){
   if(!file)throw new Error("Please upload your bank payment slip.");
-  if(!ALLOWED_PAYMENT_SLIP_TYPES.includes(file.type)){
-    throw new Error("Only JPG, PNG, WEBP and PDF payment slips are accepted.");
+
+  const type=file.type.toLowerCase();
+
+  const extension=(file.name.split(".").pop()||"").toLowerCase();
+
+  const allowedExtensions=["jpg","jpeg","png","webp","gif","heic","heif","pdf"];
+
+  if(!PAYMENT_SLIP_MIME_TYPES.includes(type)&&!allowedExtensions.includes(extension)){
+    throw new Error("Please upload a PDF or common photo receipt (JPG, PNG, WEBP, GIF or HEIC).");
   }
+
   if(file.size<=0||file.size>PAYMENT_SLIP_MAX_BYTES){
-    throw new Error("Your payment slip must be a valid file of 5MB or smaller.");
+    throw new Error("Your payment slip must be a valid file of 10MB or smaller.");
   }
 }
 
 /*
-  NEW PAYMENT SLIP HANDLING
+  Convert the selected receipt to Base64.
+  The Edge Function receives:
+  file_name
+  content_type
+  data_base64
 
-  The browser no longer uploads the payment slip directly
-  to Supabase Storage. It converts the file to Base64 and
-  sends it to the place-order Edge Function.
+  Do NOT upload the payment slip directly from
+  the browser to Storage in this version.
 */
 
 async function paymentSlipToBase64(file){
@@ -871,20 +943,27 @@ async function paymentSlipToBase64(file){
     binary+=String.fromCharCode(...bytes.subarray(i,i+chunkSize));
   }
 
+  const base64=btoa(binary);
+
   return {
     file_name:file.name,
-    content_type:file.type,
-    data_base64:btoa(binary)
+    content_type:file.type||(
+      file.name.toLowerCase().endsWith(".pdf")
+        ?"application/pdf"
+        :"application/octet-stream"
+    ),
+    data_base64:base64
   };
 }
 
-/* UPLOAD CUSTOMER PHOTOS — EXISTING FLOW PRESERVED */
+/* UPLOAD CUSTOMER PHOTOS */
 
 async function uploadItemPhotos(item){
   const required=photoCountFor(item.name);
   if(!required)return null;
 
   const files=item.photoFiles||[];
+
   if(files.length!==required){
     throw new Error(item.name+": please upload exactly "+required+" photo(s).");
   }
@@ -896,18 +975,19 @@ async function uploadItemPhotos(item){
     const file=files[i];
 
     if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
-      throw new Error("Only JPG, PNG or WEBP photos are accepted.");
+      throw new Error("Only JPG, PNG or WEBP customer photos are accepted.");
     }
-    if(file.size<=0||file.size>PHOTO_MAX_BYTES){
-      throw new Error("Each photo must be 5MB or smaller.");
+
+    if(file.size>PHOTO_MAX_BYTES){
+      throw new Error("Each customer photo must be 5MB or smaller.");
     }
 
     const ext=safeFileExt(file);
     const path=`customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-${i+1}.${ext}`;
 
-    const {error}=await db.storage.from(CUSTOMER_PHOTO_BUCKET).upload(path,file,{
-      contentType:file.type,upsert:false
-    });
+    const {error}=await db.storage
+      .from(CUSTOMER_PHOTO_BUCKET)
+      .upload(path,file,{contentType:file.type,upsert:false});
 
     if(error){
       throw new Error("Photo upload failed for "+file.name+": "+error.message);
@@ -951,14 +1031,16 @@ $("checkoutForm").addEventListener("submit",async function(e){
     const n=item.name.toLowerCase();
     const d=item.details;
 
-    if(n.includes("initial couple ring")&&
-       (!d.first_box_initial||!d.second_box_initial||
-        d.first_box_initial.length!==1||d.second_box_initial.length!==1)){
+    if(n.includes("initial couple ring")&&(
+      !d.first_box_initial||!d.second_box_initial||
+      d.first_box_initial.length!==1||d.second_box_initial.length!==1
+    )){
       alert("Initial Couple Ring requires one character in each of its two boxes.");
       return;
     }
 
-    if(n.includes("customised ring")&&(!d.name||d.name.trim().length>6)){
+    if((n.includes("customised ring")||n.includes("customized ring"))&&
+      (!d.name||d.name.trim().length>6)){
       alert("Customised Ring name must contain 1 to 6 characters.");
       return;
     }
@@ -978,15 +1060,14 @@ $("checkoutForm").addEventListener("submit",async function(e){
       else if(n.includes("couple name necklace")){
         required=["first_name","second_name"];
       }
-      else if(n.includes("name bracelet & necklace combo")||
-              n.includes("name bracelet and necklace combo")){
+      else if(n.includes("bracelet necklace combo")||n.includes("bracelet and necklace")){
         required=["bracelet_name","necklace_name"];
       }
-      else if(n.includes("name necklace with bst")){
+      else if(n.includes("name necklace with bst")||n.includes("birthstone")){
         required=["name","birthstone_month"];
       }
       else if(n.includes("name necklace")||n.includes("name bracelet")||
-              n.includes("customised ring")){
+        n.includes("customised ring")||n.includes("customized ring")){
         required=["name"];
       }
       else{
@@ -999,12 +1080,12 @@ $("checkoutForm").addEventListener("submit",async function(e){
       }
 
       if((n.includes("name necklace with design")||n.includes("infinity"))&&
-         !/^[0-9]{6}$/.test(d.special_date)){
+        !/^[0-9]{6}$/.test(d.special_date)){
         alert("Enter the special date as six digits in DDMMYY format.");
         return;
       }
 
-      if(n.includes("customised ring")&&d.name.length>6){
+      if((n.includes("customised ring")||n.includes("customized ring"))&&d.name.length>6){
         alert("Customised Ring name must be 6 characters or fewer.");
         return;
       }
@@ -1012,6 +1093,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
     if(isPhotoProduct(item.name)){
       const needed=photoCountFor(item.name);
+
       if((item.photoFiles||[]).length!==needed){
         alert(item.name+": please upload exactly "+needed+" photo(s) before checkout.");
         return;
@@ -1021,6 +1103,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
   const button=$("placeOrderButton");
   const msg=$("checkoutMessage");
+
   button.disabled=true;
   button.textContent="PREPARING ORDER...";
   msg.textContent="";
@@ -1038,6 +1121,8 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
     let paymentSlip=null;
 
+    /* CONVERT PAYMENT SLIP TO BASE64 */
+
     if(selectedPayment==="Bank Transfer"){
       const selectedBank=String(form.get("selected_bank")||"").trim();
       const reference=String(form.get("bank_transaction_reference")||"").trim();
@@ -1054,9 +1139,8 @@ $("checkoutForm").addEventListener("submit",async function(e){
       const slipFile=$("paymentSlip").files[0];
       validatePaymentSlip(slipFile);
 
-      button.textContent="PREPARING PAYMENT SLIP...";
+      button.textContent="READING PAYMENT RECEIPT...";
 
-      /* CHANGED: no direct browser Storage upload */
       paymentSlip=await paymentSlipToBase64(slipFile);
     }
 
@@ -1067,9 +1151,13 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
       if(isPhotoProduct(item.name)){
         button.textContent="UPLOADING CUSTOMER PHOTOS...";
+
         const photoMeta=await uploadItemPhotos(item);
 
-        details={...(details||{}),...photoMeta};
+        details={
+          ...(details||{}),
+          ...photoMeta
+        };
 
         if(item.name.toLowerCase().includes("photo roll")&&item.details.birthday_message){
           details.birthday_message=item.details.birthday_message;
@@ -1093,12 +1181,19 @@ $("checkoutForm").addEventListener("submit",async function(e){
       city:String(form.get("city")||"").trim(),
       district:String(form.get("district")||"").trim(),
       postal_code:postal,
+
       payment_method:selectedPayment==="Cash on Delivery"?"COD":"Bank Transfer",
+
       selected_bank:selectedPayment==="Bank Transfer"
-        ?String(form.get("selected_bank")||"").trim():null,
+        ?String(form.get("selected_bank")||"").trim()
+        :null,
+
       bank_transaction_reference:selectedPayment==="Bank Transfer"
-        ?String(form.get("bank_transaction_reference")||"").trim():null,
+        ?String(form.get("bank_transaction_reference")||"").trim()
+        :null,
+
       payment_slip:paymentSlip,
+
       customer_notes:String(form.get("customer_notes")||"").trim()||null,
       items:orderItems
     };
@@ -1107,10 +1202,12 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
     if(error){
       let serverMessage="";
+
       try{
-        serverMessage=error.context
-          ?await error.context.json().then(x=>x.error||x.message||"")
-          :"";
+        if(error.context){
+          const response=await error.context.json();
+          serverMessage=response.error||response.message||"";
+        }
       }catch{}
 
       throw new Error(serverMessage||error.message||"The order request failed.");
@@ -1121,14 +1218,17 @@ $("checkoutForm").addEventListener("submit",async function(e){
     }
 
     closeModal("checkoutModal");
+
     $("trackingNumber").textContent="Your store order number: "+data.order_number;
     $("successModal").style.display="block";
 
     this.reset();
+
     $("bankGroup").style.display="none";
     $("referenceGroup").style.display="none";
     $("paymentSlipGroup").style.display="none";
     $("bankDetails").style.display="none";
+    $("paymentSlipFileName").textContent="";
 
   }catch(err){
     console.error("Zyra order submission failed:",err);
@@ -1144,6 +1244,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
 async function trackDelivery(){
   const id=$("trackingId").value.trim();
   const box=$("trackingResult");
+
   box.hidden=false;
   box.textContent="Checking...";
 
@@ -1179,6 +1280,7 @@ ${o.note||""}`;
 
 loadProducts();
 renderCart();
+
 </script>
 </body>
 </html>
