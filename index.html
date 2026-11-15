@@ -316,11 +316,16 @@ const PHOTO_MAX_BYTES=5*1024*1024;
 
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
+/*
+Keep your existing BANK_INFO account details here.
+The placeholders below are intentional; replace them with
+the same public payment details from your current file.
+*/
 const BANK_INFO={
-"Commercial Bank":"Account Name: Hamrah<br>Account Number: 8031077367<br>Branch: Mutwal",
-"Nations Trust Bank":"Account Name: MF Hamrah<br>Account Number: 200190100485<br>Branch: Union Place",
-"Amana Bank PLC":"Account Name: MOHAMMED ILMY FATHIMA HAMRAH<br>Account Number: 0290244734002<br>Branch: Kollupitiya",
-"HNB":"Account Name: Miss Hilmey F H M<br>Account Number: 096020094073<br>Branch: Kotahena"
+"Commercial Bank":"Account Name: YOUR ACCOUNT NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
+"Nations Trust Bank":"Account Name: YOUR ACCOUNT NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
+"Amana Bank PLC":"Account Name: YOUR ACCOUNT NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH",
+"HNB":"Account Name: YOUR ACCOUNT NAME<br>Account Number: YOUR ACCOUNT NUMBER<br>Branch: YOUR BRANCH"
 };
 
 const DELIVERY_FEES={
@@ -375,10 +380,6 @@ return !!productOrItem.is_customisable||
 !!productOrItem.isCustomisable||
 isPhotoProduct(name)||
 isBstProduct(name);
-}
-
-function cartRequiresBankTransfer(){
-return cart.some(item=>isCustomProduct(item));
 }
 
 function imageUrlForProduct(p){
@@ -580,6 +581,10 @@ if($("paymentMethod").value==="")$("paymentMethod").value="";
 }
 
 updatePaymentFields();
+}
+
+function cartRequiresBankTransfer(){
+return cart.some(item=>isCustomProduct(item));
 }
 
 function updatePaymentFields(){
@@ -1348,7 +1353,7 @@ item.append(small,strong);
 parent.append(item);
 }
 
-/* NEW: CUSTOMER PAYMENT STATUS DISPLAY */
+/* CUSTOMER PAYMENT STATUS DISPLAY */
 
 function displayPaymentDetails(parent,o){
 const heading=document.createElement("h4");
@@ -1359,7 +1364,7 @@ const details=document.createElement("div");
 details.className="track-details";
 
 const method=String(o.payment_method||"Not available");
-const rawStatus=String(o.payment_status||"pending").trim().toLowerCase();
+const rawStatus=String(o.payment_status||"not available").trim().toLowerCase();
 
 addTrackDetail(details,"Payment Method",method);
 
@@ -1378,6 +1383,9 @@ value.classList.add("payment-paid");
 }else if(rawStatus==="pending"){
 value.textContent="PENDING";
 value.classList.add("payment-pending");
+}else if(rawStatus==="not available"||!rawStatus){
+value.textContent="NOT AVAILABLE";
+value.classList.add("payment-other");
 }else{
 value.textContent=rawStatus.toUpperCase();
 value.classList.add("payment-other");
@@ -1486,6 +1494,14 @@ progress.append(row);
 box.append(progress);
 }
 
+/*
+UPDATED TRACKING FUNCTION:
+1. Gets delivery details from track_zyra_order.
+2. Gets current payment details from store_orders through
+   get_zyra_payment_status.
+3. Displays both without changing delivery status.
+*/
+
 async function trackDelivery(){
 const id=$("trackingId").value.trim().toUpperCase();
 const box=$("trackingResult");
@@ -1504,6 +1520,7 @@ button.disabled=true;
 button.textContent="CHECKING...";
 
 try{
+/* FIRST: FETCH DELIVERY TRACKING */
 const {data,error}=await db.rpc(
 "track_zyra_order",
 {p_tracking_id:id}
@@ -1517,6 +1534,28 @@ if(!o||o.found===false||!o.tracking_id){
 box.textContent="We couldn't find an order with that ID. Please check your Order ID and try again.";
 return;
 }
+
+/* SECOND: FETCH LATEST PAYMENT STATUS */
+const {
+data:paymentData,
+error:paymentError
+}=await db.rpc(
+"get_zyra_payment_status",
+{p_tracking_id:id}
+);
+
+if(paymentError){
+console.error("Payment status lookup failed:",paymentError);
+throw paymentError;
+}
+
+const payment=Array.isArray(paymentData)
+?paymentData[0]
+:paymentData;
+
+/* COMBINE BOTH RESULTS */
+o.payment_method=payment?.payment_method||"Not available";
+o.payment_status=payment?.payment_status||"Not available";
 
 displayTracking(o);
 
