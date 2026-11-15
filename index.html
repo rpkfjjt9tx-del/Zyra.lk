@@ -449,6 +449,34 @@ footer p{
   letter-spacing:.5px;
 }
 
+/* PAYMENT SLIP UPLOAD */
+
+.payment-slip-upload{
+  border:1px dashed #cbb8ae;
+  background:#fcfaf8;
+  padding:13px;
+  margin-top:8px;
+}
+
+.payment-slip-upload label{
+  display:block;
+  font-size:13px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.payment-slip-upload input{
+  width:100%;
+  font-size:13px;
+}
+
+.payment-slip-help{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-top:7px;
+}
+
 /* MOBILE */
 
 @media(max-width:900px){
@@ -740,12 +768,34 @@ footer p{
         </div>
 
         <div class="form-group full" id="referenceGroup" style="display:none">
-          <label>Bank Transaction Reference (if already paid)</label>
+          <label>Bank Transaction Reference *</label>
           <input
             name="bank_transaction_reference"
-            maxlength="120"
-            placeholder="Enter transaction reference"
+            id="bankTransactionReference"
+            maxlength="150"
+            placeholder="Enter your bank transaction reference"
           >
+          <small class="fine">Enter the transaction reference for your bank transfer.</small>
+        </div>
+
+        <!-- NEW PAYMENT SLIP UPLOAD -->
+
+        <div class="form-group full" id="paymentSlipGroup" style="display:none">
+          <div class="payment-slip-upload">
+            <label for="paymentSlip">Upload Bank Payment Slip *</label>
+
+            <input
+              type="file"
+              id="paymentSlip"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+            >
+
+            <div class="payment-slip-help">
+              Accepted formats: JPG, PNG, WEBP and PDF.
+              Maximum file size: 5MB.
+              Upload your payment receipt to complete your Bank Transfer order.
+            </div>
+          </div>
         </div>
 
         <div class="form-group full">
@@ -760,9 +810,8 @@ footer p{
       </div>
 
       <p class="fine">
-        For bank transfers, payment remains pending until Zyra verifies it.
-        This checkout version records your selected bank and transaction reference;
-        payment-slip upload is not yet connected.
+        For bank transfers, payment remains pending until Zyra verifies your payment.
+        Please upload your payment slip and enter your transaction reference.
       </p>
 
       <div class="cart-total" id="checkoutTotal"></div>
@@ -806,6 +855,16 @@ const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 
 const PRODUCT_TABLE="store_products";
 const STORAGE_BUCKET="Product -image";
+
+const PAYMENT_SLIP_BUCKET="payment-slips";
+const PAYMENT_SLIP_MAX_BYTES=5*1024*1024;
+
+const ALLOWED_PAYMENT_SLIP_TYPES=[
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf"
+];
 
 const db=window.supabase.createClient(
   SUPABASE_URL,
@@ -870,6 +929,13 @@ function normaliseProductName(name){
     .trim();
 }
 
+function isRegularNoPersonalisationProduct(name){
+  const n=normaliseProductName(name);
+
+  return n.includes("rapunzel 360 necklace")||
+    n.includes("heart necklace");
+}
+
 /* BANK TRANSFER ONLY PRODUCT LIST */
 
 const BANK_TRANSFER_ONLY_PRODUCTS = new Set([
@@ -910,9 +976,19 @@ function getProductPaymentOption(product){
   ) ? "bank_transfer_only" : "both";
 }
 
+/*
+  Customised products also require Bank Transfer.
+  Regular no-personalisation products are excluded
+  to match the Edge Function.
+*/
+
 function cartRequiresBankTransfer(){
   return cart.some(item=>
-    item.payment_option==="bank_transfer_only"
+    item.payment_option==="bank_transfer_only"||
+    (
+      item.is_customisable&&
+      !isRegularNoPersonalisationProduct(item.name)
+    )
   );
 }
 
@@ -939,17 +1015,33 @@ function updatePaymentOptions(){
 
   if(existing){
     existing.textContent=restricted
-      ? "Your bag contains a Bank Transfer Only product. Cash on Delivery is unavailable for this order."
+      ? "Your bag contains a customised or Bank Transfer Only product. Cash on Delivery is unavailable for this order."
       : "";
 
     existing.style.display=restricted?"block":"none";
   }
 
-  const isBank=payment.value==="Bank Transfer";
+  updatePaymentFields();
+}
+
+function updatePaymentFields(){
+  const isBank=$("paymentMethod").value==="Bank Transfer";
 
   $("bankGroup").style.display=isBank?"block":"none";
   $("referenceGroup").style.display=isBank?"block":"none";
+  $("paymentSlipGroup").style.display=isBank?"block":"none";
+
   $("selectedBank").required=isBank;
+  $("bankTransactionReference").required=isBank;
+  $("paymentSlip").required=isBank;
+
+  if(!isBank){
+    $("paymentSlip").value="";
+    $("bankTransactionReference").value="";
+    $("selectedBank").value="";
+    $("bankDetails").style.display="none";
+    $("bankDetails").innerHTML="";
+  }
 }
 
 function imageUrlForProduct(p){
@@ -966,7 +1058,7 @@ function imageUrlForProduct(p){
 function safeFileExt(file){
   const ext=(file.name.split(".").pop()||"").toLowerCase();
 
-  return ["jpg","jpeg","png","webp"].includes(ext)
+  return ["jpg","jpeg","png","webp","pdf"].includes(ext)
     ?ext
     :"jpg";
 }
@@ -1543,12 +1635,7 @@ $("paymentMethod").addEventListener("change",()=>{
     $("paymentMethod").value="Bank Transfer";
   }
 
-  const bank=$("paymentMethod").value==="Bank Transfer";
-
-  $("bankGroup").style.display=bank?"block":"none";
-  $("referenceGroup").style.display=bank?"block":"none";
-
-  $("selectedBank").required=bank;
+  updatePaymentFields();
 });
 
 $("selectedBank").addEventListener("change",()=>{
@@ -1566,6 +1653,55 @@ $("selectedBank").addEventListener("change",()=>{
     box.innerHTML="";
   }
 });
+
+/* VALIDATE PAYMENT SLIP */
+
+function validatePaymentSlip(file){
+  if(!file){
+    throw new Error("Please upload your bank payment slip.");
+  }
+
+  if(!ALLOWED_PAYMENT_SLIP_TYPES.includes(file.type)){
+    throw new Error("Only JPG, PNG, WEBP and PDF payment slips are accepted.");
+  }
+
+  if(file.size<=0||file.size>PAYMENT_SLIP_MAX_BYTES){
+    throw new Error("Your payment slip must be a valid file of 5MB or smaller.");
+  }
+}
+
+/* UPLOAD PAYMENT SLIP */
+
+async function uploadPaymentSlip(file){
+  validatePaymentSlip(file);
+
+  const ext=safeFileExt(file);
+
+  const folderId=crypto.randomUUID();
+
+  const path=
+    `customer-payment-slips/${folderId}/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
+
+  const {data,error}=await db.storage
+    .from(PAYMENT_SLIP_BUCKET)
+    .upload(path,file,{
+      contentType:file.type,
+      upsert:false
+    });
+
+  if(error){
+    throw new Error(
+      "Payment slip upload failed: "+error.message+
+      ". Please check that the payment-slips storage bucket exists and allows uploads."
+    );
+  }
+
+  return {
+    path:data.path,
+    file_name:file.name,
+    content_type:file.type
+  };
+}
 
 /* UPLOAD CUSTOMER PHOTOS */
 
@@ -1762,7 +1898,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
   const msg=$("checkoutMessage");
 
   button.disabled=true;
-  button.textContent="UPLOADING PHOTOS...";
+  button.textContent="PREPARING ORDER...";
   msg.textContent="";
 
   try{
@@ -1777,7 +1913,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
       selectedPayment!=="Bank Transfer"
     ){
       throw new Error(
-        "This order contains a Bank Transfer Only product. Please select Bank Transfer."
+        "This order contains a customised or Bank Transfer Only product. Please select Bank Transfer."
       );
     }
 
@@ -1788,11 +1924,47 @@ $("checkoutForm").addEventListener("submit",async function(e){
       throw new Error("Please select a valid payment method.");
     }
 
-    if(
-      selectedPayment==="Bank Transfer" &&
-      !String(form.get("selected_bank")||"").trim()
-    ){
-      throw new Error("Please select your bank.");
+    let paymentSlip=null;
+
+    if(selectedPayment==="Bank Transfer"){
+      const selectedBank=String(
+        form.get("selected_bank")||""
+      ).trim();
+
+      const reference=String(
+        form.get("bank_transaction_reference")||""
+      ).trim();
+
+      if(!selectedBank){
+        throw new Error("Please select your bank.");
+      }
+
+      if(
+        ![
+          "Commercial Bank",
+          "Nations Trust Bank",
+          "Amana Bank PLC",
+          "HNB"
+        ].includes(selectedBank)
+      ){
+        throw new Error("Please select a valid bank.");
+      }
+
+      if(!reference){
+        throw new Error("Please enter your bank transaction reference.");
+      }
+
+      if(reference.length>150){
+        throw new Error("Bank transaction reference must be 150 characters or fewer.");
+      }
+
+      const slipFile=$("paymentSlip").files[0];
+
+      validatePaymentSlip(slipFile);
+
+      button.textContent="UPLOADING PAYMENT SLIP...";
+
+      paymentSlip=await uploadPaymentSlip(slipFile);
     }
 
     const orderItems=[];
@@ -1803,7 +1975,7 @@ $("checkoutForm").addEventListener("submit",async function(e){
         :null;
 
       if(isPhotoProduct(item.name)){
-        button.textContent="UPLOADING PHOTOS...";
+        button.textContent="UPLOADING CUSTOMER PHOTOS...";
 
         const photoMeta=await uploadItemPhotos(item);
 
@@ -1860,13 +2032,15 @@ $("checkoutForm").addEventListener("submit",async function(e){
           ?"COD"
           :"Bank Transfer",
 
-      selected_bank:String(
-        form.get("selected_bank")||""
-      ).trim()||null,
+      selected_bank:selectedPayment==="Bank Transfer"
+        ?String(form.get("selected_bank")||"").trim()
+        :null,
 
-      bank_transaction_reference:String(
-        form.get("bank_transaction_reference")||""
-      ).trim()||null,
+      bank_transaction_reference:selectedPayment==="Bank Transfer"
+        ?String(form.get("bank_transaction_reference")||"").trim()
+        :null,
+
+      payment_slip:paymentSlip,
 
       customer_notes:String(
         form.get("customer_notes")||""
@@ -1880,7 +2054,21 @@ $("checkoutForm").addEventListener("submit",async function(e){
       {body:payload}
     );
 
-    if(error)throw error;
+    if(error){
+      let serverMessage="";
+
+      try{
+        serverMessage=error.context
+          ?await error.context.json().then(x=>x.error||x.message||"")
+          :"";
+      }catch{}
+
+      throw new Error(
+        serverMessage||
+        error.message||
+        "The order request failed."
+      );
+    }
 
     if(!data||!data.order_number){
       throw new Error(
@@ -1900,10 +2088,11 @@ $("checkoutForm").addEventListener("submit",async function(e){
 
     $("bankGroup").style.display="none";
     $("referenceGroup").style.display="none";
+    $("paymentSlipGroup").style.display="none";
     $("bankDetails").style.display="none";
 
   }catch(err){
-    console.error(err);
+    console.error("Zyra order submission failed:",err);
 
     msg.textContent=
       err.message||
