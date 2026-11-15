@@ -48,6 +48,7 @@ th{background:#faf7f2}
 .section-title{color:var(--wine);font-family:Georgia,serif}
 .order-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .status-pill{display:inline-block;padding:5px 9px;background:#eee;border-radius:20px;font-size:12px}
+.photo-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 @media(max-width:650px){
  .wrap{padding:12px}
  .stats{grid-template-columns:1fr}
@@ -298,38 +299,66 @@ function parseCustomisationDetails(raw){
  return raw&&typeof raw==="object"?raw:{};
 }
 
+/* CUSTOMER PHOTO DISPLAY WITH VIEW AND DOWNLOAD BUTTONS */
+
 function appendCustomisationDetails(parent,raw){
  const d=parseCustomisationDetails(raw);
- const paths=Array.isArray(d.photo_paths)?d.photo_paths:(d.photo_path?[d.photo_path]:[]);
+ const paths=Array.isArray(d.photo_paths)
+  ?d.photo_paths
+  :(d.photo_path?[d.photo_path]:[]);
+
  const details={...d};
 
- ["photo_path","photo_paths","photo_count","photo_file_names"].forEach(k=>delete details[k]);
+ ["photo_path","photo_paths","photo_count","photo_file_names"]
+  .forEach(k=>delete details[k]);
 
  const text=document.createElement("div");
  text.className="muted";
  text.style.marginTop="6px";
 
- if(Object.keys(details).length)text.textContent="Customisation: "+JSON.stringify(details);
- else if(!paths.length)text.textContent="Customisation details were not provided.";
+ if(Object.keys(details).length){
+  text.textContent="Customisation: "+JSON.stringify(details);
+ }else if(!paths.length){
+  text.textContent="Customisation details were not provided.";
+ }
 
  parent.append(text);
 
  if(paths.length){
   const photos=document.createElement("div");
-  photos.style.marginTop="8px";
+  photos.style.marginTop="10px";
 
   const heading=document.createElement("strong");
-  heading.textContent="Customer uploaded photo(s): ";
+  heading.textContent="Customer uploaded photo(s):";
   photos.append(heading);
 
   paths.forEach((path,i)=>{
-   const b=document.createElement("button");
-   b.className="btn light";
-   b.type="button";
-   b.style.margin="4px";
-   b.textContent="VIEW PHOTO "+(i+1);
-   b.onclick=()=>viewCustomerPhoto(path,b);
-   photos.append(b);
+   const photoRow=document.createElement("div");
+   photoRow.className="photo-actions";
+
+   const viewBtn=document.createElement("button");
+   viewBtn.type="button";
+   viewBtn.className="btn light";
+   viewBtn.textContent="VIEW PHOTO "+(i+1);
+   viewBtn.onclick=()=>viewCustomerPhoto(path,viewBtn);
+
+   const downloadBtn=document.createElement("button");
+   downloadBtn.type="button";
+   downloadBtn.className="btn";
+   downloadBtn.textContent="DOWNLOAD PHOTO "+(i+1);
+
+   const originalName=Array.isArray(d.photo_file_names)
+    ?d.photo_file_names[i]
+    :null;
+
+   downloadBtn.onclick=()=>downloadCustomerPhoto(
+    path,
+    downloadBtn,
+    originalName
+   );
+
+   photoRow.append(viewBtn,downloadBtn);
+   photos.append(photoRow);
   });
 
   parent.append(photos);
@@ -337,30 +366,77 @@ function appendCustomisationDetails(parent,raw){
   if(Array.isArray(d.photo_file_names)&&d.photo_file_names.length){
    const names=document.createElement("div");
    names.className="muted";
+   names.style.marginTop="6px";
    names.textContent="File name(s): "+d.photo_file_names.join(", ");
    parent.append(names);
   }
  }
 }
 
+/* VIEW CUSTOMER PHOTO */
+
 async function viewCustomerPhoto(path,button){
  const old=button.textContent;
+
  button.disabled=true;
  button.textContent="OPENING...";
 
- const {data,error}=await sb.storage
-  .from("customer-photos")
-  .createSignedUrl(path,300);
+ try{
+  const {data,error}=await sb.storage
+   .from("customer-photos")
+   .createSignedUrl(path,300);
 
- button.disabled=false;
- button.textContent=old;
+  if(error)throw error;
 
- if(error){
+  window.open(data.signedUrl,"_blank","noopener");
+
+ }catch(error){
   alert("Could not open customer photo: "+error.message);
-  return;
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
  }
+}
 
- window.open(data.signedUrl,"_blank","noopener");
+/* DOWNLOAD CUSTOMER PHOTO */
+
+async function downloadCustomerPhoto(path,button,originalName){
+ const old=button.textContent;
+
+ button.disabled=true;
+ button.textContent="PREPARING DOWNLOAD...";
+
+ try{
+  const fallbackName="zyra-customer-photo-"+Date.now();
+
+  const safeName=String(originalName||fallbackName)
+   .split(/[\\/]/)
+   .pop()
+   .replace(/[^\w.-]/g,"_");
+
+  const {data,error}=await sb.storage
+   .from("customer-photos")
+   .createSignedUrl(path,300,{
+    download:safeName
+   });
+
+  if(error)throw error;
+
+  const link=document.createElement("a");
+  link.href=data.signedUrl;
+  link.download=safeName;
+  link.style.display="none";
+
+  document.body.append(link);
+  link.click();
+  link.remove();
+
+ }catch(error){
+  alert("Could not download customer photo: "+error.message);
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
 }
 
 function showDashboard(show){
@@ -411,10 +487,7 @@ async function logout(){
  showDashboard(false);
 }
 
-/* DASHBOARD STATISTICS
-   Calculate from store_orders independently of the 200 orders
-   displayed in the order list.
-*/
+/* DASHBOARD STATISTICS */
 
 async function loadDashboardStats(){
  try{
@@ -1090,7 +1163,6 @@ async function loadOrders(){
 
   root.append(card);
  });
-
 }
 
 /* SAVE PAYMENT STATUS */
@@ -1261,7 +1333,7 @@ async function saveOrderTracking({
  }
 }
 
-/* REMOVE ORDER — WITH DELETE VERIFICATION AND STATS REFRESH */
+/* REMOVE ORDER */
 
 async function removeOrder(order,button){
  const orderId=order.id;
@@ -1292,7 +1364,6 @@ async function removeOrder(order,button){
  button.textContent="REMOVING...";
 
  try{
-  // Delete tracking records connected to this store order.
   const {error:trackingError1}=await sb.from("zyra_orders")
    .delete()
    .eq("store_order_id",orderId);
@@ -1304,7 +1375,6 @@ async function removeOrder(order,button){
    );
   }
 
-  // Also remove an older tracking record matching the order number.
   if(trackingId){
    const {error:trackingError2}=await sb.from("zyra_orders")
     .delete()
@@ -1318,7 +1388,6 @@ async function removeOrder(order,button){
    }
   }
 
-  // Delete product line items linked to the order.
   const {error:itemError}=await sb.from("store_order_items")
    .delete()
    .eq("order_id",orderId);
@@ -1330,7 +1399,6 @@ async function removeOrder(order,button){
    );
   }
 
-  // Delete the main store order and ask Supabase to return the deleted row.
   const {data:deletedOrders,error:orderError}=await sb.from("store_orders")
    .delete()
    .eq("id",orderId)
@@ -1342,8 +1410,6 @@ async function removeOrder(order,button){
    );
   }
 
-  // A successful response with no returned row means the deletion
-  // was not confirmed. This can happen because of RLS permissions.
   if(!deletedOrders||deletedOrders.length===0){
    throw new Error(
     "Supabase did not confirm that this store order was deleted. "+
@@ -1362,7 +1428,6 @@ async function removeOrder(order,button){
    "\nStore order: Removed"
   );
 
-  // Reload both the order list and dashboard totals after deletion.
   await loadOrders();
   await loadDashboardStats();
 
