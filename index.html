@@ -357,6 +357,10 @@ let products=[];
 let cart=[];
 let lastInvoice=null;
 
+/* ADDED: automatic tracking refresh controls */
+let trackingRefreshTimer=null;
+let trackingRequestInProgress=false;
+
 const DELIVERY_FEES={
 colombo_city:350,
 colombo_suburbs:400,
@@ -777,7 +781,7 @@ customField(item,"second_name","Second name","Second name — max 6 characters",
 else if(n.includes("name bracelet & necklace combo")||n.includes("name bracelet and necklace combo")||n.includes("bracelet necklace combo")){
 fields.append(
 customField(item,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),
-customField(item,"necklace_name","Necklace name — max 8 characters",8)
+customField(item,"necklace_name","Necklace name","Necklace name — max 8 characters",8)
 );
 }
 else if(n.includes("name necklace")||n.includes("name bracelet")){
@@ -1356,7 +1360,7 @@ w.document.write(html);
 w.document.close();
 }
 
-/* NEW TRACKING INVOICE — USES LIVE DATABASE DETAILS */
+/* UPDATED TRACKING INVOICE — INCLUDES LIVE COURIER INFORMATION */
 function downloadTrackingInvoice(o){
 
 if(!o||!o.order_number){
@@ -1445,6 +1449,7 @@ th{background:#faf7f2}
 .totals div{display:flex;justify-content:space-between;padding:6px}
 .grand{font-weight:bold;border-top:2px solid #842d40;color:#842d40;font-size:17px}
 .payment-status{background:#faf7f2;border-left:4px solid #842d40;padding:13px;margin:20px 0;line-height:1.7;font-size:13px}
+.delivery-info{background:#fcfaf8;border:1px solid #e9e1dc;padding:14px;margin:20px 0;line-height:1.8;font-size:13px}
 .rejection{color:#842d40;margin-top:8px}
 .actions{margin:25px 0}
 button{background:#842d40;color:white;border:0;padding:12px 22px;cursor:pointer}
@@ -1474,9 +1479,17 @@ ${invoiceEscape(o.district||"")}
 ${invoiceEscape(o.postal_code||"")}
 </section>
 
-<p class="meta">
-<b>Tracking ID:</b> ${invoiceEscape(o.tracking_id)}
-</p>
+<div class="delivery-info">
+<b>DELIVERY INFORMATION</b><br>
+<b>Tracking ID:</b> ${invoiceEscape(o.tracking_id||"—")}<br>
+<b>Courier:</b> ${invoiceEscape(o.courier||"Not assigned")}<br>
+<b>Courier Reference:</b> ${invoiceEscape(o.courier_reference||"Not available")}<br>
+<b>Delivery Status:</b> ${invoiceEscape(o.status||"Pending")}<br>
+<b>Current Location:</b> ${invoiceEscape(o.location||"Not updated")}<br>
+<b>Estimated Delivery:</b> ${invoiceEscape(o.estimated_delivery||"Not available")}<br>
+<b>Delivery Note:</b> ${invoiceEscape(o.note||"—")}<br>
+<b>Last Updated:</b> ${invoiceEscape(o.updated_at?new Date(o.updated_at).toLocaleString("en-LK"):"Not available")}
+</div>
 
 <table>
 <thead>
@@ -1521,18 +1534,26 @@ w.document.write(html);
 w.document.close();
 }
 
-/* UPDATED TRACKING — SHOWS LIVE PAYMENT STATUS AND INVOICE */
-async function trackDelivery(){
+/* UPDATED TRACKING — AUTOMATICALLY REFRESHES EVERY 15 SECONDS */
+async function trackDelivery(silent=false){
 
 const id=$("trackingId").value.trim();
 const box=$("trackingResult");
 
+if(!id){
+if(!silent){
+box.hidden=false;
+box.textContent="Please enter your tracking ID.";
+}
+return;
+}
+
+if(trackingRequestInProgress)return;
+trackingRequestInProgress=true;
+
+if(!silent){
 box.hidden=false;
 box.textContent="Checking your order...";
-
-if(!id){
-box.textContent="Please enter your tracking ID.";
-return;
 }
 
 try{
@@ -1543,19 +1564,25 @@ const {data,error}=await db.rpc(
 );
 
 if(error){
+if(!silent){
 box.textContent="Unable to check tracking: "+error.message;
+}
 return;
 }
 
 const o=Array.isArray(data)?data[0]:data;
 
 if(!o||o.found===false||!o.tracking_id){
+if(!silent){
 box.textContent="No tracking record found. Please check your tracking ID.";
+}
 return;
 }
 
 if(!o.order_number){
+if(!silent){
 box.textContent="Your tracking record was found, but the order details are unavailable. Please contact Zyra.lk on 074 153 9576.";
+}
 return;
 }
 
@@ -1586,7 +1613,7 @@ details.style.lineHeight="1.8";
 
 details.textContent=
 "Order Number: "+(o.order_number||"Not available")+
-"\nTracking ID: "+o.tracking_id+
+"\nTracking ID: "+(o.tracking_id||"Not available")+
 "\nDelivery Status: "+(o.status||"Not available")+
 "\nCourier: "+(o.courier||"Not assigned")+
 "\nCourier Reference: "+(o.courier_reference||"Not available")+
@@ -1611,20 +1638,37 @@ box.append(rejection);
 
 if(o.note){
 const note=document.createElement("p");
-note.textContent="Update: "+o.note;
+note.textContent="Delivery update: "+o.note;
 box.append(note);
 }
+
+const refreshInfo=document.createElement("p");
+refreshInfo.className="fine";
+refreshInfo.textContent="Your tracking information refreshes automatically every 15 seconds.";
+box.append(refreshInfo);
 
 const invoiceButton=document.createElement("button");
 invoiceButton.className="invoice-button";
 invoiceButton.textContent="DOWNLOAD / PRINT LATEST INVOICE";
 invoiceButton.onclick=()=>downloadTrackingInvoice(o);
-
 box.append(invoiceButton);
+
+/* Start automatic refreshing after a successful tracking lookup */
+if(!trackingRefreshTimer){
+trackingRefreshTimer=setInterval(()=>{
+trackDelivery(true);
+},15000);
+}
 
 }catch(err){
 console.error("Tracking error:",err);
+
+if(!silent){
 box.textContent="Unable to check your order. Please try again or contact Zyra.lk on 074 153 9576.";
+}
+
+}finally{
+trackingRequestInProgress=false;
 }
 }
 
