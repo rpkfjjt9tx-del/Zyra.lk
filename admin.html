@@ -8,14 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root {
- --ink:#30251f;
- --muted:#887b72;
- --cream:#faf7f2;
- --line:#eee5dc;
- --green:#287653;
- --red:#b94b4b;
-}
+:root{--ink:#30251f;--muted:#887b72;--cream:#faf7f2;--line:#eee5dc;--green:#287653;--red:#b94b4b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
@@ -71,6 +64,11 @@ summary{cursor:pointer;color:var(--muted)}
 .modalbox{background:white;max-width:900px;margin:20px auto;padding:20px;border-radius:12px}
 #slipContent img,#slipContent iframe{width:100%;max-height:70vh;min-height:400px;object-fit:contain;border:0}
 hr{border:0;border-top:1px solid var(--line);margin:17px 0}
+.tracking-panel{background:#fffaf6;border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}
+.tracking-panel h3{margin-top:0}
+.tracking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.tracking-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tracking-info{font-size:12px;color:var(--muted);margin-top:8px;overflow-wrap:anywhere}
 @media(max-width:700px){
  .layout{display:block}
  nav{width:100%;display:flex;overflow:auto;padding:7px;border-right:0;border-bottom:1px solid var(--line)}
@@ -131,6 +129,8 @@ hr{border:0;border-top:1px solid var(--line);margin:17px 0}
       <option value="pending">Pending</option>
       <option value="processing">Processing</option>
       <option value="dispatched">Dispatched</option>
+      <option value="in_transit">In Transit</option>
+      <option value="out_for_delivery">Out for Delivery</option>
       <option value="delivered">Delivered</option>
       <option value="cancelled">Cancelled</option>
      </select>
@@ -425,9 +425,7 @@ function table(headers, rows) {
  return `
   <div class="tablewrap">
    <table>
-    <thead>
-     <tr>${headers.map(x => `<th>${x}</th>`).join("")}</tr>
-    </thead>
+    <thead><tr>${headers.map(x => `<th>${x}</th>`).join("")}</tr></thead>
     <tbody>${rows.join("")}</tbody>
    </table>
   </div>
@@ -442,7 +440,6 @@ function customerName(o) {
  return o.customer_name || o.name || o.full_name || "-";
 }
 
-/* CUSTOMER-FACING ORDER NUMBER */
 function displayOrderNumber(o) {
  return o?.order_number || o?.id || "-";
 }
@@ -458,9 +455,8 @@ function paymentStatus(o) {
 function orderTotal(o) {
  if (o.total_amount != null) return Number(o.total_amount);
  if (o.total != null) return Number(o.total);
-
- return orderItems(o).reduce((s, i) =>
-  s + Number(i.unit_price || i.price || 0) * Number(i.quantity || 1), 0
+ return orderItems(o).reduce((s,i) =>
+  s + Number(i.unit_price || i.price || 0) * Number(i.quantity || 1),0
  );
 }
 
@@ -476,12 +472,12 @@ function statusClass(s) {
 async function loadOrders() {
  let result = await db.from(ORDERS)
   .select("*,store_order_items(*)")
-  .order("created_at", {ascending:false});
+  .order("created_at",{ascending:false});
 
  if (result.error) {
   result = await db.from(ORDERS)
    .select("*")
-   .order("created_at", {ascending:false});
+   .order("created_at",{ascending:false});
  }
 
  if (result.error) {
@@ -490,7 +486,6 @@ async function loadOrders() {
  }
 
  orders = result.data || [];
-
  renderOrders();
  renderPayments();
  renderOverview();
@@ -502,12 +497,7 @@ function renderOrders() {
 
  const list = orders.filter(o => {
   const text = norm([
-   customerName(o),
-   o.order_number,
-   o.id,
-   o.phone,
-   o.customer_phone,
-   o.email
+   customerName(o),o.order_number,o.id,o.phone,o.customer_phone,o.email
   ].join(" "));
 
   return (!q || text.includes(q)) &&
@@ -519,21 +509,14 @@ function renderOrders() {
   list.map(o => `
    <tr>
     <td>${esc(displayOrderNumber(o))}</td>
-    <td>
-     ${esc(customerName(o))}
-     <br><small>${esc(o.phone || o.customer_phone || o.email || "")}</small>
-    </td>
+    <td>${esc(customerName(o))}<br><small>${esc(o.phone || o.customer_phone || o.email || "")}</small></td>
     <td>${dateValue(o.created_at)}</td>
     <td>${money(orderTotal(o))}</td>
-    <td>
-     <span class="status ${statusClass(o.payment_status)}">
-      ${esc(o.payment_status || "-")}
-     </span>
-    </td>
+    <td><span class="status ${statusClass(o.payment_status)}">${esc(o.payment_status || "-")}</span></td>
     <td>
      <select onchange="updateOrderStatus('${esc(o.id)}',this.value)">
-      ${["pending","processing","dispatched","delivered","cancelled"].map(s => `
-       <option value="${s}" ${norm(orderStatus(o)) === s ? "selected" : ""}>${s}</option>
+      ${["pending","processing","dispatched","in_transit","out_for_delivery","delivered","cancelled"].map(s => `
+       <option value="${s}" ${norm(orderStatus(o)) === s ? "selected" : ""}>${s.replace(/_/g," ")}</option>
       `).join("")}
      </select>
     </td>
@@ -549,7 +532,7 @@ function renderOrders() {
  );
 }
 
-async function updateOrderStatus(id, status) {
+async function updateOrderStatus(id,status) {
  const {error} = await db.from(ORDERS)
   .update({order_status:status})
   .eq("id",id);
@@ -561,10 +544,7 @@ async function updateOrderStatus(id, status) {
  }
 
  const tracking = await db.from(TRACKING)
-  .update({
-   status,
-   updated_at:new Date().toISOString()
-  })
+  .update({status,updated_at:new Date().toISOString()})
   .eq("store_order_id",id);
 
  if (tracking.error) {
@@ -577,9 +557,7 @@ async function updateOrderStatus(id, status) {
 async function deleteOrder(id) {
  if (!confirm("Delete this store order?")) return;
 
- const {error} = await db.rpc("delete_zyra_store_order", {
-  p_order_id:id
- });
+ const {error} = await db.rpc("delete_zyra_store_order",{p_order_id:id});
 
  if (error) {
   notify("Delete failed: " + error.message);
@@ -612,37 +590,21 @@ function customFieldsHTML(record) {
  if (!record || typeof record !== "object") return "";
 
  return Object.entries(record)
-  .filter(([key,value]) =>
-   isCustomKey(key) &&
-   !isPhotoKey(key) &&
-   value !== null &&
-   value !== ""
-  )
+  .filter(([key,value]) => isCustomKey(key) && !isPhotoKey(key) && value !== null && value !== "")
   .map(([key,value]) => `
    <div style="padding:9px 0;border-bottom:1px solid #eee">
     <small>${esc(prettyKey(key))}</small>
-    <div style="white-space:pre-wrap;overflow-wrap:anywhere">
-     ${esc(formatValue(value))}
-    </div>
+    <div style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(formatValue(value))}</div>
    </div>
   `).join("");
 }
 
-function collectPhotoPaths(value, key = "", out = []) {
+function collectPhotoPaths(value,key="",out=[]) {
  if (value === null || value === undefined) return [...new Set(out)];
 
  if (typeof value === "string") {
   const s = value.trim();
-
-  if (
-   isPhotoKey(key) &&
-   s &&
-   !/^https?:\/\//i.test(s) &&
-   !/^data:/i.test(s)
-  ) {
-   out.push(s);
-  }
-
+  if (isPhotoKey(key) && s && !/^https?:\/\//i.test(s) && !/^data:/i.test(s)) out.push(s);
   return [...new Set(out)];
  }
 
@@ -652,9 +614,7 @@ function collectPhotoPaths(value, key = "", out = []) {
  }
 
  if (typeof value === "object") {
-  Object.entries(value).forEach(([k,v]) => {
-   collectPhotoPaths(v,k,out);
-  });
+  Object.entries(value).forEach(([k,v]) => collectPhotoPaths(v,k,out));
  }
 
  return [...new Set(out)];
@@ -663,18 +623,12 @@ function collectPhotoPaths(value, key = "", out = []) {
 async function renderCustomerPhotos(records) {
  const paths = [...new Set(records.flatMap(r => collectPhotoPaths(r)))];
 
- if (!paths.length) {
-  return "<p class='muted'>No customer photo paths were found in the order or item records.</p>";
- }
+ if (!paths.length) return "<p class='muted'>No customer photo paths were found in the order or item records.</p>";
 
  const html = await Promise.all(paths.map(async path => {
-  const {data,error} = await db.storage
-   .from(CUSTOMER_BUCKET)
-   .createSignedUrl(path,300);
+  const {data,error} = await db.storage.from(CUSTOMER_BUCKET).createSignedUrl(path,300);
 
-  if (error) {
-   return `<p>Could not access ${esc(path)}: ${esc(error.message)}</p>`;
-  }
+  if (error) return `<p>Could not access ${esc(path)}: ${esc(error.message)}</p>`;
 
   return `
    <div class="photo-card">
@@ -692,42 +646,25 @@ async function renderCustomerPhotos(records) {
 }
 
 async function openCustomerPhoto(path) {
- const {data,error} = await db.storage
-  .from(CUSTOMER_BUCKET)
-  .createSignedUrl(path,300);
-
- if (error) {
-  notify(error.message);
-  return;
- }
-
+ const {data,error} = await db.storage.from(CUSTOMER_BUCKET).createSignedUrl(path,300);
+ if (error) {notify(error.message);return;}
  window.open(data.signedUrl,"_blank","noopener");
 }
 
 async function downloadCustomerPhoto(path) {
- const {data,error} = await db.storage
-  .from(CUSTOMER_BUCKET)
-  .download(path);
-
- if (error) {
-  notify("Photo download failed: " + error.message);
-  return;
- }
-
+ const {data,error} = await db.storage.from(CUSTOMER_BUCKET).download(path);
+ if (error) {notify("Photo download failed: " + error.message);return;}
  downloadBlob(data,path.split("/").pop() || "customer-photo");
 }
 
-function downloadBlob(blob, filename) {
+function downloadBlob(blob,filename) {
  const url = URL.createObjectURL(blob);
  const a = document.createElement("a");
-
  a.href = url;
  a.download = filename;
-
  document.body.appendChild(a);
  a.click();
  a.remove();
-
  setTimeout(() => URL.revokeObjectURL(url),1000);
 }
 
@@ -756,18 +693,69 @@ async function viewOrder(id) {
    <p><b>Total:</b> ${money(orderTotal(o))}</p>
   </div>
 
-  <h3>Products and Customisation Details</h3>
+  <div class="tracking-panel">
+   <h3>Courier & Delivery Management</h3>
+   <p class="muted">Add or update courier information for this order. Customers can view these updates using their tracking ID.</p>
 
+   <div class="tracking-grid">
+    <div>
+     <label>Courier Company</label>
+     <select id="trackCourier">
+      <option value="">Select courier</option>
+      <option value="Domex">Domex</option>
+      <option value="Prompt Xpress">Prompt Xpress</option>
+      <option value="Pronto Lanka">Pronto Lanka</option>
+      <option value="Koombiyo">Koombiyo</option>
+      <option value="Sri Lanka Post">Sri Lanka Post</option>
+      <option value="Other">Other</option>
+     </select>
+    </div>
+    <div>
+     <label>Courier Reference / Tracking Number</label>
+     <input id="trackReference" placeholder="Enter courier tracking number">
+    </div>
+    <div>
+     <label>Delivery Status</label>
+     <select id="trackStatus">
+      <option value="pending">Pending</option>
+      <option value="processing">Processing</option>
+      <option value="dispatched">Dispatched</option>
+      <option value="in_transit">In Transit</option>
+      <option value="out_for_delivery">Out for Delivery</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+     </select>
+    </div>
+    <div>
+     <label>Estimated Delivery Date</label>
+     <input id="trackEstimated" type="date">
+    </div>
+    <div>
+     <label>Current Location</label>
+     <input id="trackLocation" placeholder="e.g. Colombo Distribution Centre">
+    </div>
+   </div>
+
+   <label>Delivery Update / Note for Customer</label>
+   <textarea id="trackNote" placeholder="Enter a delivery update for the customer"></textarea>
+
+   <div class="tracking-actions">
+    <button class="success" onclick="saveCourierTracking('${esc(o.id)}')">Save Courier & Tracking Details</button>
+    <button class="secondary" onclick="loadCourierTracking('${esc(o.id)}')">Refresh Tracking Details</button>
+   </div>
+
+   <div id="trackingMessage" class="tracking-info"></div>
+   <div id="trackingCurrent" class="tracking-info"></div>
+  </div>
+
+  <h3>Products and Customisation Details</h3>
   ${items.length ? items.map((item,index) => `
    <div class="panel">
     <h3>${index+1}. ${esc(item.product_name || item.name || "Product")}</h3>
     <p><b>Quantity:</b> ${esc(item.quantity || 1)}</p>
     <p><b>Unit Price:</b> ${money(item.unit_price || item.price || 0)}</p>
-
     <h4>Personalisation / Customisation</h4>
-
     ${customFieldsHTML(item) || "<p class='muted'>No recognised customisation fields were found. Open the full saved record below to inspect it.</p>"}
-
     <details>
      <summary>View all saved item information</summary>
      <pre>${esc(JSON.stringify(item,null,2))}</pre>
@@ -779,7 +767,6 @@ async function viewOrder(id) {
    <h3>Customer Instructions and Order Notes</h3>
    ${customFieldsHTML(o)}
    <p>${esc(o.notes || o.customisation || o.customization || "No general notes saved.")}</p>
-
    <details>
     <summary>View all saved order information</summary>
     <pre>${esc(JSON.stringify(o,null,2))}</pre>
@@ -791,11 +778,147 @@ async function viewOrder(id) {
    ${photos}
   </div>
  `;
+
+ await loadCourierTracking(id);
 }
 
 function closeOrderModal() {
  el("modal").style.display = "none";
  el("orderDetailContent").innerHTML = "";
+}
+
+/* COURIER AND DELIVERY MANAGEMENT */
+
+function generateTrackingId() {
+ const random = Math.random().toString(36).substring(2,10).toUpperCase();
+ return "ZYRA-" + random;
+}
+
+function setTrackingMessage(message) {
+ const box = el("trackingMessage");
+ if (box) box.textContent = message || "";
+}
+
+async function loadCourierTracking(orderId) {
+ setTrackingMessage("Loading tracking information...");
+
+ const {data,error} = await db.from(TRACKING)
+  .select("*")
+  .eq("store_order_id",orderId)
+  .maybeSingle();
+
+ if (error) {
+  setTrackingMessage("Could not load tracking information: " + error.message);
+  return;
+ }
+
+ const order = orders.find(o => String(o.id) === String(orderId));
+
+ if (data) {
+  el("trackCourier").value = data.courier || "";
+  el("trackReference").value = data.courier_reference || "";
+  el("trackStatus").value = data.status || (order ? orderStatus(order) : "pending");
+  el("trackEstimated").value = data.estimated_delivery ? String(data.estimated_delivery).slice(0,10) : "";
+  el("trackLocation").value = data.location || "";
+  el("trackNote").value = data.note || "";
+
+  el("trackingCurrent").innerHTML = `
+   <hr>
+   <p><b>Customer Tracking ID:</b> ${esc(data.tracking_id || "Not generated")}</p>
+   <p><b>Courier:</b> ${esc(data.courier || "-")}</p>
+   <p><b>Courier Reference:</b> ${esc(data.courier_reference || "-")}</p>
+   <p><b>Delivery Status:</b> ${esc(data.status || "-")}</p>
+   <p><b>Estimated Delivery:</b> ${esc(data.estimated_delivery || "-")}</p>
+   <p><b>Current Location:</b> ${esc(data.location || "-")}</p>
+   <p><b>Customer Note:</b> ${esc(data.note || "-")}</p>
+   <p><b>Last Updated:</b> ${esc(dateValue(data.updated_at))}</p>
+  `;
+
+  setTrackingMessage("Existing tracking record loaded.");
+ } else {
+  el("trackCourier").value = "";
+  el("trackReference").value = "";
+  el("trackStatus").value = order ? orderStatus(order) : "processing";
+  el("trackEstimated").value = "";
+  el("trackLocation").value = "";
+  el("trackNote").value = "";
+  el("trackingCurrent").innerHTML = "";
+  setTrackingMessage("No courier record yet. Enter the details and save.");
+ }
+}
+
+async function saveCourierTracking(orderId) {
+ const courier = el("trackCourier").value.trim();
+ const courier_reference = el("trackReference").value.trim();
+ const status = el("trackStatus").value;
+ const estimated_delivery = el("trackEstimated").value || null;
+ const location = el("trackLocation").value.trim();
+ const note = el("trackNote").value.trim();
+
+ if (!status) {
+  notify("Please select a delivery status.");
+  return;
+ }
+
+ if (courier_reference && !courier) {
+  notify("Please select a courier company.");
+  return;
+ }
+
+ setTrackingMessage("Saving courier information...");
+
+ const {data:existing,error:lookupError} = await db.from(TRACKING)
+  .select("*")
+  .eq("store_order_id",orderId)
+  .maybeSingle();
+
+ if (lookupError) {
+  setTrackingMessage("Could not check existing tracking record: " + lookupError.message);
+  notify(lookupError.message);
+  return;
+ }
+
+ const trackingPayload = {
+  courier,
+  courier_reference,
+  status,
+  estimated_delivery,
+  location,
+  note,
+  updated_at:new Date().toISOString()
+ };
+
+ let result;
+
+ if (existing) {
+  result = await db.from(TRACKING)
+   .update(trackingPayload)
+   .eq("store_order_id",orderId);
+ } else {
+  trackingPayload.store_order_id = orderId;
+  trackingPayload.tracking_id = generateTrackingId();
+
+  result = await db.from(TRACKING).insert(trackingPayload);
+ }
+
+ if (result.error) {
+  setTrackingMessage("Tracking save failed: " + result.error.message);
+  notify("Could not save tracking: " + result.error.message);
+  return;
+ }
+
+ const orderUpdate = await db.from(ORDERS)
+  .update({order_status:status})
+  .eq("id",orderId);
+
+ if (orderUpdate.error) {
+  notify("Tracking was saved, but the order status could not be updated: " + orderUpdate.error.message);
+ } else {
+  notify("Courier and delivery information saved successfully.");
+ }
+
+ await loadCourierTracking(orderId);
+ await loadOrders();
 }
 
 /* PAYMENT SLIPS */
@@ -815,16 +938,8 @@ function renderPayments() {
      <td>${esc(displayOrderNumber(o))}<br><small>${dateValue(o.created_at)}</small></td>
      <td>${esc(customerName(o))}</td>
      <td>${money(orderTotal(o))}</td>
-     <td>
-      ${hasSlip
-       ? `<button class="secondary" onclick="openSlip('${esc(o.payment_slip_path)}','${esc(o.payment_slip_file_name || "")}')">View Slip</button>`
-       : "No slip uploaded"}
-     </td>
-     <td>
-      <span class="status pending">
-       ${hasSlip ? "Pending verification" : esc(o.payment_status || "Pending")}
-      </span>
-     </td>
+     <td>${hasSlip ? `<button class="secondary" onclick="openSlip('${esc(o.payment_slip_path)}','${esc(o.payment_slip_file_name || "")}')">View Slip</button>` : "No slip uploaded"}</td>
+     <td><span class="status pending">${hasSlip ? "Pending verification" : esc(o.payment_status || "Pending")}</span></td>
      <td>
       <div class="actions">
        <button class="success" ${hasSlip ? "" : "disabled"} onclick="verifyPayment('${esc(o.id)}','ACCEPT')">Accept</button>
@@ -843,14 +958,13 @@ async function verifyPayment(id,decision) {
  if (decision === "REJECT") {
   reason = prompt("Enter rejection reason:");
   if (reason === null) return;
-
   if (!reason.trim()) {
    notify("Rejection reason is required.");
    return;
   }
  }
 
- const {error} = await db.rpc("verify_zyra_payment", {
+ const {error} = await db.rpc("verify_zyra_payment",{
   p_order_id:id,
   p_decision:decision,
   p_rejection_reason:reason
@@ -868,9 +982,7 @@ async function verifyPayment(id,decision) {
 async function openSlip(path,fileName) {
  activeSlipPath = path;
 
- const {data,error} = await db.storage
-  .from(PAYMENT_BUCKET)
-  .createSignedUrl(path,300);
+ const {data,error} = await db.storage.from(PAYMENT_BUCKET).createSignedUrl(path,300);
 
  if (error) {
   notify("Cannot open slip: " + error.message);
@@ -880,14 +992,11 @@ async function openSlip(path,fileName) {
  const ext = (fileName || path).split(".").pop().toLowerCase().split("?")[0];
 
  if (["jpg","jpeg","png","webp","gif"].includes(ext)) {
-  el("slipContent").innerHTML =
-   `<img src="${data.signedUrl}" alt="Payment slip">`;
+  el("slipContent").innerHTML = `<img src="${data.signedUrl}" alt="Payment slip">`;
  } else if (ext === "pdf") {
-  el("slipContent").innerHTML =
-   `<iframe src="${data.signedUrl}"></iframe>`;
+  el("slipContent").innerHTML = `<iframe src="${data.signedUrl}"></iframe>`;
  } else {
-  el("slipContent").innerHTML =
-   `<a href="${data.signedUrl}" target="_blank" rel="noopener">Open payment slip</a>`;
+  el("slipContent").innerHTML = `<a href="${data.signedUrl}" target="_blank" rel="noopener">Open payment slip</a>`;
  }
 
  el("slipModal").style.display = "block";
@@ -901,9 +1010,7 @@ function closeSlip() {
 async function downloadSlip() {
  if (!activeSlipPath) return;
 
- const {data,error} = await db.storage
-  .from(PAYMENT_BUCKET)
-  .download(activeSlipPath);
+ const {data,error} = await db.storage.from(PAYMENT_BUCKET).download(activeSlipPath);
 
  if (error) {
   notify(error.message);
@@ -915,9 +1022,7 @@ async function downloadSlip() {
 
 /* PRODUCTS */
 async function loadProducts() {
- const {data,error} = await db.from(PRODUCTS)
-  .select("*")
-  .order("name");
+ const {data,error} = await db.from(PRODUCTS).select("*").order("name");
 
  if (error) {
   notify("Products: " + error.message);
@@ -925,7 +1030,6 @@ async function loadProducts() {
  }
 
  products = data || [];
-
  renderProducts();
  renderManualProductOptions();
  renderOverview();
@@ -933,15 +1037,10 @@ async function loadProducts() {
 
 async function productImageUrl(value) {
  if (!value) return "";
-
  if (/^https?:\/\//i.test(value)) return value;
 
- const {data,error} = await db.storage
-  .from(PRODUCT_BUCKET)
-  .createSignedUrl(value,300);
-
+ const {data,error} = await db.storage.from(PRODUCT_BUCKET).createSignedUrl(value,300);
  if (error) return "";
-
  return data.signedUrl;
 }
 
@@ -949,8 +1048,7 @@ async function renderProducts() {
  const q = norm(el("productSearch").value);
 
  const list = products.filter(p =>
-  norm(p.name).includes(q) ||
-  norm(p.category).includes(q)
+  norm(p.name).includes(q) || norm(p.category).includes(q)
  );
 
  const rows = await Promise.all(list.map(async p => {
@@ -983,11 +1081,7 @@ async function renderProducts() {
 }
 
 function clearProductForm() {
- [
-  "pId","pName","pPrice","pCost","pCategory","pStock",
-  "pPayment","pImage","pDescription","pImageFile"
- ].forEach(id => el(id).value = "");
-
+ ["pId","pName","pPrice","pCost","pCategory","pStock","pPayment","pImage","pDescription","pImageFile"].forEach(id => el(id).value = "");
  el("pCustom").value = "false";
  el("pActive").value = "true";
  el("pImagePreview").innerHTML = "";
@@ -1012,10 +1106,7 @@ async function editProduct(id) {
  el("productFormTitle").textContent = "Edit Product";
 
  const url = await productImageUrl(p.image_url);
-
- el("pImagePreview").innerHTML = url
-  ? `<img src="${url}" style="max-width:150px;max-height:150px;object-fit:contain">`
-  : "";
+ el("pImagePreview").innerHTML = url ? `<img src="${url}" style="max-width:150px;max-height:150px;object-fit:contain">` : "";
 
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -1025,12 +1116,10 @@ async function uploadProductImage(file) {
  const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
  const {data,error} = await db.storage.from(PRODUCT_BUCKET).upload(path,file,{
-  upsert:false,
-  contentType:file.type || "image/jpeg"
+  upsert:false,contentType:file.type || "image/jpeg"
  });
 
  if (error) throw error;
-
  return data.path || path;
 }
 
@@ -1055,9 +1144,7 @@ async function saveProduct() {
   payment_option:el("pPayment").value.trim()
  };
 
- if (el("pCost").value !== "") {
-  payload.cost_price = Number(el("pCost").value);
- }
+ if (el("pCost").value !== "") payload.cost_price = Number(el("pCost").value);
 
  const file = el("pImageFile").files[0];
 
@@ -1071,7 +1158,6 @@ async function saveProduct() {
  }
 
  const id = el("pId").value;
-
  const result = id
   ? await db.from(PRODUCTS).update(payload).eq("id",id)
   : await db.from(PRODUCTS).insert(payload);
@@ -1095,9 +1181,7 @@ async function downloadProductImage(id) {
   return;
  }
 
- const {data,error} = await db.storage
-  .from(PRODUCT_BUCKET)
-  .download(p.image_url);
+ const {data,error} = await db.storage.from(PRODUCT_BUCKET).download(p.image_url);
 
  if (error) {
   notify("Image download failed: " + error.message);
@@ -1111,12 +1195,7 @@ async function deleteProduct(id) {
  if (!confirm("Delete this product?")) return;
 
  const {error} = await db.from(PRODUCTS).delete().eq("id",id);
-
- if (error) {
-  notify(error.message);
-  return;
- }
-
+ if (error) {notify(error.message);return;}
  await loadProducts();
 }
 
@@ -1168,8 +1247,7 @@ function addManualItem() {
 
 function renderManualItems() {
  el("manualItems").innerHTML = manualItems.map((i,n) => `
-  <p>
-   ${esc(i.product_name)} × ${i.quantity} — ${money(i.quantity*i.unit_price)}
+  <p>${esc(i.product_name)} × ${i.quantity} — ${money(i.quantity*i.unit_price)}
    <button class="danger" onclick="manualItems.splice(${n},1);renderManualItems()">Remove</button>
   </p>
  `).join("") + `
@@ -1200,10 +1278,7 @@ async function saveManualOrder() {
   notes:el("mNotes").value.trim()
  };
 
- const {data,error} = await db.from(ORDERS)
-  .insert(payload)
-  .select()
-  .single();
+ const {data,error} = await db.from(ORDERS).insert(payload).select().single();
 
  if (error) {
   notify("Could not create order: " + error.message);
@@ -1227,12 +1302,12 @@ async function saveManualOrder() {
 
  const tracking = await db.from(TRACKING).insert({
   store_order_id:data.id,
-  status:payload.order_status
+  tracking_id:generateTrackingId(),
+  status:payload.order_status,
+  updated_at:new Date().toISOString()
  });
 
- if (tracking.error) {
-  console.warn("Tracking insert failed:",tracking.error.message);
- }
+ if (tracking.error) console.warn("Tracking insert failed:",tracking.error.message);
 
  notify("Manual order created.");
  hideManualOrder();
@@ -1302,11 +1377,7 @@ async function deleteExpense(id) {
  if (!confirm("Delete this expense?")) return;
 
  const {error} = await db.from(EXPENSES).delete().eq("id",id);
-
- if (error) {
-  notify(error.message);
-  return;
- }
+ if (error) {notify(error.message);return;}
 
  await loadExpenses();
  await loadReports();
@@ -1315,7 +1386,6 @@ async function deleteExpense(id) {
 /* REPORTS */
 function dateRange() {
  const period = el("reportPeriod").value;
-
  const selected = el("reportDate").value
   ? new Date(el("reportDate").value + "T12:00:00")
   : new Date();
@@ -1345,7 +1415,6 @@ function dateRange() {
 function inRange(value,range) {
  if (!range.start) return true;
  if (!value) return false;
-
  const d = new Date(value);
  return d >= range.start && d < range.end;
 }
@@ -1365,12 +1434,10 @@ async function loadReports() {
  if (!expenses.length) await loadExpenses();
 
  const range = dateRange();
-
  const selectedOrders = orders.filter(o => inRange(o.created_at,range));
 
  const paid = selectedOrders.filter(o =>
-  paymentStatus(o) === "paid" &&
-  norm(orderStatus(o)) !== "cancelled"
+  paymentStatus(o) === "paid" && norm(orderStatus(o)) !== "cancelled"
  );
 
  const selectedExpenses = expenses.filter(e =>
@@ -1380,7 +1447,6 @@ async function loadReports() {
  let revenue = 0;
  let productCosts = 0;
  let units = 0;
-
  const productMap = {};
  const orderRows = [];
 
@@ -1403,9 +1469,7 @@ async function loadReports() {
    if (!productMap[key]) {
     productMap[key] = {
      name:i.product_name || i.name || product?.name || "Product",
-     quantity:0,
-     revenue:0,
-     cost:0
+     quantity:0,revenue:0,cost:0
     };
    }
 
@@ -1415,7 +1479,6 @@ async function loadReports() {
   });
 
   revenue += orderRevenue;
-
   orderRows.push({
    id:displayOrderNumber(o),
    revenue:orderRevenue,
@@ -1424,25 +1487,11 @@ async function loadReports() {
   });
  });
 
- const expenseTotal = selectedExpenses.reduce(
-  (s,e) => s + Number(e.amount || 0),0
- );
-
+ const expenseTotal = selectedExpenses.reduce((s,e) => s+Number(e.amount || 0),0);
  const grossProfit = revenue-productCosts;
  const netProfit = grossProfit-expenseTotal;
 
- reportData = {
-  paid,
-  selectedExpenses,
-  revenue,
-  productCosts,
-  expenseTotal,
-  grossProfit,
-  netProfit,
-  units,
-  productMap,
-  orderRows
- };
+ reportData = {paid,selectedExpenses,revenue,productCosts,expenseTotal,grossProfit,netProfit,units,productMap,orderRows};
 
  el("reportCards").innerHTML = [
   ["Paid Revenue",money(revenue)],
@@ -1452,10 +1501,7 @@ async function loadReports() {
   ["Estimated Net Profit",money(netProfit)],
   ["Units Sold",units]
  ].map(([a,b]) => `
-  <div class="card">
-   <small>${a}</small>
-   <div class="number">${b}</div>
-  </div>
+  <div class="card"><small>${a}</small><div class="number">${b}</div></div>
  `).join("");
 
  el("productReport").innerHTML = table(
@@ -1484,7 +1530,6 @@ async function loadReports() {
  );
 
  const categories = {};
-
  selectedExpenses.forEach(e => {
   const key = e.category || "Other";
   categories[key] = (categories[key] || 0) + Number(e.amount || 0);
@@ -1492,9 +1537,7 @@ async function loadReports() {
 
  el("expenseReport").innerHTML = table(
   ["Category","Total"],
-  Object.entries(categories).map(([k,v]) => `
-   <tr><td>${esc(k)}</td><td>${money(v)}</td></tr>
-  `)
+  Object.entries(categories).map(([k,v]) => `<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`)
  );
 }
 
@@ -1513,10 +1556,7 @@ function exportCSV() {
   ["Order","Revenue","Product Cost","Profit"]
  ];
 
- reportData.orderRows.forEach(o =>
-  rows.push([o.id,o.revenue,o.cost,o.profit])
- );
-
+ reportData.orderRows.forEach(o => rows.push([o.id,o.revenue,o.cost,o.profit]));
  rows.push([]);
  rows.push(["Product","Quantity","Revenue","Cost","Profit"]);
 
@@ -1532,7 +1572,6 @@ function exportCSV() {
 
  const csv = rows.map(row => row.map(csvCell).join(",")).join("\r\n");
  const blob = new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
-
  downloadBlob(blob,"zyra-profit-report.csv");
 }
 
@@ -1564,7 +1603,7 @@ function printInvoice(id) {
    <b>Date:</b> ${dateValue(o.created_at)}<br>
    <b>Customer:</b> ${esc(customerName(o))}<br>
    <b>Phone:</b> ${esc(o.phone || o.customer_phone || "-")}<br>
-   <b>Address:</b> ${esc(o.address || "-")}
+   <b>Address:</b> ${esc(o.address || o.delivery_address || "-")}
   </p>
   <table>
    <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
@@ -1584,7 +1623,6 @@ function printInvoice(id) {
  `;
 
  const w = window.open("","_blank");
-
  if (!w) {
   notify("Allow pop-ups to print invoices.");
   return;
@@ -1599,8 +1637,7 @@ function printInvoice(id) {
 /* OVERVIEW */
 function renderOverview() {
  const paidOrders = orders.filter(o =>
-  paymentStatus(o) === "paid" &&
-  norm(orderStatus(o)) !== "cancelled"
+  paymentStatus(o) === "paid" && norm(orderStatus(o)) !== "cancelled"
  );
 
  const pendingOrders = orders.filter(o =>
@@ -1619,10 +1656,7 @@ function renderOverview() {
   ["Pending Amount",money(pendingAmount)],
   ["Expenses",money(expenses.reduce((s,e)=>s+Number(e.amount||0),0))]
  ].map(([a,b]) => `
-  <div class="card">
-   <small>${a}</small>
-   <div class="number">${b}</div>
-  </div>
+  <div class="card"><small>${a}</small><div class="number">${b}</div></div>
  `).join("");
 
  const recent = [...orders]
