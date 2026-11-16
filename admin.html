@@ -1,1404 +1,708 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zyra.lk | Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f;--line:#e9e1dc;--green:#28734c;--red:#a33b3b}
+:root{--ink:#30251f;--muted:#887b72;--cream:#faf7f2;--white:#fff;--line:#eee5dc;--gold:#a98254;--green:#287653;--red:#b94b4b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
-button{cursor:pointer;border:0}
-header{background:#fff;padding:16px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
-.logo{font:bold 25px Georgia,serif;letter-spacing:3px;color:var(--wine)}
-.header-right{display:flex;gap:10px;align-items:center}
-.btn{background:var(--wine);color:white;padding:11px 16px}
-.btn.secondary{background:var(--dark)}
-.btn.light{background:#fff;color:var(--wine);border:1px solid var(--wine)}
-.btn.danger{background:var(--red)}
-button:disabled{opacity:.5;cursor:not-allowed}
-.container{max-width:1450px;margin:auto;padding:25px 5%}
-.login-card{max-width:420px;margin:80px auto;background:white;padding:30px;border:1px solid var(--line)}
-.login-card h2{text-align:center;font:27px Georgia,serif;color:var(--wine)}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:13px;margin-bottom:6px}
-.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid #ddd;background:white}
-.field textarea{min-height:75px;resize:vertical}
-.error{color:var(--red);font-size:13px;margin-top:10px}
-.success{color:var(--green);font-size:13px;margin-top:10px}
-.muted{color:var(--muted);font-size:12px;line-height:1.6}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:25px}
-.tab{padding:11px 16px;background:white;border:1px solid var(--line);color:var(--dark)}
-.tab.active{background:var(--wine);color:white;border-color:var(--wine)}
-.panel{display:none}.panel.active{display:block}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}
-.stat{background:white;border:1px solid var(--line);padding:18px}
-.stat span{font-size:12px;color:var(--muted)}
-.stat strong{display:block;font:25px Georgia,serif;color:var(--wine);margin-top:8px;overflow-wrap:anywhere}
-.card{background:white;border:1px solid var(--line);padding:18px;margin-bottom:16px}
-.card h3{margin-top:0;font:20px Georgia,serif}
-.order-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.order-id{font-weight:bold;color:var(--wine)}
-.status{font-size:11px;background:#f2e9e6;padding:6px 9px;display:inline-block;margin:6px 4px 6px 0}
-.status.paid{background:#e4f2e9;color:var(--green)}
-.status.rejected{background:#f8e5e5;color:var(--red)}
-.order-details{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:15px 0}
-.order-details div{font-size:13px;line-height:1.7;overflow-wrap:anywhere}
-.order-details strong{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}
-.items{border-top:1px solid var(--line);padding-top:12px;font-size:13px;line-height:1.8}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
-.actions select{padding:9px;border:1px solid #ddd}
-.grid-form{display:grid;grid-template-columns:repeat(2,1fr);gap:0 15px}
-.full{grid-column:1/-1}
-.table-wrap{overflow-x:auto;background:white;border:1px solid var(--line)}
-table{border-collapse:collapse;width:100%;min-width:650px;font-size:13px}
-th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line)}
-th{background:#f4eee9;color:var(--wine)}
-.product-image{width:55px;height:55px;object-fit:cover;background:#eee}
-.invoice-area{display:none}
-.small-btn{padding:8px 11px;background:var(--wine);color:white;font-size:12px}
-.small-btn.gray{background:#555}
-.small-btn.green{background:var(--green)}
-.small-btn.red{background:var(--red)}
-.photo-link{display:inline-block;margin:4px 5px 4px 0;color:var(--wine);font-size:12px}
-.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}
-.section-heading h2{font:27px Georgia,serif;margin:0}
-.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
-.report-box{background:white;border:1px solid var(--line);padding:18px}
-.report-box strong{display:block;font:23px Georgia,serif;color:var(--wine);margin-top:8px}
-.notice{background:#f4eee9;padding:13px;font-size:12px;line-height:1.6;margin:15px 0}
-.slip-preview{display:block;max-width:260px;max-height:240px;object-fit:contain;border:1px solid var(--line);margin:12px 0;background:#fafafa}
-.payment-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
-.payment-card{border-left:4px solid var(--wine)}
-.payment-card.is-paid{border-left-color:var(--green)}
-.payment-card.is-rejected{border-left-color:var(--red)}
-.manual-item{border:1px solid var(--line);padding:14px;margin:12px 0;background:#fff}
-.manual-item-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.manual-total{font:22px Georgia,serif;color:var(--wine)}
-hr{border:0;border-top:1px solid var(--line);margin:20px 0}
-@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.report-grid{grid-template-columns:1fr}}
-@media(max-width:600px){
-.container{padding:18px 4%}.grid-form,.order-details{grid-template-columns:1fr}
-.full{grid-column:auto}.login-card{margin:40px 4%;padding:22px}
-header{padding:13px 4%}.logo{font-size:21px}
-}
-@media print{
-body{background:white}
-header,.tabs,.no-print,#loginSection{display:none!important}
-.container{padding:0;max-width:none}
-.panel{display:none!important}
-#invoicePrint{display:block!important}
-.invoice-area{display:block}
+button{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:var(--ink);color:white}
+button.secondary{background:#eee7df;color:var(--ink)}
+button.danger{background:var(--red)}
+button.success{background:var(--green)}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink)}
+textarea{min-height:75px}
+label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
+h1,h2,h3{margin-top:0}
+small,.muted{color:var(--muted)}
+header{background:var(--white);padding:17px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:22px;letter-spacing:2px;font-weight:bold}
+header small{display:block;margin-top:4px}
+#app{display:none}
+.layout{display:flex;min-height:calc(100vh - 68px)}
+nav{width:220px;padding:18px 12px;background:white;border-right:1px solid var(--line);flex-shrink:0}
+nav button{width:100%;text-align:left;background:transparent;color:var(--ink);margin:3px 0}
+nav button.active,nav button:hover{background:var(--cream)}
+main{padding:24px;width:100%;max-width:1500px;margin:auto;min-width:0}
+.tab{display:none}.tab.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:13px;margin:18px 0}
+.card,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:17px;margin-bottom:16px}
+.card small{display:block}.number{font-size:25px;font-weight:bold;margin-top:9px;overflow-wrap:anywhere}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.toolbar>*{width:auto}
+.toolbar input,.toolbar select{min-width:145px}
+.tablewrap{overflow:auto;background:white;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:700px;font-size:13px}
+th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#faf7f2;color:var(--muted)}
+.status{display:inline-block;padding:5px 8px;border-radius:20px;background:#f1eee9;font-size:11px}
+.status.paid{background:#e6f4ec;color:#287653}
+.status.pending{background:#fff3d9;color:#93651b}
+.status.rejected,.status.cancelled{background:#fbe9e9;color:#a33}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.actions button{font-size:12px;padding:7px 9px}
+#login{max-width:390px;margin:12vh auto;padding:25px;background:white;border:1px solid var(--line);border-radius:14px}
+#login button{width:100%;margin-top:16px}
+#message{margin:12px 0;color:var(--red);white-space:pre-wrap}
+#slipModal{display:none;position:fixed;inset:0;background:#0009;z-index:10;padding:20px;overflow:auto}
+.modalbox{background:white;max-width:850px;margin:3vh auto;padding:20px;border-radius:12px}
+#slipContent img,#slipContent iframe{width:100%;max-height:70vh;min-height:450px;object-fit:contain;border:0}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+@media(max-width:700px){
+ .layout{display:block}nav{width:100%;display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+ nav button{white-space:nowrap;width:auto;flex-shrink:0}
+ main{padding:14px}header{padding:14px}
 }
 </style>
 </head>
-
 <body>
+
+<div id="login">
+  <div class="brand">ZYRA.LK</div>
+  <p class="muted">Admin Dashboard</p>
+  <label>Email</label>
+  <input id="loginEmail" type="email" autocomplete="username">
+  <label>Password</label>
+  <input id="loginPassword" type="password" autocomplete="current-password">
+  <button onclick="login()">Login</button>
+  <div id="message"></div>
+</div>
+
+<div id="app">
 <header>
-  <div class="logo">ZYRA.LK</div>
-  <div class="header-right">
-    <span id="adminEmail" class="muted"></span>
-    <button class="btn danger" id="logoutBtn" hidden>LOG OUT</button>
-  </div>
+  <div><div class="brand">ZYRA.LK</div><small>Admin Dashboard</small></div>
+  <button class="secondary" onclick="logout()">Logout</button>
 </header>
 
-<section id="loginSection">
-  <div class="login-card">
-    <h2>Admin Login</h2>
-    <p class="muted" style="text-align:center">Zyra.lk management portal</p>
-    <form id="loginForm">
-      <div class="field">
-        <label>Email Address</label>
-        <input type="email" name="email" required autocomplete="username">
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <input type="password" name="password" required autocomplete="current-password">
-      </div>
-      <button class="btn" style="width:100%">LOGIN</button>
-      <p id="loginMessage" class="error"></p>
-    </form>
+<div class="layout">
+<nav>
+  <button class="active" data-tab="overview" onclick="showTab('overview',this)">Overview</button>
+  <button data-tab="orders" onclick="showTab('orders',this)">Store Orders</button>
+  <button data-tab="products" onclick="showTab('products',this)">Products</button>
+  <button data-tab="payments" onclick="showTab('payments',this)">Payments</button>
+  <button data-tab="expenses" onclick="showTab('expenses',this)">Expenses</button>
+  <button data-tab="reports" onclick="showTab('reports',this)">Profit & Reports</button>
+</nav>
+
+<main>
+
+<section id="overview" class="tab active">
+  <h2>Overview</h2>
+  <div class="cards" id="overviewCards"></div>
+  <div class="panel">
+    <h3>Recent Store Orders</h3>
+    <div id="recentOrders"></div>
   </div>
 </section>
 
-<main id="dashboard" class="container" hidden>
-  <div class="tabs no-print">
-    <button class="tab active" data-tab="overview">Overview</button>
-    <button class="tab" data-tab="orders">Store Orders</button>
-    <button class="tab" data-tab="products">Products</button>
-    <button class="tab" data-tab="payments">Payments</button>
-    <button class="tab" data-tab="expenses">Expenses</button>
-    <button class="tab" data-tab="reports">Profit & Reports</button>
+<section id="orders" class="tab">
+  <h2>Store Orders</h2>
+  <div class="toolbar">
+    <input id="orderSearch" placeholder="Search customer / order" oninput="renderOrders()">
+    <select id="orderFilter" onchange="renderOrders()">
+      <option value="">All orders</option>
+      <option value="pending">Pending</option>
+      <option value="processing">Processing</option>
+      <option value="dispatched">Dispatched</option>
+      <option value="delivered">Delivered</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+    <button onclick="loadOrders()">Refresh</button>
+    <button onclick="openManualOrder()">+ Manual order</button>
   </div>
+  <div id="ordersTable"></div>
+  <div id="manualOrder" class="panel" style="display:none">
+    <h3>Create Manual Order</h3>
+    <div class="formgrid">
+      <div><label>Customer name</label><input id="mName"></div>
+      <div><label>Phone</label><input id="mPhone"></div>
+      <div><label>Email</label><input id="mEmail" type="email"></div>
+      <div><label>Address</label><input id="mAddress"></div>
+      <div><label>Payment method</label><select id="mPayment"><option value="COD">Cash on Delivery</option><option value="BANK_TRANSFER">Bank Transfer</option></select></div>
+      <div><label>Order status</label><select id="mStatus"><option value="pending">Pending</option><option value="processing">Processing</option></select></div>
+    </div>
+    <hr>
+    <div class="formgrid">
+      <div><label>Product</label><select id="mProduct" onchange="manualProductChanged()"></select></div>
+      <div><label>Quantity</label><input id="mQty" type="number" min="1" value="1"></div>
+      <div><label>Unit price (LKR)</label><input id="mPrice" type="number" min="0"></div>
+    </div>
+    <label>Customisation / order notes</label>
+    <textarea id="mNotes"></textarea>
+    <div class="toolbar">
+      <button onclick="addManualItem()">Add item</button>
+      <button class="secondary" onclick="hideManualOrder()">Cancel</button>
+    </div>
+    <div id="manualItems"></div>
+    <button class="success" onclick="saveManualOrder()">Create Order</button>
+  </div>
+</section>
 
-  <section id="overview" class="panel active">
-    <div class="section-heading">
-      <h2>Dashboard Overview</h2>
-      <button class="btn" onclick="refreshAll()">REFRESH</button>
+<section id="products" class="tab">
+  <h2>Products</h2>
+  <div class="panel">
+    <h3 id="productFormTitle">Add Product</h3>
+    <input type="hidden" id="pId">
+    <div class="formgrid">
+      <div><label>Product name</label><input id="pName"></div>
+      <div><label>Price (LKR)</label><input id="pPrice" type="number" min="0"></div>
+      <div><label>Cost price (LKR)</label><input id="pCost" type="number" min="0"></div>
+      <div><label>Category</label><input id="pCategory"></div>
+      <div><label>Stock quantity</label><input id="pStock" type="number" min="0"></div>
+      <div><label>Image URL</label><input id="pImage"></div>
+      <div><label>Payment option</label><input id="pPayment" placeholder="e.g. COD / Bank Transfer"></div>
+      <div><label>Customisable?</label><select id="pCustom"><option value="false">No</option><option value="true">Yes</option></select></div>
+      <div><label>Active?</label><select id="pActive"><option value="true">Yes</option><option value="false">No</option></select></div>
     </div>
-    <div class="stats">
-      <div class="stat"><span>Total Store Orders</span><strong id="statOrders">0</strong></div>
-      <div class="stat"><span>Pending Orders</span><strong id="statPending">0</strong></div>
-      <div class="stat"><span>Verified Revenue</span><strong id="statRevenue">LKR 0</strong></div>
-      <div class="stat"><span>Pending Payments</span><strong id="statUnpaid">LKR 0</strong></div>
-    </div>
-    <div class="notice">
-      Shop orders and sales use <strong>store_orders</strong> and
-      <strong>store_order_items</strong>. Delivery tracking uses
-      <strong>zyra_orders</strong>. These remain separate systems.
-    </div>
-    <div class="section-heading">
-      <h3>Recent Store Orders</h3>
-      <button class="btn light" onclick="switchTab('orders')">VIEW ALL</button>
-    </div>
-    <div id="recentOrders"></div>
-  </section>
+    <label>Description</label><textarea id="pDescription"></textarea>
+    <div class="toolbar"><button onclick="saveProduct()">Save Product</button><button class="secondary" onclick="clearProductForm()">Clear</button></div>
+  </div>
+  <div class="toolbar"><input id="productSearch" placeholder="Search products" oninput="renderProducts()"><button onclick="loadProducts()">Refresh</button></div>
+  <div id="productsTable"></div>
+</section>
 
-  <section id="orders" class="panel">
-    <div class="section-heading">
-      <h2>Store Orders</h2>
-      <button class="btn" onclick="loadOrders()">REFRESH ORDERS</button>
-    </div>
+<section id="payments" class="tab">
+  <h2>Payment Verification</h2>
+  <p class="muted">Review uploaded bank-transfer slips. Approved payments are marked as PAID.</p>
+  <button onclick="loadOrders()">Refresh payments</button>
+  <div id="paymentsTable"></div>
+</section>
 
-    <div class="card">
-      <div class="section-heading">
-        <h3 style="margin:0">Add Manual Order</h3>
-        <span class="status">WHATSAPP / INSTAGRAM ORDERS</span>
-      </div>
-      <p class="muted">Use this form for orders received outside the website. The order will be saved in Store Orders and connected to the tracking system.</p>
+<section id="expenses" class="tab">
+  <h2>Expenses</h2>
+  <div class="panel">
+    <h3>Add Expense</h3>
+    <div class="formgrid">
+      <div><label>Description</label><input id="eDescription"></div>
+      <div><label>Category</label><select id="eCategory">
+        <option>Product Purchase</option><option>Packaging</option><option>Delivery</option><option>Advertising</option><option>Marketing</option><option>Supplies</option><option>Other</option>
+      </select></div>
+      <div><label>Amount (LKR)</label><input id="eAmount" type="number" min="0"></div>
+      <div><label>Date</label><input id="eDate" type="date"></div>
+    </div>
+    <button onclick="addExpense()">Save Expense</button>
+  </div>
+  <div class="toolbar"><button onclick="loadExpenses()">Refresh</button></div>
+  <div id="expensesTable"></div>
+</section>
 
-      <form id="manualOrderForm">
-        <h3>Customer Details</h3>
-        <div class="grid-form">
-          <div class="field">
-            <label>Customer Name *</label>
-            <input name="customer_name" required maxlength="200">
-          </div>
-          <div class="field">
-            <label>Phone Number *</label>
-            <input name="phone" required>
-          </div>
-          <div class="field">
-            <label>Email Address</label>
-            <input name="email" type="email">
-          </div>
-          <div class="field">
-            <label>Delivery Address *</label>
-            <input name="delivery_address" required>
-          </div>
-          <div class="field">
-            <label>City *</label>
-            <input name="city" required>
-          </div>
-          <div class="field">
-            <label>District</label>
-            <input name="district">
-          </div>
-          <div class="field">
-            <label>Postal Code</label>
-            <input name="postal_code">
-          </div>
-          <div class="field">
-            <label>Payment Method *</label>
-            <select name="payment_method" id="manualPaymentMethod" required>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Cash on Delivery">Cash on Delivery</option>
-            </select>
-          </div>
-          <div class="field" id="manualBankField">
-            <label>Bank</label>
-            <select name="selected_bank" id="manualBank">
-              <option value="">Select bank</option>
-              <option value="Commercial Bank">Commercial Bank</option>
-              <option value="Nations Trust Bank">Nations Trust Bank</option>
-              <option value="Amana Bank PLC">Amana Bank PLC</option>
-              <option value="HNB">HNB</option>
-            </select>
-          </div>
-          <div class="field full">
-            <label>Customer Notes</label>
-            <textarea name="customer_notes" placeholder="Additional delivery instructions or order notes"></textarea>
-          </div>
-        </div>
+<section id="reports" class="tab">
+  <h2>Profit & Reports</h2>
+  <div class="toolbar">
+    <select id="reportPeriod" onchange="loadReports()">
+      <option value="all">All time</option>
+      <option value="day">Daily</option>
+      <option value="week">Weekly</option>
+      <option value="month">Monthly</option>
+    </select>
+    <input type="date" id="reportDate" onchange="loadReports()">
+    <button onclick="loadReports()">Apply</button>
+    <button onclick="exportCSV()">Download CSV</button>
+  </div>
+  <div class="cards" id="reportCards"></div>
+  <div class="panel">
+    <h3>Product-wise Sales & Profit</h3>
+    <div id="productReport"></div>
+  </div>
+  <div class="panel">
+    <h3>Order-wise Profit</h3>
+    <div id="orderReport"></div>
+  </div>
+  <div class="panel">
+    <h3>Expense Breakdown</h3>
+    <div id="expenseReport"></div>
+  </div>
+  <p class="muted">Profit figures are estimates based on the available product cost information and recorded expenses. Historical profit can change if a product's cost price is edited later.</p>
+</section>
 
-        <hr>
-        <div class="section-heading">
-          <h3 style="margin:0">Products</h3>
-          <button type="button" class="btn light" id="addManualItemBtn">+ ADD PRODUCT</button>
-        </div>
-        <div id="manualItems"></div>
-
-        <div class="notice" id="manualPaymentNotice">
-          Payment options will update based on the products selected.
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
-          <strong>Order Total</strong>
-          <strong class="manual-total" id="manualOrderTotal">LKR 0.00</strong>
-        </div>
-
-        <div class="actions">
-          <button class="btn" type="submit" id="saveManualOrderBtn">SAVE MANUAL ORDER</button>
-          <button class="btn light" type="reset">CLEAR FORM</button>
-        </div>
-        <p id="manualOrderMessage" class="error"></p>
-      </form>
-    </div>
-
-    <div class="field">
-      <input id="orderSearch" placeholder="Search order number, customer or phone...">
-    </div>
-    <div id="ordersList"></div>
-  </section>
-
-  <section id="products" class="panel">
-    <div class="section-heading">
-      <h2>Product Management</h2>
-      <button class="btn" onclick="newProduct()">ADD PRODUCT</button>
-    </div>
-
-    <div id="productFormCard" class="card" hidden>
-      <h3 id="productFormTitle">Add Product</h3>
-      <form id="productForm">
-        <input type="hidden" name="id">
-        <div class="grid-form">
-          <div class="field">
-            <label>Product Name *</label>
-            <input name="name" required maxlength="200">
-          </div>
-          <div class="field">
-            <label>Price (LKR) *</label>
-            <input name="price" type="number" min="0" step="0.01" required>
-          </div>
-          <div class="field">
-            <label>Category</label>
-            <input name="category" maxlength="100">
-          </div>
-          <div class="field">
-            <label>Stock Quantity</label>
-            <input name="stock_quantity" type="number" min="0" step="1" value="0">
-          </div>
-          <div class="field">
-            <label>Product Image URL / Storage Path</label>
-            <input name="image_url" placeholder="Paste image URL or storage path">
-          </div>
-          <div class="field">
-            <label>Product Cost (LKR)</label>
-            <input name="cost_price" type="number" min="0" step="0.01">
-          </div>
-          <div class="field full">
-            <label>Payment Option *</label>
-            <select name="payment_option" required>
-              <option value="bank_transfer_only">Bank Transfer Only</option>
-              <option value="both">Bank Transfer + Cash on Delivery</option>
-            </select>
-            <p class="muted">Choose which payment methods customers can use for this product.</p>
-          </div>
-          <div class="field full">
-            <label>Description</label>
-            <textarea name="description"></textarea>
-          </div>
-          <div class="field">
-            <label><input type="checkbox" name="is_customisable"> Customisable product</label>
-          </div>
-          <div class="field">
-            <label><input type="checkbox" name="is_active" checked> Active / visible in shop</label>
-          </div>
-        </div>
-        <div class="notice">Product cost saving requires a cost_price column in store_products.</div>
-        <div class="actions">
-          <button class="btn" type="submit">SAVE PRODUCT</button>
-          <button class="btn light" type="button" onclick="closeProductForm()">CANCEL</button>
-        </div>
-        <p id="productMessage" class="error"></p>
-      </form>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Image</th><th>Product</th><th>Category</th>
-            <th>Price</th><th>Cost</th><th>Stock</th>
-            <th>Payment Option</th><th>Status</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="productsTable"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="payments" class="panel">
-    <div class="section-heading">
-      <h2>Payment Verification</h2>
-      <button class="btn" onclick="loadPayments()">REFRESH PAYMENTS</button>
-    </div>
-    <div class="notice">
-      Check the uploaded bank-transfer receipt against your actual bank account.
-      Select Accept Payment only after confirming that the funds have arrived.
-      Rejected payments require a reason. Payment status is changed through the
-      secure Supabase verification function.
-    </div>
-    <div id="paymentsList"></div>
-  </section>
-
-  <section id="expenses" class="panel">
-    <div class="section-heading"><h2>Business Expenses</h2></div>
-    <div class="card">
-      <h3>Add Expense</h3>
-      <form id="expenseForm">
-        <div class="grid-form">
-          <div class="field">
-            <label>Expense Description *</label>
-            <input name="description" required maxlength="200">
-          </div>
-          <div class="field">
-            <label>Amount (LKR) *</label>
-            <input name="amount" type="number" min="0.01" step="0.01" required>
-          </div>
-          <div class="field">
-            <label>Expense Date *</label>
-            <input name="expense_date" type="date" required>
-          </div>
-          <div class="field">
-            <label>Category</label>
-            <select name="category">
-              <option>Packaging</option><option>Delivery</option>
-              <option>Marketing</option><option>Supplies</option><option>Other</option>
-            </select>
-          </div>
-          <div class="field full">
-            <label>Notes</label>
-            <textarea name="notes"></textarea>
-          </div>
-        </div>
-        <button class="btn">SAVE EXPENSE</button>
-        <p id="expenseMessage" class="error"></p>
-      </form>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Action</th></tr></thead>
-        <tbody id="expensesTable"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="reports" class="panel">
-    <div class="section-heading">
-      <h2>Profit & Reports</h2>
-      <button class="btn" onclick="loadReports()">REFRESH REPORTS</button>
-    </div>
-    <div class="report-grid">
-      <div class="report-box"><span class="muted">Verified Revenue</span><strong id="reportRevenue">LKR 0</strong></div>
-      <div class="report-box"><span class="muted">Product Cost</span><strong id="reportCosts">LKR 0</strong></div>
-      <div class="report-box"><span class="muted">Business Expenses</span><strong id="reportExpenses">LKR 0</strong></div>
-      <div class="report-box"><span class="muted">Estimated Net Profit</span><strong id="reportProfit">LKR 0</strong></div>
-      <div class="report-box"><span class="muted">Total Units Sold</span><strong id="reportUnits">0</strong></div>
-      <div class="report-box"><span class="muted">Completed Orders</span><strong id="reportCompleted">0</strong></div>
-    </div>
-    <div class="notice">
-      Profit calculations depend on accurate product cost prices and verified
-      payment records. Missing cost information is treated as zero.
-    </div>
-    <div class="card">
-      <h3>Sales by Product</h3>
-      <div id="productSales"></div>
-    </div>
-  </section>
 </main>
+</div>
+</div>
 
-<section id="invoicePrint" class="invoice-area"></section>
+<div id="slipModal">
+  <div class="modalbox">
+    <div class="toolbar" style="justify-content:space-between">
+      <h3>Payment Slip</h3>
+      <button class="secondary" onclick="closeSlip()">Close</button>
+    </div>
+    <div id="slipContent"></div>
+    <div class="toolbar"><button onclick="downloadSlip()">Download Slip</button></div>
+  </div>
+</div>
 
 <script>
-"use strict";
-
 const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
+const SUPABASE_KEY = "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 
-const PRODUCT_TABLE = "store_products";
-const ORDER_TABLE = "store_orders";
-const ITEM_TABLE = "store_order_items";
-const TRACKING_TABLE = "zyra_orders";
-const EXPENSE_TABLE = "zyra_expenses";
+const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const PHOTO_BUCKET = "customer-photos";
+const PRODUCTS = "store_products";
+const ORDERS = "store_orders";
+const ITEMS = "store_order_items";
+const TRACKING = "zyra_orders";
+const EXPENSES = "zyra_expenses";
+
+const CUSTOMER_BUCKET = "customer-photos";
 const PRODUCT_BUCKET = "Product -image";
-const PAYMENT_SLIP_BUCKET = "payment-slips";
-
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const $ = id => document.getElementById(id);
-
-const money = n => Number(n || 0).toLocaleString("en-LK", {
-  minimumFractionDigits:2, maximumFractionDigits:2
-});
-const dateText = v => v ? new Date(v).toLocaleDateString("en-LK") : "—";
+const PAYMENT_BUCKET = "payment-slips";
 
 let orders = [];
 let products = [];
 let expenses = [];
-let paymentColumnAvailable = true;
+let manualItems = [];
+let activeSlipPath = null;
+let reportData = null;
 
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
-}
+const money = n => "LKR " + Number(n || 0).toLocaleString("en-LK",{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = v => String(v || "").toLowerCase();
+const dateValue = v => v ? new Date(v).toLocaleString() : "-";
+const el = id => document.getElementById(id);
 
-function showError(id,message) {
-  const el = $(id);
-  if (el) el.textContent = message;
-}
+function msg(text){el("message").textContent=text || ""}
 
-function formatCustomisation(value) {
-  if (value == null) return "";
-  if (typeof value === "string") {
-    try { value = JSON.parse(value); }
-    catch { return value; }
-  }
-  if (Array.isArray(value)) return value.map(x=>formatCustomisation(x)).join(", ");
-  if (typeof value === "object") {
-    return Object.entries(value)
-      .filter(([k,v])=>v!==null && v!=="")
-      .map(([k,v])=>{
-        const label=k.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
-        return label+": "+(typeof v==="object"?formatCustomisation(v):String(v));
-      }).join(" | ");
-  }
-  return String(value);
+function showTab(id,button){
+ document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ el(id).classList.add("active");
+ if(button)button.classList.add("active");
+ if(id==="overview")renderOverview();
+ if(id==="orders")renderOrders();
+ if(id==="products")renderProducts();
+ if(id==="payments")renderPayments();
+ if(id==="expenses")renderExpenses();
+ if(id==="reports")loadReports();
 }
 
-function defaultPaymentOption(name) {
-  const bankOnlyProducts = [
-    "english name necklace",
-    "different font style name necklace",
-    "arabic name necklace",
-    "alternative design name necklace",
-    "double name / couple necklace",
-    "name necklace with design",
-    "name bracelet english",
-    "name bracelet arabic",
-    "name bracelet and bracelet",
-    "name bracelet with bst",
-    "photo projection bracelet rope",
-    "photo projection bracelet",
-    "initial couple ring",
-    "customised ring",
-    "double layered name necklace",
-    "customise photo roll",
-    "engraved eye bracelet",
-    "engraved eye necklace",
-    "customised phone case"
-  ];
-  return bankOnlyProducts.includes(String(name||"").trim().toLowerCase())
-    ? "bank_transfer_only" : "both";
+async function login(){
+ msg("");
+ const {data,error}=await db.auth.signInWithPassword({
+  email:el("loginEmail").value.trim(),
+  password:el("loginPassword").value
+ });
+ if(error){msg(error.message);return}
+ await startApp();
 }
 
-function paymentOptionLabel(option) {
-  return option==="bank_transfer_only" ? "Bank Transfer Only" : "Bank Transfer + COD";
+async function logout(){
+ await db.auth.signOut();
+ el("app").style.display="none";
+ el("login").style.display="block";
 }
 
-/* AUTHENTICATION */
-async function checkSession() {
-  const {data,error}=await db.auth.getSession();
-  if(error) console.error(error);
-  if(data.session) showDashboard(data.session.user);
-  else showLogin();
+async function startApp(){
+ el("login").style.display="none";
+ el("app").style.display="block";
+ await Promise.all([loadProducts(),loadOrders(),loadExpenses()]);
+ renderOverview();
 }
-function showLogin() {
-  $("loginSection").hidden=false;
-  $("dashboard").hidden=true;
-  $("logoutBtn").hidden=true;
-}
-function showDashboard(user) {
-  $("loginSection").hidden=true;
-  $("dashboard").hidden=false;
-  $("logoutBtn").hidden=false;
-  $("adminEmail").textContent=user.email||"Admin";
-  refreshAll();
-}
-$("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const f=new FormData(e.currentTarget);
-  showError("loginMessage","Signing in...");
-  const {data,error}=await db.auth.signInWithPassword({
-    email:f.get("email"),password:f.get("password")
-  });
-  if(error){showError("loginMessage",error.message);return;}
-  showError("loginMessage","");
-  showDashboard(data.user);
+
+db.auth.getSession().then(({data})=>{
+ if(data.session)startApp();
 });
-async function logout() {
-  const {error}=await db.auth.signOut();
-  if(error){alert("Logout failed: "+error.message);return;}
-  showLogin();
-}
-$("logoutBtn").addEventListener("click",logout);
 
-/* NAVIGATION */
-document.querySelectorAll(".tab").forEach(button=>{
-  button.addEventListener("click",()=>switchTab(button.dataset.tab));
-});
-function switchTab(id) {
-  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
-  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id===id));
-  if(id==="orders"){loadOrders();loadProducts();}
-  if(id==="products")loadProducts();
-  if(id==="payments")loadPayments();
-  if(id==="expenses")loadExpenses();
-  if(id==="reports")loadReports();
+function statusClass(s){
+ const v=norm(s);
+ if(v==="paid"||v==="delivered")return "paid";
+ if(v==="rejected"||v==="cancelled")return "rejected";
+ if(v==="pending"||v==="processing")return "pending";
+ return "";
 }
 
-/* REFRESH */
-async function refreshAll() {
-  await Promise.all([loadOrders(),loadProducts(),loadExpenses()]);
-  updateOverview();
+function table(headers,rows){
+ if(!rows.length)return "<p class='muted'>No records found.</p>";
+ return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
 }
 
-/* ORDER HELPERS */
-function orderNumber(o){return o.order_number||o.id||"—";}
-function orderAmount(o){return Number(o.total_amount??o.total??0);}
-function getItems(o){return o.store_order_items||o.items||[];}
-function getPaymentStatus(o){return String(o.payment_status||"PENDING").toUpperCase();}
-
-/* LOAD ORDERS */
-async function loadOrders() {
-  const root=$("ordersList");
-  if(root)root.textContent="Loading orders...";
-  let result=await db.from(ORDER_TABLE).select("*,store_order_items(*)")
-    .order("created_at",{ascending:false}).limit(200);
-  if(result.error){
-    console.error("Order items query:",result.error);
-    result=await db.from(ORDER_TABLE).select("*").order("created_at",{ascending:false}).limit(200);
-  }
-  if(result.error){
-    if(root)root.textContent="Unable to load orders: "+result.error.message;
-    orders=[];updateOverview();return;
-  }
-  orders=result.data||[];
-  paymentColumnAvailable=!orders[0]||("payment_status" in orders[0]);
-  updateOverview();
-  renderOrders();
-  renderRecentOrders();
-  renderPayments();
+async function loadOrders(){
+ let result=await db.from(ORDERS).select("*,store_order_items(*)").order("created_at",{ascending:false});
+ if(result.error)result=await db.from(ORDERS).select("*").order("created_at",{ascending:false});
+ if(result.error){alert("Could not load store orders: "+result.error.message);return}
+ orders=result.data || [];
+ renderOrders();renderPayments();renderOverview();
 }
 
-/* TRACKING STATUS */
-function getTrackingStatus(status) {
-  const map={pending:"Order Confirmed",confirmed:"Order Confirmed",processing:"Processing",shipped:"Shipped",completed:"Delivered",cancelled:"Cancelled"};
-  return map[String(status).toLowerCase()]||"Order Confirmed";
+function orderItems(o){return Array.isArray(o.store_order_items)?o.store_order_items:[]}
+function orderTotal(o){
+ if(o.total_amount!=null)return Number(o.total_amount);
+ if(o.total!=null)return Number(o.total);
+ return orderItems(o).reduce((s,i)=>s+Number(i.unit_price||i.price||0)*Number(i.quantity||1),0);
+}
+function customerName(o){return o.customer_name||o.name||o.full_name||"-"}
+function orderStatus(o){return o.order_status||o.status||"pending"}
+function paymentStatus(o){return norm(o.payment_status)}
+function orderId(o){return o.id}
+
+function renderOrders(){
+ const q=norm(el("orderSearch").value);
+ const f=norm(el("orderFilter").value);
+ const filtered=orders.filter(o=>{
+  const text=norm([customerName(o),o.id,o.phone,o.customer_phone,o.email].join(" "));
+  return (!q||text.includes(q))&&(!f||norm(orderStatus(o))===f);
+ });
+ el("ordersTable").innerHTML=table(
+ ["Order","Customer","Date","Total","Payment","Order status","Actions"],
+ filtered.map(o=>`<tr>
+ <td>${esc(String(o.id).slice(0,8))}</td>
+ <td>${esc(customerName(o))}<br><small>${esc(o.phone||o.customer_phone||o.email||"")}</small></td>
+ <td>${dateValue(o.created_at)}</td>
+ <td>${money(orderTotal(o))}</td>
+ <td><span class="status ${statusClass(o.payment_status)}">${esc(o.payment_status||"-")}</span></td>
+ <td><select onchange="updateOrderStatus('${esc(o.id)}',this.value)">
+ ${["pending","processing","dispatched","delivered","cancelled"].map(s=>`<option value="${s}" ${norm(orderStatus(o))===s?"selected":""}>${s}</option>`).join("")}
+ </select></td>
+ <td><div class="actions">
+ <button class="secondary" onclick="viewOrder('${esc(o.id)}')">View</button>
+ <button class="secondary" onclick="printInvoice('${esc(o.id)}')">Invoice</button>
+ <button class="danger" onclick="deleteOrder('${esc(o.id)}')">Delete</button>
+ </div></td></tr>`)
+ );
 }
 
-async function updateOrderStatus(id,status,button) {
-  if(!id){alert("Order ID is missing.");return;}
-  if(button){button.disabled=true;button.textContent="UPDATING...";}
-  try{
-    const {error:storeError}=await db.from(ORDER_TABLE).update({order_status:status}).eq("id",id);
-    if(storeError)throw new Error("Store order update failed: "+storeError.message);
-
-    const {data:trackingRecords,error:findError}=await db.from(TRACKING_TABLE)
-      .select("id,tracking_id,status").eq("store_order_id",id);
-    if(findError)throw new Error("Store order updated, but tracking records could not be checked: "+findError.message);
-
-    if(!trackingRecords||trackingRecords.length===0){
-      alert("Store order updated. No connected zyra_orders tracking record was found.");
-      await loadOrders();return;
-    }
-
-    const {error:trackingError}=await db.from(TRACKING_TABLE)
-      .update({status:getTrackingStatus(status),updated_at:new Date().toISOString()})
-      .eq("store_order_id",id);
-    if(trackingError)throw new Error("Store order updated, but tracking update failed: "+trackingError.message);
-    alert("Order and connected tracking status updated successfully.");
-    await loadOrders();
-  }catch(error){
-    console.error(error);alert(error.message);await loadOrders();
-  }finally{
-    if(button){button.disabled=false;button.textContent="UPDATE ORDER";}
-  }
+async function updateOrderStatus(id,status){
+ const {error}=await db.from(ORDERS).update({order_status:status}).eq("id",id);
+ if(error){alert(error.message);loadOrders();return}
+ const tracking=await db.from(TRACKING).update({status,updated_at:new Date().toISOString()}).eq("store_order_id",id);
+ if(tracking.error)console.warn("Tracking status update:",tracking.error.message);
+ await loadOrders();
 }
 
-/* PERMANENTLY DELETE STORE ORDER */
-async function deleteStoreOrder(orderId, orderNo, button) {
-  if (!orderId) {
-    alert("Order ID is missing.");
-    return;
-  }
-
-  const confirmed = confirm(
-    "PERMANENTLY DELETE ORDER?\n\n" +
-    "Order: " + orderNo + "\n\n" +
-    "This will permanently delete:\n" +
-    "• Store order details\n" +
-    "• Product details\n" +
-    "• Connected delivery tracking record\n\n" +
-    "This action cannot be undone.\n\n" +
-    "Are you sure?"
-  );
-
-  if (!confirmed) return;
-
-  button.disabled = true;
-  button.textContent = "DELETING...";
-
-  try {
-    const { data, error } = await db.rpc(
-      "delete_zyra_store_order",
-      { p_order_id: orderId }
-    );
-
-    if (error) throw error;
-
-    if (!data || !data.success) {
-      throw new Error("The order could not be deleted.");
-    }
-
-    alert(
-      "Order " +
-      (data.order_number || orderNo) +
-      " was permanently deleted."
-    );
-
-    await loadReports();
-
-  } catch (error) {
-    console.error("Delete order error:", error);
-
-    alert(
-      "Unable to delete order:\n" +
-      error.message
-    );
-
-    button.disabled = false;
-    button.textContent = "DELETE ORDER";
-  }
+async function deleteOrder(id){
+ if(!confirm("Delete this store order?"))return;
+ const {error}=await db.rpc("delete_zyra_store_order",{p_order_id:id});
+ if(error){alert("Could not delete order: "+error.message);return}
+ await loadOrders();
 }
 
-/* ORDER CARDS */
-function renderOrders() {
-  const q=$("orderSearch").value.toLowerCase();
-  const filtered=orders.filter(o=>[orderNumber(o),o.customer_name,o.phone,o.email].join(" ").toLowerCase().includes(q));
-  const root=$("ordersList");root.replaceChildren();
-  if(!filtered.length){root.textContent="No matching store orders found.";return;}
-  filtered.forEach(o=>root.append(makeOrderCard(o)));
+function viewOrder(id){
+ const o=orders.find(x=>String(x.id)===String(id));if(!o)return;
+ const items=orderItems(o);
+ const itemText=items.map(i=>`${i.product_name||i.name||"Product"} × ${i.quantity||1} — ${money(Number(i.unit_price||i.price||0)*Number(i.quantity||1))}`).join("\n");
+ alert(`Order: ${o.id}\nCustomer: ${customerName(o)}\nPhone: ${o.phone||o.customer_phone||"-"}\nAddress: ${o.address||o.delivery_address||"-"}\nPayment: ${o.payment_status||"-"}\nTotal: ${money(orderTotal(o))}\n\n${itemText}\n\nNotes: ${o.notes||o.customisation||"-"}`);
 }
 
-/* DOWNLOAD CUSTOMER PHOTO */
-async function downloadCustomerPhoto(path,filename,button) {
-  if(!path){
-    alert("Customer photo path is missing.");
-    return;
-  }
-
-  const originalText=button.textContent;
-  button.disabled=true;
-  button.textContent="DOWNLOADING...";
-
-  try{
-    const {data,error}=await db.storage
-      .from(PHOTO_BUCKET)
-      .download(path);
-
-    if(error)throw error;
-
-    const blobUrl=URL.createObjectURL(data);
-    const link=document.createElement("a");
-
-    link.href=blobUrl;
-    link.download=filename||path.split("/").pop()||"customer-photo";
-
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    setTimeout(()=>URL.revokeObjectURL(blobUrl),1000);
-
-  }catch(error){
-    console.error("Customer photo download error:",error);
-    alert("Unable to download customer photo:\n"+error.message);
-  }finally{
-    button.disabled=false;
-    button.textContent=originalText;
-  }
+function renderOverview(){
+ const paid=orders.filter(o=>paymentStatus(o)==="paid"&&norm(orderStatus(o))!=="cancelled");
+ const pending=orders.filter(o=>["pending",""].includes(paymentStatus(o))&&norm(orderStatus(o))!=="cancelled");
+ const pendingSlips=pending.filter(o=>o.payment_slip_path);
+ const revenue=paid.reduce((s,o)=>s+orderTotal(o),0);
+ const pendingValue=pending.reduce((s,o)=>s+orderTotal(o),0);
+ const cards=[
+ ["Total Orders",orders.length],
+ ["Paid Revenue",money(revenue)],
+ ["Pending Payments",pending.length],
+ ["Pending Value",money(pendingValue)],
+ ["Slips to Verify",pendingSlips.length],
+ ["Products",products.length]
+ ];
+ el("overviewCards").innerHTML=cards.map(([a,b])=>`<div class="card"><small>${a}</small><div class="number">${b}</div></div>`).join("");
+ el("recentOrders").innerHTML=table(["Order","Customer","Total","Status"],orders.slice(0,7).map(o=>`<tr><td>${esc(String(o.id).slice(0,8))}</td><td>${esc(customerName(o))}</td><td>${money(orderTotal(o))}</td><td><span class="status ${statusClass(orderStatus(o))}">${esc(orderStatus(o))}</span></td></tr>`));
 }
 
-function makeOrderCard(o) {
-  const card=document.createElement("article");card.className="card";
-  const items=getItems(o);
-  const status=String(o.order_status||"pending").toLowerCase();
-  const top=document.createElement("div");top.className="order-top";
-  const left=document.createElement("div");
-  left.innerHTML=`<div class="order-id">Order #${escapeHTML(orderNumber(o))}</div><div class="muted">${escapeHTML(dateText(o.created_at))}</div>`;
-  const right=document.createElement("div");
-  right.innerHTML=`<span class="status">ORDER: ${escapeHTML(status.toUpperCase())}</span><span class="status">PAYMENT: ${escapeHTML(getPaymentStatus(o))}</span>`;
-  top.append(left,right);card.append(top);
-
-  const details=document.createElement("div");details.className="order-details";
-  const fields=[
-    ["Customer",o.customer_name],["Phone",o.phone],["Email",o.email],
-    ["Payment Method",o.payment_method],["Bank",o.selected_bank],
-    ["Transaction Reference",o.bank_transaction_reference],
-    ["Address",o.delivery_address],["City / District",[o.city,o.district].filter(Boolean).join(", ")],
-    ["Postal Code",o.postal_code],["Order Source",o.order_source],["Notes",o.customer_notes]
-  ];
-  fields.forEach(([label,value])=>{
-    const div=document.createElement("div");
-    div.innerHTML=`<strong>${escapeHTML(label)}</strong>${escapeHTML(value||"—")}`;
-    details.append(div);
-  });
-  card.append(details);
-
-  const itemBox=document.createElement("div");itemBox.className="items";
-  const heading=document.createElement("strong");heading.textContent="Products";
-  itemBox.append(heading,document.createElement("br"));
-  if(!items.length)itemBox.append("No item details available.");
-  else items.forEach(i=>{
-    const name=i.product_name||i.name||i.name_snapshot||i.product_id||"Product";
-    const qty=i.quantity||1;
-    const price=i.unit_price??i.price??i.price_at_purchase;
-    const line=document.createElement("div");
-    line.textContent=`${name} × ${qty}`+(price!=null?" — LKR "+money(Number(price)*Number(qty)):"");
-    itemBox.append(line);
-    const custom=i.customisation_details||i.customization_details;
-    if(custom){
-      const c=document.createElement("div");c.className="muted";
-      c.textContent="Customisation: "+formatCustomisation(custom);itemBox.append(c);
-      const paths=Array.isArray(custom.photo_paths)?custom.photo_paths:(custom.photo_path?[custom.photo_path]:[]);
-      const fileNames=Array.isArray(custom.photo_file_names)?custom.photo_file_names:[];
-      paths.forEach((path,index)=>{
-        const fileName=fileNames[index]||path.split("/").pop()||`customer-photo-${index+1}`;
-
-        const a=document.createElement("a");a.className="photo-link";a.href="#";a.textContent="View customer photo";
-        a.onclick=async e=>{
-          e.preventDefault();
-          const {data,error}=await db.storage.from(PHOTO_BUCKET).createSignedUrl(path,300);
-          if(error)return alert(error.message);
-          window.open(data.signedUrl,"_blank","noopener");
-        };
-        itemBox.append(a);
-
-        const download=document.createElement("button");
-        download.className="small-btn gray";
-        download.textContent="DOWNLOAD CUSTOMER PHOTO";
-        download.onclick=()=>downloadCustomerPhoto(path,fileName,download);
-        itemBox.append(download);
-      });
-    }
-  });
-  card.append(itemBox);
-
-  const actions=document.createElement("div");actions.className="actions";
-  const select=document.createElement("select");
-  ["pending","confirmed","processing","shipped","completed","cancelled"].forEach(s=>{
-    const op=document.createElement("option");op.value=s;op.textContent=s.charAt(0).toUpperCase()+s.slice(1);select.append(op);
-  });
-  select.value=status;actions.append(select);
-  const update=document.createElement("button");update.className="small-btn";update.textContent="UPDATE ORDER";
-  update.onclick=()=>updateOrderStatus(o.id,select.value,update);actions.append(update);
-
-  const invoice=document.createElement("button");
-  invoice.className="small-btn gray";
-  invoice.textContent="PRINT INVOICE";
-  invoice.onclick=()=>printInvoice(o);
-  actions.append(invoice);
-
-  /* PERMANENT DELETE ORDER BUTTON */
-  const deleteBtn=document.createElement("button");
-  deleteBtn.className="small-btn red";
-  deleteBtn.textContent="DELETE ORDER";
-  deleteBtn.onclick=()=>deleteStoreOrder(
-    o.id,
-    orderNumber(o),
-    deleteBtn
-  );
-  actions.append(deleteBtn);
-
-  card.append(actions);
-  return card;
+function renderPayments(){
+ const list=orders.filter(o=>paymentStatus(o)!=="paid"&&paymentStatus(o)!=="rejected"&&paymentStatus(o)!=="not_required"&&norm(orderStatus(o))!=="cancelled");
+ el("paymentsTable").innerHTML=table(["Order","Customer","Amount","Slip","Payment status","Decision"],list.map(o=>{
+ const hasSlip=!!o.payment_slip_path;
+ return `<tr>
+ <td>${esc(String(o.id).slice(0,8))}<br><small>${dateValue(o.created_at)}</small></td>
+ <td>${esc(customerName(o))}</td><td>${money(orderTotal(o))}</td>
+ <td>${hasSlip?`<button class="secondary" onclick="openSlip('${esc(o.payment_slip_path)}','${esc(o.payment_slip_file_name||"")}')">View slip</button>`:"No slip uploaded"}</td>
+ <td><span class="status pending">${hasSlip?"Pending verification":esc(o.payment_status||"Pending")}</span></td>
+ <td><div class="actions">
+ <button class="success" ${hasSlip?"":"disabled"} onclick="verifyPayment('${esc(o.id)}','ACCEPT')">Accept</button>
+ <button class="danger" ${hasSlip?"":"disabled"} onclick="verifyPayment('${esc(o.id)}','REJECT')">Reject</button>
+ </div></td></tr>`;
+ }));
 }
 
-function renderRecentOrders() {
-  const root=$("recentOrders");root.replaceChildren();
-  orders.slice(0,5).forEach(o=>root.append(makeOrderCard(o)));
-  if(!orders.length)root.textContent="No store orders yet.";
-}
-
-/* OVERVIEW */
-function updateOverview() {
-  $("statOrders").textContent=orders.length;
-  $("statPending").textContent=orders.filter(o=>String(o.order_status||"pending").toLowerCase()==="pending").length;
-  const verified=orders.filter(o=>getPaymentStatus(o)==="PAID");
-  const revenue=verified.reduce((s,o)=>s+orderAmount(o),0);
-  const unpaid=orders.filter(o=>getPaymentStatus(o)!=="PAID").reduce((s,o)=>s+orderAmount(o),0);
-  $("statRevenue").textContent="LKR "+money(revenue);
-  $("statUnpaid").textContent="LKR "+money(unpaid);
-}
-
-/* PAYMENT VERIFICATION */
-function paymentStatusClass(status) {
-  if(status==="PAID")return "paid";
-  if(status==="REJECTED"||status==="FAILED")return "rejected";
-  return "";
-}
-async function openPaymentSlip(path) {
-  if(!path){alert("No payment slip path is saved for this order.");return;}
-  const {data,error}=await db.storage.from(PAYMENT_SLIP_BUCKET).createSignedUrl(path,300);
-  if(error){alert("Unable to open payment slip: "+error.message);return;}
-  window.open(data.signedUrl,"_blank","noopener");
-}
-async function loadPayments(){await loadOrders();renderPayments();}
-
-function renderPayments() {
-  const root=$("paymentsList");root.replaceChildren();
-  if(!paymentColumnAvailable){root.textContent="The payment_status column was not found in store_orders.";return;}
-  if(!orders.length){root.textContent="No store orders found.";return;}
-  const transferOrders=orders.filter(o=>String(o.payment_method||"").toLowerCase().includes("bank")||o.payment_slip_path);
-  if(!transferOrders.length){root.textContent="No bank-transfer orders found.";return;}
-
-  transferOrders.forEach(o=>{
-    const status=getPaymentStatus(o);
-    const card=document.createElement("div");
-    card.className="card payment-card "+(status==="PAID"?"is-paid":status==="REJECTED"?"is-rejected":"");
-    const title=document.createElement("h3");title.textContent="Order #"+orderNumber(o);card.append(title);
-    const badge=document.createElement("span");badge.className="status "+paymentStatusClass(status);badge.textContent="PAYMENT: "+status;card.append(badge);
-    const info=document.createElement("p");info.textContent=`${o.customer_name||"Customer"} | ${o.phone||"No phone"} | LKR ${money(orderAmount(o))}`;card.append(info);
-
-    const bankInfo=document.createElement("div");bankInfo.className="order-details";
-    [["Bank",o.selected_bank],["Transaction Reference",o.bank_transaction_reference],["Payment Method",o.payment_method],
-    ["Payment Slip File",o.payment_slip_file_name],["Submitted",dateText(o.created_at)],
-    ["Verified At",o.payment_verified_at?new Date(o.payment_verified_at).toLocaleString("en-LK"):"—"]]
-    .forEach(([label,value])=>{
-      const div=document.createElement("div");
-      div.innerHTML=`<strong>${escapeHTML(label)}</strong>${escapeHTML(value||"—")}`;
-      bankInfo.append(div);
-    });
-    card.append(bankInfo);
-
-    if(o.payment_slip_path){
-      const view=document.createElement("button");view.className="small-btn gray";view.textContent="VIEW PAYMENT SLIP";
-      view.onclick=()=>openPaymentSlip(o.payment_slip_path);card.append(view);
-    }else{
-      const missing=document.createElement("p");missing.className="error";missing.textContent="No payment slip is attached to this order.";card.append(missing);
-    }
-
-    if(o.payment_rejection_reason){
-      const reason=document.createElement("p");reason.className="error";
-      reason.textContent="Rejection reason: "+o.payment_rejection_reason;card.append(reason);
-    }
-
-    const actions=document.createElement("div");actions.className="payment-actions";
-    if(status!=="PAID"&&status!=="REJECTED"&&o.payment_slip_path){
-      const accept=document.createElement("button");accept.className="small-btn green";accept.textContent="ACCEPT PAYMENT";
-      accept.onclick=()=>verifyPayment(o.id,"ACCEPT",accept);actions.append(accept);
-      const reject=document.createElement("button");reject.className="small-btn red";reject.textContent="REJECT PAYMENT";
-      reject.onclick=()=>rejectPayment(o.id,reject);actions.append(reject);
-    }else if(status==="PAID"){
-      const note=document.createElement("span");note.className="success";note.textContent="Payment verified.";actions.append(note);
-    }else if(status==="REJECTED"){
-      const note=document.createElement("span");note.className="error";note.textContent="Payment rejected. Check the reason above.";actions.append(note);
-    }
-    card.append(actions);root.append(card);
-  });
-}
-
-async function verifyPayment(orderId,decision,button,rejectionReason=null) {
-  if(!orderId){alert("Order ID is missing.");return;}
-  if(button){button.disabled=true;button.textContent="PROCESSING...";}
-  try{
-    const {data,error}=await db.rpc("verify_zyra_payment",{
-      p_order_id:orderId,p_decision:decision,p_rejection_reason:rejectionReason
-    });
-    if(error)throw new Error(error.message);
-    alert(decision==="ACCEPT"?"Payment accepted and marked as PAID.":"Payment rejected successfully.");
-    await loadOrders();
-  }catch(error){
-    console.error("Payment verification error:",error);
-    alert("Payment verification failed:\n"+error.message+
-      "\n\nCheck that verify_zyra_payment exists, the signed-in account is listed in zyra_admins, and the payment status constraint allows the requested status.");
-    await loadOrders();
-  }finally{
-    if(button){button.disabled=false;button.textContent=decision==="ACCEPT"?"ACCEPT PAYMENT":"REJECT PAYMENT";}
-  }
-}
-async function rejectPayment(orderId,button) {
-  const reason=prompt("Enter the reason for rejecting this payment:");
+async function verifyPayment(id,decision){
+ let reason="";
+ if(decision==="REJECT"){
+  reason=prompt("Enter the reason for rejecting this payment slip:");
   if(reason===null)return;
-  const trimmed=reason.trim();
-  if(!trimmed){alert("Please enter a rejection reason.");return;}
-  await verifyPayment(orderId,"REJECT",button,trimmed);
+  if(!reason.trim()){alert("A rejection reason is required.");return}
+ }
+ const {error}=await db.rpc("verify_zyra_payment",{
+  p_order_id:id,p_decision:decision,p_rejection_reason:reason
+ });
+ if(error){alert("Payment verification failed: "+error.message);return}
+ alert(decision==="ACCEPT"?"Payment marked as paid.":"Payment rejected.");
+ await loadOrders();
 }
 
-/* PRODUCTS */
-async function loadProducts() {
-  const body=$("productsTable");
-  body.innerHTML="<tr><td colspan='9'>Loading products...</td></tr>";
-  let result=await db.from(PRODUCT_TABLE).select("*").order("created_at",{ascending:false});
-  if(result.error)result=await db.from(PRODUCT_TABLE).select("*");
-  if(result.error){
-    body.innerHTML=`<tr><td colspan="9">Unable to load products: ${escapeHTML(result.error.message)}</td></tr>`;
-    return;
-  }
-  products=result.data||[];
-  body.replaceChildren();
+async function openSlip(path,fileName){
+ activeSlipPath=path;
+ const {data,error}=await db.storage.from(PAYMENT_BUCKET).createSignedUrl(path,300);
+ if(error){alert("Unable to open payment slip: "+error.message);return}
+ const url=data.signedUrl;
+ const ext=(fileName||path).split(".").pop().toLowerCase().split("?")[0];
+ if(["jpg","jpeg","png","webp","gif"].includes(ext)){
+  el("slipContent").innerHTML=`<img src="${url}" alt="Payment slip">`;
+ }else if(ext==="pdf"){
+  el("slipContent").innerHTML=`<iframe src="${url}"></iframe>`;
+ }else{
+  el("slipContent").innerHTML=`<a href="${url}" target="_blank" rel="noopener">Open payment slip</a>`;
+ }
+ el("slipModal").style.display="block";
+}
+function closeSlip(){el("slipModal").style.display="none";el("slipContent").innerHTML=""}
+async function downloadSlip(){
+ if(!activeSlipPath)return;
+ const {data,error}=await db.storage.from(PAYMENT_BUCKET).download(activeSlipPath);
+ if(error){alert(error.message);return}
+ const url=URL.createObjectURL(data);
+ const a=document.createElement("a");a.href=url;a.download=activeSlipPath.split("/").pop()||"payment-slip";
+ a.click();URL.revokeObjectURL(url);
+}
 
-  products.forEach(p=>{
-    const tr=document.createElement("tr");
-    const raw=p.image_url||"";
-    const src=raw?(/^https?:\/\//i.test(raw)?raw:db.storage.from(PRODUCT_BUCKET).getPublicUrl(raw).data.publicUrl):"";
-    const image=document.createElement("td");
-    if(src){const img=document.createElement("img");img.className="product-image";img.src=src;img.alt=p.name||"Product";image.append(img);}
-    else image.textContent="—";
-    const name=document.createElement("td");name.textContent=p.name||"";
-    const category=document.createElement("td");category.textContent=p.category||"—";
-    const price=document.createElement("td");price.textContent="LKR "+money(p.price);
-    const cost=document.createElement("td");cost.textContent=p.cost_price==null?"—":"LKR "+money(p.cost_price);
-    const stock=document.createElement("td");stock.textContent=p.stock_quantity??"—";
-    const payment=document.createElement("td");payment.textContent=paymentOptionLabel(p.payment_option||defaultPaymentOption(p.name));
-    const status=document.createElement("td");status.textContent=p.is_active?"Active":"Inactive";
-    const actions=document.createElement("td");
-    const edit=document.createElement("button");edit.className="small-btn";edit.textContent="EDIT";edit.onclick=()=>editProduct(p.id);
-    const toggle=document.createElement("button");toggle.className="small-btn gray";toggle.style.marginLeft="5px";
-    toggle.textContent=p.is_active?"DEACTIVATE":"ACTIVATE";toggle.onclick=()=>toggleProduct(p.id,!p.is_active);
-    actions.append(edit,toggle);
-    [image,name,category,price,cost,stock,payment,status,actions].forEach(x=>tr.append(x));
-    body.append(tr);
+async function loadProducts(){
+ const {data,error}=await db.from(PRODUCTS).select("*").order("name");
+ if(error){alert("Products: "+error.message);return}
+ products=data||[];
+ renderProducts();renderManualProductOptions();renderOverview();
+}
+
+function renderProducts(){
+ const q=norm(el("productSearch").value);
+ const list=products.filter(p=>norm(p.name).includes(q)||norm(p.category).includes(q));
+ el("productsTable").innerHTML=table(["Product","Category","Price","Cost","Stock","Active","Actions"],list.map(p=>`<tr>
+ <td>${esc(p.name)}<br><small>${esc(p.description||"")}</small></td>
+ <td>${esc(p.category||"-")}</td><td>${money(p.price)}</td><td>${money(p.cost_price)}</td>
+ <td>${esc(p.stock_quantity??"-")}</td><td>${p.is_active?"Yes":"No"}</td>
+ <td><div class="actions"><button class="secondary" onclick="editProduct('${esc(p.id)}')">Edit</button><button class="danger" onclick="deleteProduct('${esc(p.id)}')">Delete</button></div></td>
+ </tr>`));
+}
+
+function clearProductForm(){
+ ["pId","pName","pPrice","pCost","pCategory","pStock","pImage","pPayment","pDescription"].forEach(id=>el(id).value="");
+ el("pCustom").value="false";el("pActive").value="true";el("productFormTitle").textContent="Add Product";
+}
+function editProduct(id){
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return;
+ el("pId").value=p.id;el("pName").value=p.name||"";el("pPrice").value=p.price??"";
+ el("pCost").value=p.cost_price??"";el("pCategory").value=p.category||"";
+ el("pStock").value=p.stock_quantity??0;el("pImage").value=p.image_url||"";
+ el("pPayment").value=p.payment_option||"";el("pDescription").value=p.description||"";
+ el("pCustom").value=String(!!p.is_customisable);el("pActive").value=String(!!p.is_active);
+ el("productFormTitle").textContent="Edit Product";
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+async function saveProduct(){
+ const name=el("pName").value.trim(),price=Number(el("pPrice").value);
+ if(!name||!Number.isFinite(price)){alert("Enter a product name and valid price.");return}
+ const payload={
+  name,price,category:el("pCategory").value.trim(),
+  stock_quantity:Number(el("pStock").value||0),
+  image_url:el("pImage").value.trim(),
+  description:el("pDescription").value.trim(),
+  is_customisable:el("pCustom").value==="true",
+  is_active:el("pActive").value==="true",
+  payment_option:el("pPayment").value.trim()
+ };
+ if(el("pCost").value!=="")payload.cost_price=Number(el("pCost").value);
+ const id=el("pId").value;
+ const result=id?await db.from(PRODUCTS).update(payload).eq("id",id):await db.from(PRODUCTS).insert(payload);
+ if(result.error){alert("Product save failed: "+result.error.message);return}
+ alert("Product saved.");clearProductForm();await loadProducts();
+}
+async function deleteProduct(id){
+ if(!confirm("Delete this product?"))return;
+ const {error}=await db.from(PRODUCTS).delete().eq("id",id);
+ if(error){alert(error.message);return}await loadProducts();
+}
+
+function renderManualProductOptions(){
+ el("mProduct").innerHTML=products.filter(p=>p.is_active).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+ manualProductChanged();
+}
+function manualProductChanged(){
+ const p=products.find(x=>String(x.id)===el("mProduct").value);
+ if(p)el("mPrice").value=p.price??"";
+}
+function openManualOrder(){
+ manualItems=[];el("manualOrder").style.display="block";renderManualProductOptions();renderManualItems();
+}
+function hideManualOrder(){el("manualOrder").style.display="none"}
+function addManualItem(){
+ const p=products.find(x=>String(x.id)===el("mProduct").value);
+ const qty=Number(el("mQty").value),price=Number(el("mPrice").value);
+ if(!p||qty<1||price<0||!Number.isFinite(price)){alert("Select a product and enter valid quantity and price.");return}
+ manualItems.push({product_id:p.id,product_name:p.name,quantity:qty,unit_price:price});
+ renderManualItems();
+}
+function renderManualItems(){
+ el("manualItems").innerHTML=manualItems.map((i,n)=>`<p>${esc(i.product_name)} × ${i.quantity} — ${money(i.quantity*i.unit_price)} <button class="danger" onclick="manualItems.splice(${n},1);renderManualItems()">Remove</button></p>`).join("")+
+ `<p><b>Total: ${money(manualItems.reduce((s,i)=>s+i.quantity*i.unit_price,0))}</b></p>`;
+}
+async function saveManualOrder(){
+ const name=el("mName").value.trim();
+ if(!name||!manualItems.length){alert("Enter customer name and add at least one product.");return}
+ const total=manualItems.reduce((s,i)=>s+i.quantity*i.unit_price,0);
+ const payment=el("mPayment").value;
+ const payload={
+  customer_name:name,phone:el("mPhone").value.trim(),
+  email:el("mEmail").value.trim(),address:el("mAddress").value.trim(),
+  payment_method:payment,payment_status:payment==="COD"?"not_required":"pending",
+  order_status:el("mStatus").value,total_amount:total,
+  notes:el("mNotes").value.trim()
+ };
+ const {data,error}=await db.from(ORDERS).insert(payload).select().single();
+ if(error){alert("Could not create order: "+error.message);return}
+ const items=manualItems.map(i=>({
+  order_id:data.id,product_id:i.product_id,product_name:i.product_name,
+  quantity:i.quantity,unit_price:i.unit_price
+ }));
+ const itemResult=await db.from(ITEMS).insert(items);
+ if(itemResult.error){
+  alert("Order was created, but its items could not be saved: "+itemResult.error.message);
+  return;
+ }
+ const tracking=await db.from(TRACKING).insert({
+  store_order_id:data.id,status:payload.order_status
+ });
+ if(tracking.error)console.warn("Tracking row could not be created:",tracking.error.message);
+ alert("Manual order created.");
+ hideManualOrder();await loadOrders();
+}
+
+async function loadExpenses(){
+ const {data,error}=await db.from(EXPENSES).select("*").order("expense_date",{ascending:false});
+ if(error){alert("Expenses: "+error.message);return}
+ expenses=data||[];renderExpenses();
+}
+async function addExpense(){
+ const description=el("eDescription").value.trim();
+ const amount=Number(el("eAmount").value);
+ const date=el("eDate").value||new Date().toISOString().slice(0,10);
+ if(!description||!Number.isFinite(amount)||amount<=0){alert("Enter an expense description and a valid amount.");return}
+ const {error}=await db.from(EXPENSES).insert({
+  description,category:el("eCategory").value,amount,expense_date:date
+ });
+ if(error){alert("Expense could not be saved: "+error.message);return}
+ el("eDescription").value="";el("eAmount").value="";
+ await loadExpenses();await loadReports();
+}
+function renderExpenses(){
+ el("expensesTable").innerHTML=table(["Date","Description","Category","Amount","Action"],expenses.map(e=>`<tr>
+ <td>${esc(e.expense_date||"-")}</td><td>${esc(e.description||"-")}</td><td>${esc(e.category||"-")}</td>
+ <td>${money(e.amount)}</td><td><button class="danger" onclick="deleteExpense('${esc(e.id)}')">Delete</button></td></tr>`));
+}
+async function deleteExpense(id){
+ if(!confirm("Delete this expense?"))return;
+ const {error}=await db.from(EXPENSES).delete().eq("id",id);
+ if(error){alert(error.message);return}await loadExpenses();await loadReports();
+}
+
+function dateRange(){
+ const period=el("reportPeriod").value;
+ const selected=el("reportDate").value?new Date(el("reportDate").value+"T12:00:00"):new Date();
+ let start=null,end=null;
+ if(period==="day"){
+  start=new Date(selected);start.setHours(0,0,0,0);
+  end=new Date(start);end.setDate(end.getDate()+1);
+ }else if(period==="week"){
+  start=new Date(selected);start.setHours(0,0,0,0);
+  const day=(start.getDay()+6)%7;start.setDate(start.getDate()-day);
+  end=new Date(start);end.setDate(end.getDate()+7);
+ }else if(period==="month"){
+  start=new Date(selected.getFullYear(),selected.getMonth(),1);
+  end=new Date(selected.getFullYear(),selected.getMonth()+1,1);
+ }
+ return {start,end};
+}
+function inRange(value,range){
+ if(!range.start)return true;
+ const d=new Date(value);
+ return d>=range.start&&d<range.end;
+}
+function itemRevenue(i){return Number(i.unit_price??i.price??0)*Number(i.quantity??1)}
+function itemCost(i,p){
+ const unit=Number(i.unit_cost??i.cost_price??p?.cost_price??0);
+ return unit*Number(i.quantity??1);
+}
+
+async function loadReports(){
+ if(!orders.length)await loadOrders();
+ if(!expenses.length)await loadExpenses();
+ const range=dateRange();
+ const filteredOrders=orders.filter(o=>inRange(o.created_at,range));
+ const paid=filteredOrders.filter(o=>paymentStatus(o)==="paid"&&norm(orderStatus(o))!=="cancelled");
+ const filteredExpenses=expenses.filter(e=>inRange(e.expense_date||e.created_at,range));
+ const revenue=paid.reduce((s,o)=>s+orderTotal(o),0);
+ let productCosts=0,units=0;
+ const productMap={};
+ const orderRows=[];
+ paid.forEach(o=>{
+  let orderCost=0;
+  orderItems(o).forEach(i=>{
+   const p=products.find(x=>String(x.id)===String(i.product_id));
+   const rev=itemRevenue(i),cost=itemCost(i,p);
+   productCosts+=cost;orderCost+=cost;units+=Number(i.quantity||1);
+   const key=i.product_id||i.product_name||i.name||"Unknown";
+   if(!productMap[key])productMap[key]={name:i.product_name||i.name||p?.name||"Product",quantity:0,revenue:0,cost:0};
+   productMap[key].quantity+=Number(i.quantity||1);
+   productMap[key].revenue+=rev;
+   productMap[key].cost+=cost;
   });
-
-  renderManualProductOptions();
+  orderRows.push({id:o.id,revenue:orderTotal(o),cost:orderCost,profit:orderTotal(o)-orderCost});
+ });
+ const expenseTotal=filteredExpenses.reduce((s,e)=>s+Number(e.amount||0),0);
+ const grossProfit=revenue-productCosts;
+ const netProfit=grossProfit-expenseTotal;
+ reportData={range,paid,filteredExpenses,revenue,productCosts,expenseTotal,grossProfit,netProfit,units,productMap,orderRows};
+ el("reportCards").innerHTML=[
+  ["Paid Revenue",money(revenue)],["Product Costs",money(productCosts)],
+  ["Gross Profit",money(grossProfit)],["Expenses",money(expenseTotal)],
+  ["Estimated Net Profit",money(netProfit)],["Units Sold",units]
+ ].map(([a,b])=>`<div class="card"><small>${a}</small><div class="number">${b}</div></div>`).join("");
+ el("productReport").innerHTML=table(["Product","Units","Sales","Product Cost","Profit"],Object.values(productMap).map(p=>`<tr><td>${esc(p.name)}</td><td>${p.quantity}</td><td>${money(p.revenue)}</td><td>${money(p.cost)}</td><td>${money(p.revenue-p.cost)}</td></tr>`));
+ el("orderReport").innerHTML=table(["Order","Revenue","Product Cost","Profit"],orderRows.map(o=>`<tr><td>${esc(String(o.id).slice(0,8))}</td><td>${money(o.revenue)}</td><td>${money(o.cost)}</td><td>${money(o.profit)}</td></tr>`));
+ const cats={};filteredExpenses.forEach(e=>{const k=e.category||"Other";cats[k]=(cats[k]||0)+Number(e.amount||0)});
+ el("expenseReport").innerHTML=table(["Category","Total"],Object.entries(cats).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`));
 }
 
-function newProduct() {
-  $("productForm").reset();
-  $("productForm").elements.id.value="";
-  $("productForm").elements.is_active.checked=true;
-  $("productForm").elements.payment_option.value="both";
-  $("productFormTitle").textContent="Add Product";
-  $("productFormCard").hidden=false;
-  showError("productMessage","");
+function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
+function downloadCSV(filename,rows){
+ const csv=rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");a.href=url;a.download=filename;a.click();
+ URL.revokeObjectURL(url);
 }
-function closeProductForm(){$("productFormCard").hidden=true;}
-
-function editProduct(id) {
-  const p=products.find(x=>x.id===id);if(!p)return;
-  const f=$("productForm");
-  f.elements.id.value=p.id;
-  f.elements.name.value=p.name||"";
-  f.elements.price.value=p.price??"";
-  f.elements.category.value=p.category||"";
-  f.elements.stock_quantity.value=p.stock_quantity??0;
-  f.elements.image_url.value=p.image_url||"";
-  f.elements.description.value=p.description||"";
-  f.elements.is_customisable.checked=!!p.is_customisable;
-  f.elements.is_active.checked=!!p.is_active;
-  f.elements.cost_price.value=p.cost_price??"";
-  f.elements.payment_option.value=p.payment_option||defaultPaymentOption(p.name);
-  $("productFormTitle").textContent="Edit Product";
-  $("productFormCard").hidden=false;
-  showError("productMessage","");
-  window.scrollTo({top:0,behavior:"smooth"});
+function exportCSV(){
+ if(!reportData){alert("Load the report first.");return}
+ const rows=[["Zyra.lk Profit Report"],["Order / Product","Quantity","Revenue","Cost","Profit"]];
+ reportData.orderRows.forEach(o=>rows.push([o.id,"",o.revenue,o.cost,o.profit]));
+ rows.push([]);
+ rows.push(["Product-wise report"]);
+ rows.push(["Product","Quantity","Revenue","Cost","Profit"]);
+ Object.values(reportData.productMap).forEach(p=>rows.push([p.name,p.quantity,p.revenue,p.cost,p.revenue-p.cost]));
+ rows.push([]);
+ rows.push(["Paid Revenue",reportData.revenue]);
+ rows.push(["Product Costs",reportData.productCosts]);
+ rows.push(["Expenses",reportData.expenseTotal]);
+ rows.push(["Estimated Net Profit",reportData.netProfit]);
+ downloadCSV("zyra-profit-report.csv",rows);
 }
 
-$("productForm").elements.name.addEventListener("input",()=>{
-  const f=$("productForm");
-  if(!f.elements.id.value)f.elements.payment_option.value=defaultPaymentOption(f.elements.name.value);
-});
-
-$("productForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const f=e.currentTarget,id=f.elements.id.value;
-  const payload={
-    name:f.elements.name.value.trim(),
-    price:Number(f.elements.price.value),
-    category:f.elements.category.value.trim()||null,
-    stock_quantity:Number(f.elements.stock_quantity.value||0),
-    image_url:f.elements.image_url.value.trim()||null,
-    description:f.elements.description.value.trim()||null,
-    is_customisable:f.elements.is_customisable.checked,
-    is_active:f.elements.is_active.checked,
-    payment_option:f.elements.payment_option.value
-  };
-  if(f.elements.cost_price.value!=="")payload.cost_price=Number(f.elements.cost_price.value);
-  showError("productMessage","Saving...");
-  const result=id?await db.from(PRODUCT_TABLE).update(payload).eq("id",id):await db.from(PRODUCT_TABLE).insert(payload);
-  if(result.error){showError("productMessage",result.error.message);return;}
-  showError("productMessage","Product saved successfully.");
-  await loadProducts();setTimeout(closeProductForm,700);
-});
-
-async function toggleProduct(id,active) {
-  const {error}=await db.from(PRODUCT_TABLE).update({is_active:active}).eq("id",id);
-  if(error)return alert(error.message);
-  await loadProducts();
+function printInvoice(id){
+ const o=orders.find(x=>String(x.id)===String(id));if(!o)return;
+ const items=orderItems(o);
+ const html=`<!DOCTYPE html><html><head><title>Zyra Invoice</title><style>body{font-family:Arial;padding:35px;color:#30251f}table{width:100%;border-collapse:collapse;margin-top:25px}td,th{padding:12px;border-bottom:1px solid #ddd;text-align:left}h1{letter-spacing:4px}</style></head><body>
+ <h1>ZYRA.LK</h1><p>Order Invoice</p><hr>
+ <p><b>Order:</b> ${esc(o.id)}<br><b>Date:</b> ${dateValue(o.created_at)}<br><b>Customer:</b> ${esc(customerName(o))}<br><b>Phone:</b> ${esc(o.phone||o.customer_phone||"-")}<br><b>Address:</b> ${esc(o.address||"-")}</p>
+ <table><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+ ${items.map(i=>`<tr><td>${esc(i.product_name||i.name||"Product")}</td><td>${i.quantity||1}</td><td>${money(i.unit_price||i.price)}</td><td>${money(itemRevenue(i))}</td></tr>`).join("")}
+ </table><h3>Total: ${money(orderTotal(o))}</h3><p>Thank you for shopping with Zyra.lk.</p><script>window.onload=()=>window.print()<\/script></body></html>`;
+ const w=window.open("","_blank");if(!w){alert("Please allow pop-ups to print invoices.");return}
+ w.document.write(html);w.document.close();
 }
-
-/* MANUAL ORDER PRODUCT ROWS */
-function renderManualProductOptions() {
-  document.querySelectorAll(".manual-product-select").forEach(select=>{
-    const current=select.value;
-    select.innerHTML='<option value="">Select a product</option>';
-    products.filter(p=>p.is_active).forEach(p=>{
-      const option=document.createElement("option");
-      option.value=p.id;
-      option.textContent=`${p.name} — LKR ${money(p.price)}`;
-      select.append(option);
-    });
-    if(current)select.value=current;
-  });
-  updateManualOrderSummary();
-}
-
-function addManualItemRow() {
-  const row=document.createElement("div");
-  row.className="manual-item";
-  row.innerHTML=`
-    <div class="manual-item-top">
-      <strong>Order Item</strong>
-      <button type="button" class="small-btn red remove-manual-item">REMOVE</button>
-    </div>
-    <div class="grid-form">
-      <div class="field full">
-        <label>Product *</label>
-        <select class="manual-product-select" required>
-          <option value="">Select a product</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Quantity *</label>
-        <input class="manual-quantity" type="number" min="1" step="1" value="1" required>
-      </div>
-      <div class="field">
-        <label>Unit Price (LKR)</label>
-        <input class="manual-unit-price" type="number" min="0" step="0.01" readonly>
-      </div>
-      <div class="field full">
-        <label>Customisation / Item Notes</label>
-        <textarea class="manual-customisation" placeholder="Enter names, dates, initials or other customer specifications"></textarea>
-      </div>
-    </div>
-    <div class="muted manual-line-total">Line total: LKR 0.00</div>
-  `;
-  $("manualItems").append(row);
-  const select=row.querySelector(".manual-product-select");
-  const qty=row.querySelector(".manual-quantity");
-  select.addEventListener("change",()=>{
-    const p=products.find(x=>x.id===select.value);
-    row.querySelector(".manual-unit-price").value=p?p.price:"";
-    updateManualOrderSummary();
-  });
-  qty.addEventListener("input",updateManualOrderSummary);
-  row.querySelector(".manual-customisation").addEventListener("input",updateManualOrderSummary);
-  row.querySelector(".remove-manual-item").addEventListener("click",()=>{
-    row.remove();
-    if(!$("manualItems").children.length)addManualItemRow();
-    updateManualOrderSummary();
-  });
-  renderManualProductOptions();
-}
-
-function getManualSelectedItems() {
-  return [...document.querySelectorAll(".manual-item")].map(row=>{
-    const product=products.find(p=>p.id===row.querySelector(".manual-product-select").value);
-    const quantity=Math.max(1,Number(row.querySelector(".manual-quantity").value||1));
-    const customisation=row.querySelector(".manual-customisation").value.trim();
-    return {row,product,quantity,customisation};
-  }).filter(x=>x.product);
-}
-
-function updateManualOrderSummary() {
-  const selected=getManualSelectedItems();
-  let total=0;
-  let hasBankOnly=false;
-  selected.forEach(item=>{
-    const price=Number(item.product.price||0);
-    total+=price*item.quantity;
-    const option=item.product.payment_option||defaultPaymentOption(item.product.name);
-    if(option==="bank_transfer_only")hasBankOnly=true;
-    item.row.querySelector(".manual-unit-price").value=price;
-    item.row.querySelector(".manual-line-total").textContent=`Line total: LKR ${money(price*item.quantity)}`;
-  });
-
-  $("manualOrderTotal").textContent="LKR "+money(total);
-  const method=$("manualPaymentMethod");
-  const codOption=[...method.options].find(o=>o.value==="Cash on Delivery");
-  if(codOption)codOption.disabled=hasBankOnly;
-
-  if(hasBankOnly&&method.value==="Cash on Delivery")method.value="Bank Transfer";
-
-  $("manualBankField").hidden=method.value!=="Bank Transfer";
-  $("manualBank").required=method.value==="Bank Transfer";
-
-  $("manualPaymentNotice").textContent=hasBankOnly
-    ?"At least one selected product is Bank Transfer Only. Cash on Delivery is unavailable for this order."
-    :"The selected products allow Bank Transfer and Cash on Delivery.";
-}
-
-$("addManualItemBtn").addEventListener("click",addManualItemRow);
-$("manualPaymentMethod").addEventListener("change",updateManualOrderSummary);
-
-$("manualOrderForm").addEventListener("reset",()=>{
-  setTimeout(()=>{
-    $("manualItems").replaceChildren();
-    addManualItemRow();
-    updateManualOrderSummary();
-    showError("manualOrderMessage","");
-  },0);
-});
-
-/* CREATE MANUAL ORDER */
-function createManualOrderNumber() {
-  const now=new Date();
-  const date=now.toISOString().slice(0,10).replace(/-/g,"");
-  const random=Math.random().toString(36).slice(2,7).toUpperCase();
-  return "ZY-"+date+"-"+random;
-}
-
-$("manualOrderForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const form=e.currentTarget;
-  const button=$("saveManualOrderBtn");
-  const formData=new FormData(form);
-  const selected=getManualSelectedItems();
-
-  if(!selected.length){
-    showError("manualOrderMessage","Please add at least one product.");
-    return;
-  }
-
-  const hasBankOnly=selected.some(item=>
-    (item.product.payment_option||defaultPaymentOption(item.product.name))==="bank_transfer_only"
-  );
-
-  const paymentMethod=formData.get("payment_method");
-  if(hasBankOnly&&paymentMethod==="Cash on Delivery"){
-    showError("manualOrderMessage","This order contains a Bank Transfer Only product. Please select Bank Transfer.");
-    return;
-  }
-
-  if(paymentMethod==="Bank Transfer"&&!formData.get("selected_bank")){
-    showError("manualOrderMessage","Please select the bank.");
-    return;
-  }
-
-  const total=selected.reduce((sum,item)=>sum+Number(item.product.price||0)*item.quantity,0);
-  const hasCustomised=selected.some(item=>item.customisation.length>0);
-  const orderNo=createManualOrderNumber();
-
-  const orderPayload={
-    order_number:orderNo,
-    customer_name:String(formData.get("customer_name")||"").trim(),
-    email:String(formData.get("email")||"").trim()||null,
-    phone:String(formData.get("phone")||"").trim(),
-    delivery_address:String(formData.get("delivery_address")||"").trim(),
-    city:String(formData.get("city")||"").trim(),
-    district:String(formData.get("district")||"").trim()||null,
-    postal_code:String(formData.get("postal_code")||"").trim()||null,
-    payment_method:paymentMethod,
-    selected_bank:paymentMethod==="Bank Transfer"?formData.get("selected_bank"):null,
-    customer_notes:String(formData.get("customer_notes")||"").trim()||null,
-    total_amount:total,
-    payment_status:paymentMethod==="Cash on Delivery"?"not_required":"pending",
-    order_status:"pending",
-    order_source:"manual",
-    has_customised_items:hasCustomised
-  };
-
-  button.disabled=true;
-  button.textContent="SAVING ORDER...";
-  showError("manualOrderMessage","Creating manual order...");
-
-  let createdOrder=null;
-
-  try{
-    const {data:order,error:orderError}=await db.from(ORDER_TABLE)
-      .insert(orderPayload).select().single();
-
-    if(orderError)throw new Error("Could not create store order: "+orderError.message);
-    createdOrder=order;
-
-    const itemPayload=selected.map(item=>({
-      order_id:createdOrder.id,
-      product_id:item.product.id,
-      product_name:item.product.name,
-      unit_price:Number(item.product.price),
-      quantity:item.quantity,
-      is_customised:Boolean(item.customisation),
-      customisation_details:item.customisation
-        ? {manual_notes:item.customisation,source:"admin_manual_order"}
-        : null
-    }));
-
-    const {error:itemError}=await db.from(ITEM_TABLE).insert(itemPayload);
-    if(itemError){
-      await db.from(ORDER_TABLE).delete().eq("id",createdOrder.id);
-      throw new Error("Order items could not be saved. The incomplete order was rolled back. "+itemError.message);
-    }
-
-    const trackingPayload={
-      tracking_id:createdOrder.order_number,
-      courier:"Pending assignment",
-      status:"Pending",
-      customer_name:createdOrder.customer_name,
-      store_order_id:createdOrder.id
-    };
-
-    const {error:trackingError}=await db.from(TRACKING_TABLE).insert(trackingPayload);
-
-    if(trackingError){
-      showError("manualOrderMessage",
-        "Order saved, but tracking record could not be created: "+trackingError.message+
-        ". Order number: "+createdOrder.order_number);
-      alert("The store order and items were saved, but the tracking record failed. Please check zyra_orders.");
-    }else{
-      showError("manualOrderMessage","Manual order created successfully. Order number: "+createdOrder.order_number);
-      alert("Manual order created successfully!\nOrder number: "+createdOrder.order_number+"\nYou can now print the invoice from Store Orders.");
-    }
-
-    form.reset();
-    await Promise.all([loadOrders(),loadProducts()]);
-  }catch(error){
-    console.error("Manual order error:",error);
-    showError("manualOrderMessage",error.message);
-  }finally{
-    button.disabled=false;
-    button.textContent="SAVE MANUAL ORDER";
-  }
-});
-
-/* EXPENSES */
-async function loadExpenses() {
-  const body=$("expensesTable");body.innerHTML="<tr><td colspan='5'>Loading...</td></tr>";
-  const {data,error}=await db.from(EXPENSE_TABLE).select("*").order("expense_date",{ascending:false});
-  if(error){
-    expenses=[];body.innerHTML=`<tr><td colspan="5">Expense table unavailable: ${escapeHTML(error.message)}. Create zyra_expenses first.</td></tr>`;
-    return;
-  }
-  expenses=data||[];body.replaceChildren();
-  expenses.forEach(x=>{
-    const tr=document.createElement("tr");
-    [dateText(x.expense_date),x.description,x.category||"Other","LKR "+money(x.amount)].forEach(v=>{
-      const td=document.createElement("td");td.textContent=v;tr.append(td);
-    });
-    const action=document.createElement("td");
-    const del=document.createElement("button");del.className="small-btn";del.textContent="DELETE";
-    del.onclick=()=>deleteExpense(x.id);action.append(del);tr.append(action);body.append(tr);
-  });
-}
-$("expenseForm").addEventListener("submit",async e=>{
-  e.preventDefault();const f=new FormData(e.currentTarget);
-  const payload={
-    description:String(f.get("description")).trim(),
-    amount:Number(f.get("amount")),
-    expense_date:f.get("expense_date"),
-    category:f.get("category"),
-    notes:String(f.get("notes")||"").trim()||null
-  };
-  showError("expenseMessage","Saving...");
-  const {error}=await db.from(EXPENSE_TABLE).insert(payload);
-  if(error){showError("expenseMessage","Could not save expense: "+error.message);return;}
-  showError("expenseMessage","Expense saved.");
-  e.currentTarget.reset();await loadExpenses();await loadReports();
-});
-async function deleteExpense(id) {
-  if(!confirm("Delete this expense?"))return;
-  const {error}=await db.from(EXPENSE_TABLE).delete().eq("id",id);
-  if(error)return alert(error.message);
-  await loadExpenses();await loadReports();
-}
-
-/* REPORTS */
-async function loadReports() {
-  await Promise.all([loadOrders(),loadExpenses()]);
-  const verified=orders.filter(o=>getPaymentStatus(o)==="PAID");
-  const revenue=verified.reduce((s,o)=>s+orderAmount(o),0);
-  const expenseTotal=expenses.reduce((s,e)=>s+Number(e.amount||0),0);
-  let productCosts=0,units=0;
-  const byProduct={};
-
-  verified.forEach(o=>{
-    getItems(o).forEach(i=>{
-      const qty=Number(i.quantity||1);
-      const name=i.product_name||i.name||i.name_snapshot||i.product_id||"Product";
-      const price=Number(i.unit_price??i.price??i.price_at_purchase??0);
-      const cost=Number(i.unit_cost??i.cost_price??0);
-      units+=qty;productCosts+=cost*qty;
-      if(!byProduct[name])byProduct[name]={quantity:0,revenue:0};
-      byProduct[name].quantity+=qty;
-      byProduct[name].revenue+=price*qty;
-    });
-  });
-
-  $("reportRevenue").textContent="LKR "+money(revenue);
-  $("reportCosts").textContent="LKR "+money(productCosts);
-  $("reportExpenses").textContent="LKR "+money(expenseTotal);
-  $("reportProfit").textContent="LKR "+money(revenue-productCosts-expenseTotal);
-  $("reportUnits").textContent=units;
-  $("reportCompleted").textContent=orders.filter(o=>String(o.order_status).toLowerCase()==="completed").length;
-
-  const root=$("productSales");root.replaceChildren();
-  Object.entries(byProduct).sort((a,b)=>b[1].quantity-a[1].quantity).forEach(([name,v])=>{
-    const p=document.createElement("p");p.textContent=`${name} — ${v.quantity} sold — LKR ${money(v.revenue)}`;root.append(p);
-  });
-  if(!Object.keys(byProduct).length)root.textContent="No verified sales available.";
-}
-
-/* INVOICE */
-function printInvoice(o) {
-  const lines=getItems(o).map(i=>{
-    const name=i.product_name||i.name||i.name_snapshot||"Product";
-    const qty=Number(i.quantity||1);
-    const price=Number(i.unit_price??i.price??i.price_at_purchase??0);
-    const custom=i.customisation_details||i.customization_details;
-    const customText=custom
-      ?'<div style="font-size:11px;color:#666">Customisation: '+escapeHTML(formatCustomisation(custom))+'</div>'
-      :"";
-    return `<tr><td>${escapeHTML(name)}${customText}</td><td>${qty}</td><td>LKR ${money(price)}</td><td>LKR ${money(price*qty)}</td></tr>`;
-  }).join("");
-
-  $("invoicePrint").innerHTML=`
-    <div style="max-width:800px;margin:20px auto;padding:30px;color:#292522;font-family:Arial,sans-serif">
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div><h1 style="color:#842d40;letter-spacing:3px">ZYRA.LK</h1><p>Exclusive Collection</p></div>
-        <div style="text-align:right"><h2>INVOICE</h2>
-          <p>Invoice #: ${escapeHTML(orderNumber(o))}</p>
-          <p>Date: ${escapeHTML(dateText(o.created_at))}</p>
-        </div>
-      </div>
-      <hr>
-      <h3>Bill To</h3>
-      <p><strong>${escapeHTML(o.customer_name||"Customer")}</strong><br>
-      ${escapeHTML(o.phone||"")}<br>${escapeHTML(o.email||"")}<br>
-      ${escapeHTML(o.delivery_address||"")}<br>
-      ${escapeHTML([o.city,o.district,o.postal_code].filter(Boolean).join(", "))}</p>
-      <table style="width:100%;border-collapse:collapse;margin-top:25px">
-        <thead><tr style="background:#f4eee9">
-          <th style="padding:10px;text-align:left">Product</th>
-          <th>Qty</th><th>Unit Price</th><th>Total</th>
-        </tr></thead>
-        <tbody>${lines}</tbody>
-      </table>
-      <h2 style="text-align:right;color:#842d40;margin-top:25px">Total: LKR ${money(orderAmount(o))}</h2>
-      <p>Payment Method: ${escapeHTML(o.payment_method||"—")}</p>
-      <p>Payment Status: ${escapeHTML(getPaymentStatus(o))}</p>
-      <p>Order Status: ${escapeHTML(o.order_status||"pending")}</p>
-      <hr>
-      <p style="text-align:center;font-size:13px">Thank you for shopping with Zyra.lk.</p>
-    </div>`;
-  window.print();
-}
-
-/* SEARCH */
-$("orderSearch").addEventListener("input",renderOrders);
-
-/* AUTH STATE */
-db.auth.onAuthStateChange((event,session)=>{
-  if(event==="SIGNED_OUT")showLogin();
-});
-
-/* START */
-addManualItemRow();
-checkSession();
 </script>
 </body>
 </html>
