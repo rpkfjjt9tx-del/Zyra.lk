@@ -123,14 +123,14 @@ th{background:#faf7f2}
 <div class="topline">
 <div>
 <h2 class="section-title">Sales &amp; Profit Report</h2>
-<p class="muted">Non-pending and non-cancelled orders. Delivery fees are excluded. Profit = selling price − cost price. For older order items without a saved cost snapshot, the latest product cost is used as an estimate.</p>
+<p class="muted">Non-pending and non-cancelled orders. Delivery fees are excluded. Discounts are deducted proportionally from product sales. Profit = net selling price − cost price. Older items without a saved cost snapshot use the latest product cost as an estimate.</p>
 </div>
 <button id="refreshReportBtn" class="btn light" type="button" onclick="refreshReport()">REFRESH REPORT</button>
 </div>
 <p id="reportMessage" class="message" aria-live="polite"></p>
 <div class="tablewrap">
 <table>
-<thead><tr><th>Product</th><th>Units sold</th><th>Sales</th><th>Cost</th><th>Gross profit</th></tr></thead>
+<thead><tr><th>Product</th><th>Units sold</th><th>Net sales</th><th>Cost</th><th>Gross profit</th></tr></thead>
 <tbody id="profitReportBody"><tr><td colspan="5">Sign in to load the report.</td></tr></tbody>
 </table>
 </div>
@@ -158,7 +158,7 @@ th{background:#faf7f2}
 <div class="topline">
 <div>
 <h2 class="section-title">Store Orders &amp; Courier Updates</h2>
-<p class="muted">Update order status, save courier tracking information and print or download invoices.</p>
+<p class="muted">Website orders and manual orders are displayed together here. Update order status, edit courier details, and print or download invoices.</p>
 </div>
 <button class="btn light" type="button" onclick="loadOrders()">REFRESH ORDERS</button>
 </div>
@@ -233,10 +233,18 @@ th{background:#faf7f2}
 </div>
 </div>
 
+<div class="row">
+<div class="field">
+<label>Discount amount (LKR)</label>
+<input name="discount_amount" type="number" min="0" step="0.01" value="0">
+<small class="muted">Enter the discount amount in rupees. It cannot exceed the product subtotal.</small>
+</div>
 <div class="field">
 <label>Delivery fee (LKR)</label>
 <input name="delivery_fee" type="number" min="0" step="0.01" value="0">
 </div>
+</div>
+
 <div class="field">
 <label>Customer notes</label>
 <textarea name="customer_notes"></textarea>
@@ -244,6 +252,8 @@ th{background:#faf7f2}
 
 <div class="subpanel">
 <p>Subtotal: <strong id="manualSubtotal">LKR 0</strong></p>
+<p>Discount: <strong id="manualDiscount">LKR 0</strong></p>
+<p>After discount: <strong id="manualAfterDiscount">LKR 0</strong></p>
 <p>Delivery fee: <strong id="manualDelivery">LKR 0</strong></p>
 <h2 class="manual-total">Grand total: <strong id="manualGrandTotal">LKR 0</strong></h2>
 </div>
@@ -521,7 +531,7 @@ el("reportMessage").textContent="Refreshing sales, saved product costs and profi
 try{
 await loadProducts();
 await loadOrders({quiet:true});
-el("reportMessage").textContent="Report refreshed. Missing historical item costs are estimated from each product's currently saved cost price.";
+el("reportMessage").textContent="Report refreshed. Discounts are deducted from product sales. Missing historical item costs are estimated from each product's currently saved cost price.";
 }catch(e){
 el("reportMessage").textContent="Report refresh failed: "+e.message;
 }finally{
@@ -593,13 +603,18 @@ loadingOrders=false;
 }
 }
 
+/* SALES REPORT: DISCOUNT IS ALLOCATED PROPORTIONALLY ACROSS ITEMS */
+
 function renderStatsAndReport(orders){
 el("statOrders").textContent=orders.length;
 el("statPending").textContent=orders.filter(o=>(o.order_status||"pending").toLowerCase()==="pending").length;
 
 const valid=orders.filter(o=>!["pending","cancelled"].includes((o.order_status||"pending").toLowerCase()));
 
-el("statSales").textContent=money(valid.reduce((s,o)=>s+Number(o.subtotal_amount??(Number(o.total_amount||0)-Number(o.delivery_fee||0))),0));
+el("statSales").textContent=money(valid.reduce((s,o)=>{
+const subtotal=Number(o.subtotal_amount??(Number(o.total_amount||0)-Number(o.delivery_fee||0)+Number(o.discount_amount||0)));
+return s+Math.max(0,subtotal-Number(o.discount_amount||0));
+},0));
 
 const rows=new Map();
 let totalCost=0,totalProfit=0,ordersWithCost=0;
@@ -608,9 +623,14 @@ valid.forEach(o=>{
 const items=o.store_order_items||[];
 let orderHasCost=items.length>0;
 
+const grossSubtotal=items.reduce((sum,i)=>sum+Number(i.unit_price||0)*Number(i.quantity||0),0);
+const orderDiscount=Number(o.discount_amount||0);
+
 items.forEach(i=>{
 const qty=Number(i.quantity||0);
-const sales=Number(i.unit_price||0)*qty;
+const grossSales=Number(i.unit_price||0)*qty;
+const discountShare=grossSubtotal>0?orderDiscount*(grossSales/grossSubtotal):0;
+const netSales=grossSales-discountShare;
 const key=i.product_id||i.product_name;
 
 const stored=i.unit_cost_price!==null&&i.unit_cost_price!==undefined?Number(i.unit_cost_price):null;
@@ -620,7 +640,7 @@ const estimated=stored===null&&fallback!==null;
 
 const r=rows.get(key)||{name:i.product_name||"Product",qty:0,sales:0,cost:0,profit:0,hasCost:true,hasEstimate:false};
 r.qty+=qty;
-r.sales+=sales;
+r.sales+=netSales;
 
 if(unitCost===null){
 r.hasCost=false;
@@ -628,9 +648,9 @@ orderHasCost=false;
 }else{
 const cost=unitCost*qty;
 r.cost+=cost;
-r.profit+=sales-cost;
+r.profit+=netSales-cost;
 totalCost+=cost;
-totalProfit+=sales-cost;
+totalProfit+=netSales-cost;
 if(estimated)r.hasEstimate=true;
 }
 rows.set(key,r);
@@ -724,6 +744,29 @@ note.textContent="Order notes: "+order.customer_notes;
 card.append(note);
 }
 
+/* ORDER PRICE BREAKDOWN */
+
+const subtotalValue=Number(order.subtotal_amount??(Number(order.total_amount||0)-Number(order.delivery_fee||0)+Number(order.discount_amount||0)));
+const discountValue=Number(order.discount_amount||0);
+const deliveryValue=Number(order.delivery_fee||0);
+
+const priceBox=document.createElement("div");
+priceBox.className="subpanel";
+
+[
+["Subtotal",money(subtotalValue)],
+["Discount",money(discountValue)],
+["Delivery fee",money(deliveryValue)],
+["Grand total",money(order.total_amount)]
+].forEach(([label,value],index)=>{
+const p=document.createElement("p");
+p.textContent=label+": "+value;
+if(index===3)p.style.fontWeight="bold";
+priceBox.append(p);
+});
+
+card.append(priceBox);
+
 const items=order.store_order_items||[];
 const itemBox=document.createElement("div");
 itemBox.style.margin="12px 0";
@@ -740,7 +783,7 @@ const fallbackCost=it.product_id&&productCostMap.has(it.product_id)?productCostM
 const unitCost=savedCost!==null?savedCost:fallbackCost;
 const estimated=savedCost===null&&fallbackCost!==null;
 
-line.textContent=`${it.product_name} × ${it.quantity} — Selling: ${money(Number(it.unit_price)*Number(it.quantity))} · Cost: ${unitCost===null?"Not recorded":money(unitCost*Number(it.quantity))+(estimated?" (current estimate)":"")} · Profit: ${unitCost===null?"Pending cost history":money((Number(it.unit_price)-unitCost)*Number(it.quantity))+(estimated?" (estimated)":"")}`;
+line.textContent=`${it.product_name} × ${it.quantity} — Selling: ${money(Number(it.unit_price)*Number(it.quantity))} · Cost: ${unitCost===null?"Not recorded":money(unitCost*Number(it.quantity))+(estimated?" (current estimate)":"")} · Profit: ${unitCost===null?"Pending cost history":money((Number(it.unit_price)-unitCost)*Number(it.quantity))+(estimated?" (estimated, before order discount)":"")}`;
 
 if(it.is_customised)appendCustomisationDetails(line,it.customisation_details);
 itemBox.append(line);
@@ -1090,12 +1133,16 @@ button.textContent=old;
 }
 }
 
-/* PRINT INVOICE */
+/* PRINT INVOICE - INCLUDES DISCOUNT */
 
 function printInvoice(o,track={}){
 const rows=(o.store_order_items||[]).map(i=>
 `<tr><td>${escapeHtml(i.product_name)}</td><td>${escapeHtml(i.quantity)}</td><td>${money(i.unit_price)}</td><td>${money(Number(i.quantity)*Number(i.unit_price))}</td></tr>`
 ).join("");
+
+const subtotal=Number(o.subtotal_amount??(Number(o.total_amount||0)-Number(o.delivery_fee||0)+Number(o.discount_amount||0)));
+const discount=Number(o.discount_amount||0);
+const delivery=Number(o.delivery_fee||0);
 
 const w=window.open("","_blank");
 if(!w){alert("Please allow pop-ups to print invoices.");return;}
@@ -1110,6 +1157,7 @@ h1{color:#842d40}
 table{width:100%;border-collapse:collapse;margin-top:25px}
 td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
 .total{text-align:right;font-weight:bold;margin-top:20px}
+.summary{margin-top:20px;text-align:right;line-height:1.8}
 </style>
 </head>
 <body>
@@ -1128,7 +1176,12 @@ td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
 <thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead>
 <tbody>${rows}</tbody>
 </table>
-<p class="total">Order total: ${money(o.total_amount)}</p>
+<div class="summary">
+Subtotal: ${money(subtotal)}<br>
+Discount: − ${money(discount)}<br>
+Delivery fee: ${money(delivery)}<br>
+<strong>Grand total: ${money(o.total_amount)}</strong>
+</div>
 <h3>Courier / Tracking</h3>
 <p>
 Courier: ${escapeHtml(track.courier||"Not assigned")}<br>
@@ -1159,7 +1212,7 @@ const local=new Date(now.getTime()-now.getTimezoneOffset()*60000);
 input.value=local.toISOString().slice(0,16);
 }
 
-/* FIX: REFRESH PRODUCT OPTIONS FOR ALL MANUAL ITEM ROWS */
+/* REFRESH PRODUCT OPTIONS FOR ALL MANUAL ITEM ROWS */
 
 function refreshManualProductOptions(){
 document.querySelectorAll(".manual-item").forEach(box=>{
@@ -1347,6 +1400,8 @@ updateProduct();
 calculateManualTotal();
 }
 
+/* LIVE SUBTOTAL, DISCOUNT, DELIVERY AND GRAND TOTAL */
+
 function calculateManualTotal(){
 let subtotal=0;
 
@@ -1362,14 +1417,23 @@ d.subtotal.textContent="Line total: "+money(line);
 const form=el("manualOrderForm");
 if(!form)return;
 
-const delivery=Number(form.elements.delivery_fee.value||0);
+const delivery=Math.max(0,Number(form.elements.delivery_fee.value||0));
+const discount=Math.max(0,Number(form.elements.discount_amount.value||0));
+const afterDiscount=subtotal-discount;
+const grandTotal=afterDiscount+delivery;
 
 el("manualSubtotal").textContent=money(subtotal);
+el("manualDiscount").textContent="− "+money(discount);
+el("manualAfterDiscount").textContent=money(afterDiscount);
 el("manualDelivery").textContent=money(delivery);
-el("manualGrandTotal").textContent=money(subtotal+delivery);
+el("manualGrandTotal").textContent=money(grandTotal);
+
+el("manualAfterDiscount").style.color=afterDiscount<0?"#b42318":"";
+el("manualGrandTotal").style.color=grandTotal<0?"#b42318":"";
 }
 
 el("manualOrderForm").elements.delivery_fee.addEventListener("input",calculateManualTotal);
+el("manualOrderForm").elements.discount_amount.addEventListener("input",calculateManualTotal);
 
 function getManualItems(){
 const items=[];
@@ -1438,10 +1502,13 @@ const items=getManualItems();
 
 const subtotal=items.reduce((total,item)=>total+item.unit_price*item.quantity,0);
 const delivery=Number(f.get("delivery_fee")||0);
+const discount=Number(f.get("discount_amount")||0);
 
 if(!Number.isFinite(delivery)||delivery<0)throw new Error("Enter a valid delivery fee.");
+if(!Number.isFinite(discount)||discount<0)throw new Error("Enter a valid discount amount.");
+if(discount>subtotal)throw new Error("Discount cannot exceed the product subtotal.");
 
-const total=subtotal+delivery;
+const total=subtotal-discount+delivery;
 const localDate=new Date(f.get("order_date"));
 
 if(Number.isNaN(localDate.getTime()))throw new Error("Please select a valid order date.");
@@ -1459,6 +1526,7 @@ payment_status:String(f.get("payment_status")||"pending"),
 order_status:String(f.get("order_status")||"pending"),
 customer_notes:String(f.get("customer_notes")||"").trim()||null,
 subtotal_amount:subtotal,
+discount_amount:discount,
 delivery_fee:delivery,
 total_amount:total,
 has_customised_items:items.some(i=>i.is_customised),
@@ -1529,7 +1597,7 @@ button.textContent="CREATE MANUAL ORDER";
 }
 });
 
-/* PDF INVOICE */
+/* PDF INVOICE - INCLUDES DISCOUNT */
 
 function downloadInvoicePDF(order,track={}){
 if(!window.jspdf||!window.jspdf.jsPDF){
@@ -1556,6 +1624,9 @@ pdf.text(t,18,y);
 y+=6;
 });
 }
+
+const subtotal=Number(order.subtotal_amount??(Number(order.total_amount||0)-Number(order.delivery_fee||0)+Number(order.discount_amount||0)));
+const discount=Number(order.discount_amount||0);
 
 pdf.setTextColor(132,45,64);
 line("ZYRA.LK",22,true);
@@ -1595,7 +1666,8 @@ y+=2;
 });
 
 y+=3;
-line("Subtotal: "+money(order.subtotal_amount??(Number(order.total_amount||0)-Number(order.delivery_fee||0))),11,true);
+line("Subtotal: "+money(subtotal),11,true);
+line("Discount: - "+money(discount),11,true);
 line("Delivery fee: "+money(order.delivery_fee));
 line("GRAND TOTAL: "+money(order.total_amount),15,true);
 y+=4;
@@ -1610,6 +1682,8 @@ line("Courier: "+(track.courier||"Not assigned"));
 line("Tracking ID: "+(track.tracking_id||"Not assigned"));
 line("Courier reference: "+(track.courier_reference||"Not provided"));
 line("Tracking status: "+(track.status||"Pending"));
+line("Location: "+(track.location||"Not updated"));
+line("Estimated delivery: "+(track.estimated_delivery||"Not provided"));
 y+=6;
 
 line("Thank you for shopping with Zyra.lk.",11,true);
@@ -1652,7 +1726,6 @@ productCache=(data||[]).map(p=>({
 cost_price:costMap.has(p.id)?costMap.get(p.id):null
 }));
 
-/* IMPORTANT: UPDATE MANUAL ORDER PRODUCT DROPDOWNS AFTER FETCH */
 refreshManualProductOptions();
 
 const body=el("productsBody");
