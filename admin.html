@@ -442,6 +442,11 @@ function customerName(o) {
  return o.customer_name || o.name || o.full_name || "-";
 }
 
+/* CUSTOMER-FACING ORDER NUMBER */
+function displayOrderNumber(o) {
+ return o?.order_number || o?.id || "-";
+}
+
 function orderStatus(o) {
  return o.order_status || o.status || "pending";
 }
@@ -498,6 +503,7 @@ function renderOrders() {
  const list = orders.filter(o => {
   const text = norm([
    customerName(o),
+   o.order_number,
    o.id,
    o.phone,
    o.customer_phone,
@@ -512,7 +518,7 @@ function renderOrders() {
   ["Order","Customer","Date","Total","Payment","Status","Actions"],
   list.map(o => `
    <tr>
-    <td>${esc(String(o.id).slice(0,8))}</td>
+    <td>${esc(displayOrderNumber(o))}</td>
     <td>
      ${esc(customerName(o))}
      <br><small>${esc(o.phone || o.customer_phone || o.email || "")}</small>
@@ -743,7 +749,7 @@ async function viewOrder(id) {
    <p><b>Phone:</b> ${esc(o.phone || o.customer_phone || "-")}</p>
    <p><b>Email:</b> ${esc(o.email || "-")}</p>
    <p><b>Address:</b> ${esc(o.address || o.delivery_address || "-")}</p>
-   <p><b>Order ID:</b> ${esc(o.id)}</p>
+   <p><b>Order ID:</b> ${esc(displayOrderNumber(o))}</p>
    <p><b>Date:</b> ${dateValue(o.created_at)}</p>
    <p><b>Payment:</b> ${esc(o.payment_status || "-")}</p>
    <p><b>Order Status:</b> ${esc(orderStatus(o))}</p>
@@ -806,7 +812,7 @@ function renderPayments() {
 
    return `
     <tr>
-     <td>${esc(String(o.id).slice(0,8))}<br><small>${dateValue(o.created_at)}</small></td>
+     <td>${esc(displayOrderNumber(o))}<br><small>${dateValue(o.created_at)}</small></td>
      <td>${esc(customerName(o))}</td>
      <td>${money(orderTotal(o))}</td>
      <td>
@@ -1411,7 +1417,7 @@ async function loadReports() {
   revenue += orderRevenue;
 
   orderRows.push({
-   id:o.id,
+   id:displayOrderNumber(o),
    revenue:orderRevenue,
    cost,
    profit:orderRevenue-cost
@@ -1469,7 +1475,7 @@ async function loadReports() {
   ["Order","Revenue","Product Cost","Profit"],
   orderRows.map(o => `
    <tr>
-    <td>${esc(String(o.id).slice(0,8))}</td>
+    <td>${esc(o.id)}</td>
     <td>${money(o.revenue)}</td>
     <td>${money(o.cost)}</td>
     <td>${money(o.profit)}</td>
@@ -1554,7 +1560,7 @@ function printInvoice(id) {
   <p>Order Invoice</p>
   <hr>
   <p>
-   <b>Order:</b> ${esc(o.id)}<br>
+   <b>Order:</b> ${esc(displayOrderNumber(o))}<br>
    <b>Date:</b> ${dateValue(o.created_at)}<br>
    <b>Customer:</b> ${esc(customerName(o))}<br>
    <b>Phone:</b> ${esc(o.phone || o.customer_phone || "-")}<br>
@@ -1627,7 +1633,7 @@ function renderOverview() {
   ["Order","Customer","Total","Payment","Date"],
   recent.map(o => `
    <tr>
-    <td>${esc(String(o.id).slice(0,8))}</td>
+    <td>${esc(displayOrderNumber(o))}</td>
     <td>${esc(customerName(o))}</td>
     <td>${money(orderTotal(o))}</td>
     <td>${esc(o.payment_status || "-")}</td>
