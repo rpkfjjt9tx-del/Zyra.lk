@@ -7,63 +7,77 @@
 <title>Zyra.lk | Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f}
+:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f;--line:#eadfd9;--green:#26734d;--red:#b42318}
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-.wrap{max-width:1200px;margin:auto;padding:24px}
+.wrap{max-width:1200px;margin:auto;padding:22px}
 .brand{color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:2px}
-.panel{background:#fff;padding:20px;margin:18px 0;border:1px solid #eee}
+.panel{background:#fff;padding:20px;margin:18px 0;border:1px solid var(--line);border-radius:8px}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .row>*{flex:1}
-.btn{border:0;background:var(--wine);color:#fff;padding:11px 16px}
+.btn{border:0;border-radius:4px;background:var(--wine);color:#fff;padding:11px 16px}
 .btn.secondary{background:var(--dark)}
 .btn.light{background:#eee;color:var(--dark)}
-input,select,textarea{padding:11px;border:1px solid #ddd;width:100%;background:white}
+.btn.success{background:var(--green)}
+.btn.danger{background:var(--red)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input,select,textarea{padding:11px;border:1px solid #ddd;border-radius:3px;width:100%;background:white;color:var(--dark)}
+textarea{min-height:75px}
 .field{margin:10px 0}
 .field label{display:block;font-size:13px;margin-bottom:6px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.stat{background:#f7f1ec;padding:16px}
+.stat{background:#f7f1ec;padding:16px;border-radius:5px}
 .stat strong{display:block;font-size:23px;color:var(--wine);margin-top:8px}
 .tablewrap{overflow:auto}
-table{width:100%;border-collapse:collapse;min-width:900px}
+table{width:100%;border-collapse:collapse;min-width:850px}
 th,td{text-align:left;padding:11px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}
 th{background:#faf7f2}
 .hidden{display:none!important}
 .muted{color:var(--muted);font-size:13px}
-.order-card{border:1px solid #eee;padding:15px;margin:12px 0}
+.order-card{border:1px solid #eee;padding:15px;margin:12px 0;border-radius:6px}
 .itemline{padding:8px 0;border-bottom:1px solid #eee}
 .status{font-weight:bold;color:var(--wine)}
 .message{margin:10px 0;color:var(--wine);white-space:pre-wrap}
+.image-preview{max-width:180px;max-height:180px;object-fit:contain;border:1px solid #eee;padding:6px;margin-top:8px;background:#fff}
+.section-title{margin:0 0 8px;color:var(--wine)}
+.subpanel{background:#fcfaf8;border:1px solid #eee;padding:13px;margin-top:12px;border-radius:5px}
+.slip-preview{max-width:260px;max-height:300px;object-fit:contain;display:block;margin:10px 0;border:1px solid #eee;padding:5px}
+.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#f3e9e6;color:var(--wine);font-size:12px;font-weight:bold}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions>*{flex:0 0 auto}
+.checkline{display:flex;align-items:center;gap:8px}
+.checkline input{width:auto}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 @media(max-width:650px){
 .wrap{padding:12px}
-.stats{grid-template-columns:1fr}
+.stats{grid-template-columns:1fr 1fr}
 .panel{padding:14px}
+.row>*{flex-basis:100%}
+.actions>*{flex:1 1 100%}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header class="row">
+<header class="topline">
 <div class="brand">ZYRA.LK · ADMIN</div>
-<div style="text-align:right">
 <button id="logoutBtn" class="btn secondary hidden" onclick="logout()">LOG OUT</button>
-</div>
 </header>
 
 <section id="loginPanel" class="panel">
 <h2>Admin Login</h2>
-<p class="muted">Sign in with the Supabase Auth account that has been authorised as a Zyra admin.</p>
+<p class="muted">Sign in with the Supabase Auth account authorised as a Zyra admin.</p>
 <form id="loginForm">
 <div class="field">
 <label>Email</label>
-<input name="email" type="email" required>
+<input name="email" type="email" required autocomplete="username">
 </div>
 <div class="field">
 <label>Password</label>
-<input name="password" type="password" required>
+<input name="password" type="password" required autocomplete="current-password">
 </div>
 <button class="btn">SIGN IN</button>
 </form>
@@ -82,51 +96,58 @@ th{background:#faf7f2}
 </section>
 
 <section class="panel">
-<div class="row">
+<div class="topline">
 <div>
-<h2>Sales &amp; Profit Report</h2>
-<p class="muted">Calculated from non-pending, non-cancelled orders with saved cost-price snapshots. Delivery fees are excluded from product profit.</p>
+<h2 class="section-title">Sales &amp; Profit Report</h2>
+<p class="muted">Non-pending and non-cancelled orders. Delivery fees are excluded from product profit.</p>
 </div>
-<button class="btn light" onclick="loadOrders()">REFRESH REPORT</button>
+<button id="refreshReportBtn" class="btn light" type="button" onclick="refreshReport()">REFRESH REPORT</button>
 </div>
+<p id="reportMessage" class="message" aria-live="polite"></p>
 <div class="tablewrap">
 <table>
 <thead>
-<tr>
-<th>Product</th>
-<th>Units sold</th>
-<th>Sales</th>
-<th>Cost</th>
-<th>Gross profit</th>
-</tr>
+<tr><th>Product</th><th>Units sold</th><th>Sales</th><th>Cost</th><th>Gross profit</th></tr>
 </thead>
 <tbody id="profitReportBody">
-<tr><td colspan="5">Loading report...</td></tr>
+<tr><td colspan="5">Sign in to load the report.</td></tr>
 </tbody>
 </table>
 </div>
 </section>
 
 <section class="panel">
-<h2>Customer Payment Bank Accounts</h2>
-<p class="muted">These are the public bank-transfer details shown to customers when they select Bank Transfer at checkout.</p>
+<h2 class="section-title">Customer Payment Bank Accounts</h2>
+<p class="muted">Bank-transfer details.</p>
 <div id="adminBankAccounts"></div>
 </section>
 
 <section class="panel">
-<div class="row">
+<div class="topline">
 <div>
-<h2>Store Orders</h2>
-<p class="muted">These are shopping website orders, not delivery-tracking records.</p>
+<h2 class="section-title">Customer Payments &amp; Slips</h2>
+<p class="muted">Review uploaded bank-transfer slips and accept or reject payments.</p>
 </div>
-<button class="btn light" onclick="loadOrders()">REFRESH</button>
+<button class="btn light" type="button" onclick="loadOrders()">REFRESH PAYMENTS</button>
+</div>
+<p id="paymentsMessage" class="message"></p>
+<div id="paymentsList"></div>
+</section>
+
+<section class="panel">
+<div class="topline">
+<div>
+<h2 class="section-title">Store Orders &amp; Courier Updates</h2>
+<p class="muted">Update order status, save courier tracking information and print invoices.</p>
+</div>
+<button class="btn light" type="button" onclick="loadOrders()">REFRESH ORDERS</button>
 </div>
 <p id="ordersMessage" class="message"></p>
 <div id="ordersList"></div>
 </section>
 
 <section class="panel">
-<h2>Store Products</h2>
+<h2 class="section-title">Store Products</h2>
 <p class="muted">Manage products in store_products. Deactivate products instead of deleting them to preserve order history.</p>
 
 <form id="productForm">
@@ -137,12 +158,10 @@ th{background:#faf7f2}
 <label>Product name *</label>
 <input name="name" required maxlength="200">
 </div>
-
 <div class="field">
 <label>Cost price (LKR) *</label>
 <input name="cost_price" type="number" min="0" step="0.01" required>
 </div>
-
 <div class="field">
 <label>Selling price (LKR) *</label>
 <input name="price" type="number" min="0" step="0.01" required>
@@ -163,9 +182,16 @@ th{background:#faf7f2}
 <input name="category">
 </div>
 <div class="field">
-<label>Image URL or storage path</label>
-<input name="image_url">
+<label>Product photo (upload directly from your phone)</label>
+<input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp">
+<small class="muted">JPG, PNG or WEBP, maximum 5 MB. Uploads to Product -image.</small>
+<img id="productImagePreview" class="image-preview hidden" alt="Product photo preview">
 </div>
+</div>
+
+<div class="field">
+<label>Current image URL</label>
+<input name="image_url" placeholder="Uploaded photo URL will appear here" readonly>
 </div>
 
 <div class="field">
@@ -175,17 +201,17 @@ th{background:#faf7f2}
 
 <div class="row">
 <div class="field">
-<label>Stock quantity</label>
-<input name="stock_quantity" type="number" min="0" value="0" required>
+<label>Available quantity *</label>
+<input name="stock_quantity" type="number" min="0" step="1" value="0" required>
+<small class="muted">Low stock is 3 pieces or fewer.</small>
 </div>
-
 <div class="field">
-<label><input style="width:auto" name="is_customisable" type="checkbox"> Customisable</label>
-<label><input style="width:auto" name="is_active" type="checkbox" checked> Active</label>
+<label class="checkline"><input name="is_customisable" type="checkbox"> Customisable</label>
+<label class="checkline"><input name="is_active" type="checkbox" checked> Active</label>
 </div>
 </div>
 
-<button class="btn">SAVE PRODUCT</button>
+<button class="btn" type="submit">SAVE PRODUCT</button>
 <button type="button" class="btn light" onclick="resetProductForm()">CLEAR</button>
 <p id="productMessage" class="message"></p>
 </form>
@@ -194,22 +220,15 @@ th{background:#faf7f2}
 <table>
 <thead>
 <tr>
-<th>Product</th>
-<th>Cost price</th>
-<th>Selling price</th>
-<th>Profit / item</th>
-<th>Category</th>
-<th>Stock</th>
-<th>Customisable</th>
-<th>Active</th>
-<th>Action</th>
+<th>Product</th><th>Cost price</th><th>Selling price</th><th>Profit / item</th>
+<th>Category</th><th>Quantity</th><th>Stock status</th>
+<th>Customisable</th><th>Active</th><th>Action</th>
 </tr>
 </thead>
 <tbody id="productsBody"></tbody>
 </table>
 </div>
 </section>
-
 </main>
 </div>
 
@@ -218,11 +237,12 @@ const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-let productCache=[];
+let productCache=[],orderCache=[],trackingCache=new Map(),loadingOrders=false;
 
 const money=n=>"LKR "+Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
 const el=id=>document.getElementById(id);
 
+/* ZYRA BANK ACCOUNTS */
 const ZYRA_BANKS=[
  {bank:"Commercial Bank",holder:"Hamrah",number:"8031077367",branch:"Mutwal"},
  {bank:"Nations Trust Bank",holder:"MF Hamrah",number:"200190100485",branch:"Union Place"},
@@ -231,398 +251,654 @@ const ZYRA_BANKS=[
 ];
 
 function renderAdminBankAccounts(){
-const root=el("adminBankAccounts");
-root.replaceChildren();
-
-ZYRA_BANKS.forEach(b=>{
-const card=document.createElement("div");
-card.className="order-card";
-
-const title=document.createElement("strong");
-title.textContent=b.bank;
-
-const details=document.createElement("p");
-details.className="muted";
-details.textContent=`Account name: ${b.holder} · Account number: ${b.number} · Branch: ${b.branch}`;
-
-const copy=document.createElement("button");
-copy.className="btn light";
-copy.textContent="COPY ACCOUNT NUMBER";
-
-copy.onclick=async()=>{
-try{
-await navigator.clipboard.writeText(b.number);
-copy.textContent="COPIED";
-}catch(e){
-alert("Copy is unavailable in this browser. Account number: "+b.number);
+ const root=el("adminBankAccounts");
+ root.replaceChildren();
+ ZYRA_BANKS.forEach(b=>{
+  const card=document.createElement("div");
+  card.className="order-card";
+  const title=document.createElement("strong");
+  title.textContent=b.bank;
+  const details=document.createElement("p");
+  details.className="muted";
+  details.textContent=`Account name: ${b.holder} · Account number: ${b.number} · Branch: ${b.branch}`;
+  const copy=document.createElement("button");
+  copy.className="btn light";
+  copy.textContent="COPY ACCOUNT NUMBER";
+  copy.onclick=async()=>{
+   try{
+    await navigator.clipboard.writeText(b.number);
+    copy.textContent="COPIED";
+   }catch(e){
+    alert("Copy is unavailable. Account number: "+b.number);
+   }
+  };
+  card.append(title,details,copy);
+  root.append(card);
+ });
 }
-};
-
-card.append(title,details,copy);
-root.append(card);
-});
-}
-
 renderAdminBankAccounts();
 
 function parseCustomisationDetails(raw){
-if(typeof raw==="string"){
-try{return JSON.parse(raw);}
-catch(_){return {instructions:raw};}
-}
-return raw&&typeof raw==="object"?raw:{};
+ if(typeof raw==="string"){
+  try{return JSON.parse(raw);}
+  catch(_){return {instructions:raw};}
+ }
+ return raw&&typeof raw==="object"?raw:{};
 }
 
 function appendCustomisationDetails(parent,raw){
-const d=parseCustomisationDetails(raw);
-const photoPaths=Array.isArray(d.photo_paths)?d.photo_paths:(d.photo_path?[d.photo_path]:[]);
-const textDetails={...d};
+ const d=parseCustomisationDetails(raw);
+ const photoPaths=Array.isArray(d.photo_paths)?d.photo_paths:(d.photo_path?[d.photo_path]:[]);
+ const textDetails={...d};
+ delete textDetails.photo_path;
+ delete textDetails.photo_paths;
+ delete textDetails.photo_count;
+ delete textDetails.photo_file_names;
 
-delete textDetails.photo_path;
-delete textDetails.photo_paths;
-delete textDetails.photo_count;
-delete textDetails.photo_file_names;
+ const detail=document.createElement("div");
+ detail.className="muted";
+ detail.style.marginTop="6px";
 
-const detail=document.createElement("div");
-detail.className="muted";
-detail.style.marginTop="6px";
+ if(Object.keys(textDetails).length){
+  detail.textContent="Customisation: "+JSON.stringify(textDetails);
+ }else if(!photoPaths.length){
+  detail.textContent="Customisation details were not provided.";
+ }
+ parent.appendChild(detail);
 
-if(Object.keys(textDetails).length)
-detail.textContent="Customisation: "+JSON.stringify(textDetails);
-else if(!photoPaths.length)
-detail.textContent="Customisation details were not provided.";
+ if(photoPaths.length){
+  const photos=document.createElement("div");
+  photos.style.marginTop="8px";
+  const heading=document.createElement("strong");
+  heading.textContent="Customer uploaded photo(s): ";
+  photos.appendChild(heading);
 
-parent.appendChild(detail);
+  photoPaths.forEach((path,index)=>{
+   const b=document.createElement("button");
+   b.className="btn light";
+   b.type="button";
+   b.style.margin="4px";
+   b.textContent="VIEW PHOTO "+(index+1);
+   b.onclick=()=>viewCustomerPhoto(path,b);
+   photos.appendChild(b);
+  });
 
-if(photoPaths.length){
-const photos=document.createElement("div");
-photos.style.marginTop="8px";
+  parent.appendChild(photos);
 
-const heading=document.createElement("strong");
-heading.textContent="Customer uploaded photo(s): ";
-photos.appendChild(heading);
-
-photoPaths.forEach((path,index)=>{
-const b=document.createElement("button");
-b.className="btn light";
-b.type="button";
-b.style.margin="4px";
-b.textContent="VIEW PHOTO "+(index+1);
-b.onclick=()=>viewCustomerPhoto(path,b);
-photos.appendChild(b);
-});
-
-parent.appendChild(photos);
-
-if(Array.isArray(d.photo_file_names)&&d.photo_file_names.length){
-const names=document.createElement("div");
-names.className="muted";
-names.textContent="File name(s): "+d.photo_file_names.join(", ");
-parent.appendChild(names);
-}
-}
+  if(Array.isArray(d.photo_file_names)&&d.photo_file_names.length){
+   const names=document.createElement("div");
+   names.className="muted";
+   names.textContent="File name(s): "+d.photo_file_names.join(", ");
+   parent.appendChild(names);
+  }
+ }
 }
 
 async function viewCustomerPhoto(path,button){
-const old=button.textContent;
-button.disabled=true;
-button.textContent="OPENING...";
-
-const {data,error}=await sb.storage.from("customer-photos").createSignedUrl(path,300);
-
-button.disabled=false;
-button.textContent=old;
-
-if(error){
-alert("Could not open customer photo: "+error.message+"\nCheck the customer-photos bucket and admin read permission.");
-return;
-}
-
-window.open(data.signedUrl,"_blank","noopener");
+ const old=button.textContent;
+ button.disabled=true;
+ button.textContent="OPENING...";
+ try{
+  const {data,error}=await sb.storage.from("customer-photos").createSignedUrl(path,300);
+  if(error)throw error;
+  window.open(data.signedUrl,"_blank","noopener");
+ }catch(e){
+  alert("Could not open customer photo: "+e.message);
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
 }
 
 function showDashboard(show){
-el("loginPanel").classList.toggle("hidden",show);
-el("dashboard").classList.toggle("hidden",!show);
-el("logoutBtn").classList.toggle("hidden",!show);
+ el("loginPanel").classList.toggle("hidden",show);
+ el("dashboard").classList.toggle("hidden",!show);
+ el("logoutBtn").classList.toggle("hidden",!show);
 }
 
 async function checkSession(){
-const {data}=await sb.auth.getSession();
-if(data.session){
-showDashboard(true);
-await refreshAll();
-}else{
-showDashboard(false);
-}
+ const {data,error}=await sb.auth.getSession();
+ if(error){
+  el("loginMessage").textContent=error.message;
+  return;
+ }
+ if(data.session){
+  showDashboard(true);
+  await refreshAll();
+ }else{
+  showDashboard(false);
+ }
 }
 
 el("loginForm").addEventListener("submit",async e=>{
-e.preventDefault();
-const f=new FormData(e.target);
-el("loginMessage").textContent="Signing in...";
-
-const {error}=await sb.auth.signInWithPassword({
-email:f.get("email"),
-password:f.get("password")
-});
-
-if(error){
-el("loginMessage").textContent=error.message;
-return;
-}
-
-el("loginMessage").textContent="";
-showDashboard(true);
-await refreshAll();
+ e.preventDefault();
+ const f=new FormData(e.target);
+ el("loginMessage").textContent="Signing in...";
+ const {error}=await sb.auth.signInWithPassword({
+  email:f.get("email"),
+  password:f.get("password")
+ });
+ if(error){
+  el("loginMessage").textContent=error.message;
+  return;
+ }
+ el("loginMessage").textContent="";
+ showDashboard(true);
+ await refreshAll();
 });
 
 async function logout(){
-await sb.auth.signOut();
-showDashboard(false);
+ await sb.auth.signOut();
+ showDashboard(false);
 }
 
 async function refreshAll(){
-await Promise.all([loadOrders(),loadProducts()]);
+ await Promise.all([loadOrders(),loadProducts()]);
 }
 
-async function loadOrders(){
-el("ordersMessage").textContent="Loading orders...";
-
-const {data,error}=await sb
-.from("store_orders")
-.select("*,store_order_items(*)")
-.order("created_at",{ascending:false})
-.limit(200);
-
-if(error){
-el("ordersMessage").textContent="Could not load orders: "+error.message;
-return;
+async function refreshReport(){
+ const button=el("refreshReportBtn");
+ button.disabled=true;
+ button.textContent="REFRESHING...";
+ el("reportMessage").textContent="Refreshing sales and profit report...";
+ try{
+  await loadOrders({quiet:true});
+  el("reportMessage").textContent="Report refreshed successfully.";
+ }catch(e){
+  el("reportMessage").textContent="Report refresh failed: "+e.message;
+ }finally{
+  button.disabled=false;
+  button.textContent="REFRESH REPORT";
+ }
 }
 
-const orders=data||[];
+async function loadOrders(options={}){
+ if(loadingOrders)return;
+ loadingOrders=true;
+ if(!options.quiet)el("ordersMessage").textContent="Loading orders...";
 
-el("statOrders").textContent=orders.length;
+ try{
+  const {data,error}=await sb.from("store_orders")
+   .select("*,store_order_items(*)")
+   .order("created_at",{ascending:false})
+   .limit(300);
 
-el("statPending").textContent=orders.filter(
-o=>(o.order_status||"pending").toLowerCase()==="pending"
-).length;
+  if(error)throw error;
+  const orders=data||[];
+  orderCache=orders;
 
-el("statSales").textContent=money(
-orders.filter(o=>!["pending","cancelled"].includes((o.order_status||"pending").toLowerCase()))
-.reduce((s,o)=>s+Number(o.subtotal_amount??(Number(o.total_amount||0)-Number(o.delivery_fee||0))),0)
-);
+  const ids=orders.map(o=>o.id).filter(Boolean);
+  trackingCache=new Map();
 
-const reportOrders=orders.filter(
-o=>!["pending","cancelled"].includes((o.order_status||"pending").toLowerCase())
-);
+  if(ids.length){
+   const {data:tracks,error:trackError}=await sb.from("zyra_orders")
+    .select("tracking_id,courier,courier_reference,status,location,note,estimated_delivery,store_order_id,updated_at")
+    .in("store_order_id",ids);
 
-const reportRows=new Map();
-let totalCost=0,totalProfit=0,ordersWithCost=0;
+   if(trackError){
+    console.warn("Courier records could not be loaded:",trackError.message);
+   }else{
+    (tracks||[]).forEach(t=>trackingCache.set(t.store_order_id,t));
+   }
+  }
 
-reportOrders.forEach(o=>{
-const items=o.store_order_items||[];
+  renderStatsAndReport(orders);
+  renderOrders(orders);
+  renderPayments(orders);
 
-let hasCost=items.length>0&&items.every(
-i=>i.unit_cost_price!==null&&i.unit_cost_price!==undefined
-);
+  if(!options.quiet){
+   el("ordersMessage").textContent=orders.length?"Orders loaded.":"No store orders have been placed yet.";
+  }
+  return orders;
 
-if(hasCost)ordersWithCost++;
-
-items.forEach(i=>{
-const qty=Number(i.quantity||0);
-const sales=Number(i.unit_price||0)*qty;
-const cost=Number(i.unit_cost_price||0)*qty;
-const profit=sales-cost;
-const key=i.product_id||i.product_name;
-
-const r=reportRows.get(key)||{
-name:i.product_name||"Product",
-qty:0,
-sales:0,
-cost:0,
-profit:0,
-hasCost:true
-};
-
-r.qty+=qty;
-r.sales+=sales;
-
-if(i.unit_cost_price===null||i.unit_cost_price===undefined){
-r.hasCost=false;
-}else{
-r.cost+=cost;
-r.profit+=profit;
-totalCost+=cost;
-totalProfit+=profit;
+ }catch(error){
+  const msg="Could not load orders/report: "+(error.message||String(error));
+  el("ordersMessage").textContent=msg;
+  el("reportMessage").textContent=msg;
+  el("paymentsMessage").textContent=msg;
+  throw error;
+ }finally{
+  loadingOrders=false;
+ }
 }
 
-reportRows.set(key,r);
-});
-});
+function renderStatsAndReport(orders){
+ el("statOrders").textContent=orders.length;
+ el("statPending").textContent=orders.filter(o=>
+  (o.order_status||"pending").toLowerCase()==="pending"
+ ).length;
 
-el("statCost").textContent=money(totalCost);
-el("statProfit").textContent=money(totalProfit);
-el("statCostOrders").textContent=ordersWithCost+" / "+reportOrders.length;
+ const valid=orders.filter(o=>
+  !["pending","cancelled"].includes((o.order_status||"pending").toLowerCase())
+ );
 
-const reportBody=el("profitReportBody");
-reportBody.replaceChildren();
+ el("statSales").textContent=money(valid.reduce((s,o)=>
+  s+Number(o.subtotal_amount??(Number(o.total_amount||0)-Number(o.delivery_fee||0))),0
+ ));
 
-if(!reportRows.size){
-const tr=document.createElement("tr");
-const td=document.createElement("td");
-td.colSpan=5;
-td.textContent="No qualifying sales yet.";
-tr.appendChild(td);
-reportBody.appendChild(tr);
-}else{
-reportRows.forEach(r=>{
-const tr=document.createElement("tr");
+ const rows=new Map();
+ let totalCost=0,totalProfit=0,ordersWithCost=0;
 
-[
-r.name,
-r.qty,
-money(r.sales),
-r.hasCost?money(r.cost):"Cost not saved for all orders",
-r.hasCost?money(r.profit):"Incomplete cost history"
-].forEach(v=>{
-const td=document.createElement("td");
-td.textContent=v;
-tr.appendChild(td);
-});
+ valid.forEach(o=>{
+  const items=o.store_order_items||[];
+  const hasCost=items.length>0&&items.every(i=>
+   i.unit_cost_price!==null&&i.unit_cost_price!==undefined
+  );
+  if(hasCost)ordersWithCost++;
 
-reportBody.appendChild(tr);
-});
+  items.forEach(i=>{
+   const qty=Number(i.quantity||0);
+   const sales=Number(i.unit_price||0)*qty;
+   const key=i.product_id||i.product_name;
+   const r=rows.get(key)||{
+    name:i.product_name||"Product",
+    qty:0,sales:0,cost:0,profit:0,hasCost:true
+   };
+
+   r.qty+=qty;
+   r.sales+=sales;
+
+   if(i.unit_cost_price===null||i.unit_cost_price===undefined){
+    r.hasCost=false;
+   }else{
+    const cost=Number(i.unit_cost_price)*qty;
+    r.cost+=cost;
+    r.profit+=sales-cost;
+    totalCost+=cost;
+    totalProfit+=sales-cost;
+   }
+   rows.set(key,r);
+  });
+ });
+
+ el("statCost").textContent=money(totalCost);
+ el("statProfit").textContent=money(totalProfit);
+ el("statCostOrders").textContent=ordersWithCost+" / "+valid.length;
+
+ const body=el("profitReportBody");
+ body.replaceChildren();
+
+ if(!rows.size){
+  const tr=document.createElement("tr");
+  const td=document.createElement("td");
+  td.colSpan=5;
+  td.textContent="No qualifying sales yet.";
+  tr.appendChild(td);
+  body.appendChild(tr);
+ }else{
+  rows.forEach(r=>{
+   const tr=document.createElement("tr");
+   [
+    r.name,r.qty,money(r.sales),
+    r.hasCost?money(r.cost):"Cost not saved for all orders",
+    r.hasCost?money(r.profit):"Incomplete cost history"
+   ].forEach(v=>{
+    const td=document.createElement("td");
+    td.textContent=v;
+    tr.appendChild(td);
+   });
+   body.appendChild(tr);
+  });
+ }
 }
 
-const root=el("ordersList");
-root.replaceChildren();
-el("ordersMessage").textContent="";
+function renderOrders(orders){
+ const root=el("ordersList");
+ root.replaceChildren();
+ if(!orders.length){
+  root.textContent="No store orders have been placed yet.";
+  return;
+ }
 
-if(!orders.length){
-root.textContent="No store orders have been placed yet.";
-return;
+ orders.forEach(order=>{
+  const card=document.createElement("article");
+  card.className="order-card";
+
+  const h=document.createElement("div");
+  h.className="topline";
+  const title=document.createElement("h3");
+  title.textContent=(order.order_number||order.id)+" · "+(order.customer_name||"Customer");
+  const total=document.createElement("strong");
+  total.textContent=money(order.total_amount);
+  h.append(title,total);
+  card.append(h);
+
+  const info=document.createElement("p");
+  info.className="muted";
+  info.textContent=`${order.phone||""} · ${order.email||"No email"} · ${order.city||""} · ${order.payment_method||""} · ${order.created_at?new Date(order.created_at).toLocaleString():""}`;
+  card.append(info);
+
+  const address=document.createElement("p");
+  address.textContent="Delivery: "+(order.delivery_address||"Not provided");
+  card.append(address);
+
+  if(order.customer_notes){
+   const note=document.createElement("p");
+   note.textContent="Order notes: "+order.customer_notes;
+   card.append(note);
+  }
+
+  const items=order.store_order_items||[];
+  const itemBox=document.createElement("div");
+  itemBox.style.margin="12px 0";
+
+  if(!items.length){
+   itemBox.textContent="No product items linked to this order.";
+  }else{
+   items.forEach(it=>{
+    const line=document.createElement("div");
+    line.className="itemline";
+    line.textContent=`${it.product_name} × ${it.quantity} — Selling: ${money(Number(it.unit_price)*Number(it.quantity))} · Cost: ${it.unit_cost_price==null?"Not recorded":money(Number(it.unit_cost_price)*Number(it.quantity))} · Profit: ${it.unit_cost_price==null?"Pending cost history":money((Number(it.unit_price)-Number(it.unit_cost_price))*Number(it.quantity))}`;
+    if(it.is_customised&&it.customisation_details){
+     appendCustomisationDetails(line,it.customisation_details);
+    }
+    itemBox.append(line);
+   });
+  }
+  card.append(itemBox);
+
+  const track=trackingCache.get(order.id)||{};
+  const courierBox=document.createElement("div");
+  courierBox.className="subpanel";
+  const ct=document.createElement("strong");
+  ct.textContent="Courier / Tracking Details";
+  courierBox.append(ct);
+
+  const grid=document.createElement("div");
+  grid.className="row";
+
+  const courier=makeInput("Courier company",track.courier||"");
+  const ref=makeInput("Courier reference",track.courier_reference||"");
+  const tracking=makeInput("Tracking ID",track.tracking_id||"");
+  const trackStatus=makeSelect("Courier status",[
+   "Pending","Processing","Picked up","In transit","Out for delivery",
+   "Delivered","Delivery failed","Returned"
+  ],track.status||"Pending");
+  const location=makeInput("Current location",track.location||"");
+  const estimated=makeInput("Estimated delivery (date / note)",track.estimated_delivery||"");
+  const note=makeInput("Courier update / note",track.note||"");
+
+  [courier,ref,tracking,trackStatus,location,estimated,note].forEach(x=>grid.append(x.wrap));
+  courierBox.append(grid);
+
+  const saveTrack=document.createElement("button");
+  saveTrack.className="btn";
+  saveTrack.type="button";
+  saveTrack.textContent="SAVE COURIER DETAILS";
+  saveTrack.onclick=()=>saveCourierDetails(order.id,{
+   courier:courier.input.value.trim(),
+   courier_reference:ref.input.value.trim(),
+   tracking_id:tracking.input.value.trim(),
+   status:trackStatus.input.value,
+   location:location.input.value.trim(),
+   estimated_delivery:estimated.input.value.trim(),
+   note:note.input.value.trim()
+  },saveTrack);
+  courierBox.append(saveTrack);
+
+  const trackMsg=document.createElement("p");
+  trackMsg.className="message";
+  courierBox.append(trackMsg);
+  card.append(courierBox);
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+  const status=makeSelect("Order status",[
+   "pending","confirmed","processing","shipped","completed","cancelled"
+  ],order.order_status||"pending");
+
+  const save=document.createElement("button");
+  save.className="btn";
+  save.type="button";
+  save.textContent="UPDATE ORDER STATUS";
+  save.onclick=()=>updateOrderStatus(order.id,status.input.value,save);
+
+  const invoice=document.createElement("button");
+  invoice.className="btn secondary";
+  invoice.type="button";
+  invoice.textContent="PRINT INVOICE";
+  invoice.onclick=()=>printInvoice(order,trackingCache.get(order.id)||{});
+
+  actions.append(status.wrap,save,invoice);
+  card.append(actions);
+  root.append(card);
+ });
 }
 
-orders.forEach(order=>{
-const card=document.createElement("article");
-card.className="order-card";
-
-const h=document.createElement("div");
-h.className="row";
-
-const title=document.createElement("h3");
-title.textContent=order.order_number+" · "+order.customer_name;
-
-const total=document.createElement("strong");
-total.textContent=money(order.total_amount);
-
-h.append(title,total);
-card.appendChild(h);
-
-const info=document.createElement("p");
-info.className="muted";
-info.textContent=`${order.phone} · ${order.email||"No email"} · ${order.city} · ${order.payment_method} · ${new Date(order.created_at).toLocaleString()}`;
-card.appendChild(info);
-
-const address=document.createElement("p");
-address.textContent="Delivery: "+order.delivery_address;
-card.appendChild(address);
-
-if(order.customer_notes){
-const note=document.createElement("p");
-note.textContent="Order notes: "+order.customer_notes;
-card.appendChild(note);
+function makeInput(label,value){
+ const wrap=document.createElement("div");
+ wrap.className="field";
+ const l=document.createElement("label");
+ l.textContent=label;
+ const input=document.createElement("input");
+ input.value=value||"";
+ input.placeholder=label;
+ wrap.append(l,input);
+ return {wrap,input};
 }
 
-const items=order.store_order_items||[];
-const itemBox=document.createElement("div");
-itemBox.style.margin="12px 0";
-
-if(!items.length){
-itemBox.textContent="No product items linked to this order.";
-}else{
-items.forEach(it=>{
-const line=document.createElement("div");
-line.className="itemline";
-
-line.textContent=`${it.product_name} × ${it.quantity} — Selling: ${money(Number(it.unit_price)*Number(it.quantity))} · Cost: ${it.unit_cost_price==null?"Not recorded":money(Number(it.unit_cost_price)*Number(it.quantity))} · Profit: ${it.unit_cost_price==null?"Pending cost history":money((Number(it.unit_price)-Number(it.unit_cost_price))*Number(it.quantity))}`;
-
-if(it.is_customised&&it.customisation_details){
-appendCustomisationDetails(line,it.customisation_details);
-}
-
-itemBox.appendChild(line);
-});
-}
-
-card.appendChild(itemBox);
-
-const actions=document.createElement("div");
-actions.className="row";
-
-const status=document.createElement("select");
-["pending","confirmed","processing","shipped","completed","cancelled"].forEach(s=>{
-const op=document.createElement("option");
-op.value=s;
-op.textContent=s;
-status.appendChild(op);
-});
-
-status.value=order.order_status||"pending";
-
-const save=document.createElement("button");
-save.className="btn";
-save.textContent="UPDATE STATUS";
-save.onclick=()=>updateOrderStatus(order.id,status.value,save);
-
-const invoice=document.createElement("button");
-invoice.className="btn secondary";
-invoice.textContent="PRINT INVOICE";
-invoice.onclick=()=>printInvoice(order);
-
-actions.append(status,save,invoice);
-card.appendChild(actions);
-
-root.appendChild(card);
-});
+function makeSelect(label,values,value){
+ const wrap=document.createElement("div");
+ wrap.className="field";
+ const l=document.createElement("label");
+ l.textContent=label;
+ const input=document.createElement("select");
+ values.forEach(v=>{
+  const o=document.createElement("option");
+  o.value=v;
+  o.textContent=v;
+  input.append(o);
+ });
+ input.value=value||values[0];
+ wrap.append(l,input);
+ return {wrap,input};
 }
 
 async function updateOrderStatus(id,status,button){
-button.disabled=true;
-
-const {error}=await sb
-.from("store_orders")
-.update({order_status:status})
-.eq("id",id);
-
-button.disabled=false;
-
-if(error){
-alert("Status update failed: "+error.message);
-}else{
-await loadOrders();
-}
-}
-
-function printInvoice(o){
-const rows=(o.store_order_items||[]).map(i=>
-`<tr>
-<td>${escapeHtml(i.product_name)}</td>
-<td>${i.quantity}</td>
-<td>${money(i.unit_price)}</td>
-<td>${money(Number(i.quantity)*Number(i.unit_price))}</td>
-</tr>`
-).join("");
-
-const w=window.open("","_blank");
-
-if(!w){
-alert("Please allow pop-ups to print invoices.");
-return;
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="UPDATING...";
+ try{
+  const {data,error}=await sb.from("store_orders")
+   .update({order_status:status}).eq("id",id).select("id");
+  if(error)throw error;
+  if(!data||!data.length){
+   throw new Error("No order was updated. Check the admin UPDATE policy on store_orders.");
+  }
+  await loadOrders();
+ }catch(e){
+  alert("Order status update failed: "+e.message);
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
 }
 
-w.document.write(`<!doctype html>
+async function saveCourierDetails(storeOrderId,details,button){
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="SAVING...";
+ try{
+  const {data:existing,error:findError}=await sb.from("zyra_orders")
+   .select("tracking_id,store_order_id")
+   .eq("store_order_id",storeOrderId).maybeSingle();
+  if(findError)throw findError;
+
+  const payload={
+   ...details,
+   store_order_id:storeOrderId,
+   updated_at:new Date().toISOString()
+  };
+  if(!payload.tracking_id){
+   payload.tracking_id=existing?.tracking_id||("ZYRA-"+String(storeOrderId).slice(0,8).toUpperCase());
+  }
+
+  let result;
+  if(existing){
+   result=await sb.from("zyra_orders").update(payload)
+    .eq("store_order_id",storeOrderId).select("store_order_id");
+  }else{
+   const order=orderCache.find(o=>o.id===storeOrderId);
+   result=await sb.from("zyra_orders").insert({
+    ...payload,customer_name:order?.customer_name||"Customer"
+   }).select("store_order_id");
+  }
+
+  if(result.error)throw result.error;
+  if(!result.data||!result.data.length){
+   throw new Error("No courier record was saved. Check the admin INSERT/UPDATE policies on zyra_orders.");
+  }
+  await loadOrders();
+  alert("Courier details saved successfully.");
+ }catch(e){
+  alert("Could not save courier details: "+e.message+"\nCheck that zyra_orders has the courier columns and admin permissions.");
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
+}
+
+function renderPayments(orders){
+ const root=el("paymentsList");
+ root.replaceChildren();
+ const relevant=orders.filter(o=>
+  String(o.payment_method||"").toLowerCase().includes("bank")||
+  o.payment_slip_path||o.payment_status
+ );
+
+ if(!relevant.length){
+  root.textContent="No bank-transfer payments or uploaded slips found.";
+  el("paymentsMessage").textContent="";
+  return;
+ }
+
+ el("paymentsMessage").textContent="Showing bank-transfer orders and orders with payment records.";
+
+ relevant.forEach(o=>{
+  const card=document.createElement("div");
+  card.className="order-card";
+  const h=document.createElement("div");
+  h.className="topline";
+
+  const name=document.createElement("strong");
+  name.textContent=(o.order_number||o.id)+" · "+(o.customer_name||"Customer");
+  const badge=document.createElement("span");
+  badge.className="pill";
+  badge.textContent="Payment: "+(o.payment_status||"PENDING");
+  h.append(name,badge);
+  card.append(h);
+
+  const details=document.createElement("p");
+  details.className="muted";
+  details.textContent=`${o.payment_method||""} · ${money(o.total_amount)} · ${o.payment_slip_file_name||"No slip filename saved"}`;
+  card.append(details);
+
+  if(o.payment_rejection_reason){
+   const reason=document.createElement("p");
+   reason.textContent="Rejection reason: "+o.payment_rejection_reason;
+   card.append(reason);
+  }
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  if(o.payment_slip_path){
+   const view=document.createElement("button");
+   view.className="btn light";
+   view.textContent="VIEW PAYMENT SLIP";
+   view.onclick=()=>viewPaymentSlip(o.payment_slip_path,view);
+   actions.append(view);
+  }else{
+   const missing=document.createElement("span");
+   missing.className="muted";
+   missing.textContent="No payment slip uploaded for this order.";
+   actions.append(missing);
+  }
+
+  const accept=document.createElement("button");
+  accept.className="btn success";
+  accept.textContent="ACCEPT PAYMENT";
+  accept.disabled=String(o.payment_status||"").toUpperCase()==="PAID";
+  accept.onclick=()=>verifyPayment(o.id,"ACCEPT",accept);
+
+  const reject=document.createElement("button");
+  reject.className="btn danger";
+  reject.textContent="REJECT PAYMENT";
+  reject.disabled=["REJECTED","PAID"].includes(String(o.payment_status||"").toUpperCase());
+  reject.onclick=()=>verifyPayment(o.id,"REJECT",reject);
+
+  actions.append(accept,reject);
+  card.append(actions);
+  root.append(card);
+ });
+}
+
+async function viewPaymentSlip(path,button){
+ const win=window.open("about:blank","_blank");
+ if(!win){
+  alert("Please allow pop-ups to view payment slips.");
+  return;
+ }
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="OPENING...";
+ try{
+  const {data,error}=await sb.storage.from("payment-slips").createSignedUrl(path,300);
+  if(error)throw error;
+  win.location.href=data.signedUrl;
+ }catch(e){
+  win.close();
+  alert("Could not open payment slip: "+e.message+"\nCheck the payment-slips bucket and admin read permissions.");
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
+}
+
+async function verifyPayment(orderId,decision,button){
+ let reason=null;
+ if(decision==="REJECT"){
+  reason=prompt("Please enter the reason for rejecting this payment:");
+  if(reason===null)return;
+  reason=reason.trim();
+  if(!reason){
+   alert("A rejection reason is required.");
+   return;
+  }
+ }
+
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="PROCESSING...";
+ try{
+  const {error}=await sb.rpc("verify_zyra_payment",{
+   p_order_id:orderId,
+   p_decision:decision,
+   p_rejection_reason:reason
+  });
+  if(error)throw error;
+  alert(decision==="ACCEPT"?"Payment accepted successfully.":"Payment rejected.");
+  await loadOrders();
+ }catch(e){
+  alert("Payment verification failed: "+e.message+"\nConfirm verify_zyra_payment exists and your admin account is authorised.");
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
+}
+
+function printInvoice(o,track={}){
+ const rows=(o.store_order_items||[]).map(i=>
+  `<tr><td>${escapeHtml(i.product_name)}</td><td>${i.quantity}</td><td>${money(i.unit_price)}</td><td>${money(Number(i.quantity)*Number(i.unit_price))}</td></tr>`
+ ).join("");
+
+ const w=window.open("","_blank");
+ if(!w){
+  alert("Please allow pop-ups to print invoices.");
+  return;
+ }
+
+ w.document.write(`<!doctype html>
 <html>
 <head>
 <title>Invoice ${escapeHtml(o.order_number)}</title>
@@ -639,212 +915,279 @@ td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
 <h2>Order Invoice</h2>
 <p>
 <b>Order:</b> ${escapeHtml(o.order_number)}<br>
-<b>Date:</b> ${new Date(o.created_at).toLocaleString()}<br>
+<b>Date:</b> ${o.created_at?new Date(o.created_at).toLocaleString():""}<br>
 <b>Customer:</b> ${escapeHtml(o.customer_name)}<br>
 <b>Phone:</b> ${escapeHtml(o.phone)}<br>
 <b>Address:</b> ${escapeHtml(o.delivery_address)}, ${escapeHtml(o.city)}<br>
-<b>Payment:</b> ${escapeHtml(o.payment_method)}
+<b>Payment:</b> ${escapeHtml(o.payment_method)}<br>
+<b>Payment status:</b> ${escapeHtml(o.payment_status||"Pending")}
 </p>
 <table>
-<thead>
-<tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr>
-</thead>
+<thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead>
 <tbody>${rows}</tbody>
 </table>
 <p class="total">Order total: ${money(o.total_amount)}</p>
+<h3>Courier / Tracking</h3>
+<p>
+Courier: ${escapeHtml(track.courier||"Not assigned")}<br>
+Tracking ID: ${escapeHtml(track.tracking_id||"Not assigned")}<br>
+Courier reference: ${escapeHtml(track.courier_reference||"Not provided")}<br>
+Status: ${escapeHtml(track.status||"Pending")}<br>
+Location: ${escapeHtml(track.location||"Not updated")}<br>
+Estimated delivery: ${escapeHtml(track.estimated_delivery||"Not provided")}
+</p>
 <p>Thank you for shopping with Zyra.lk.</p>
 <script>window.onload=()=>window.print()<\/script>
 </body>
 </html>`);
-
-w.document.close();
+ w.document.close();
 }
 
 function escapeHtml(s){
-return String(s??"").replace(/[&<>"']/g,c=>({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-'"':"&quot;",
-"'":"&#39;"
-}[c]));
+ return String(s??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
 }
 
 async function loadProducts(){
-const {data,error}=await sb
-.from("store_products")
-.select("id,name,price,category,image_url,description,stock_quantity,is_customisable,is_active,created_at")
-.order("created_at",{ascending:false});
+ const {data,error}=await sb.from("store_products")
+  .select("id,name,price,category,image_url,description,stock_quantity,is_customisable,is_active,created_at")
+  .order("created_at",{ascending:false});
 
-if(error){
-el("productMessage").textContent="Could not load products: "+error.message;
-return;
-}
+ if(error){
+  el("productMessage").textContent="Could not load products: "+error.message;
+  return;
+ }
 
-const {data:costRows,error:costError}=await sb
-.from("zyra_product_costs")
-.select("product_id,cost_price");
+ const {data:costRows,error:costError}=await sb.from("zyra_product_costs")
+  .select("product_id,cost_price");
 
-if(costError){
-el("productMessage").textContent="Products loaded, but private cost prices could not be loaded: "+costError.message;
-return;
-}
+ if(costError){
+  el("productMessage").textContent="Products loaded, but private cost prices could not be loaded: "+costError.message;
+  return;
+ }
 
-const costMap=new Map(
-(costRows||[]).map(x=>[x.product_id,Number(x.cost_price)])
-);
+ const costMap=new Map((costRows||[]).map(x=>[x.product_id,Number(x.cost_price)]));
+ productCache=(data||[]).map(p=>({
+  ...p,cost_price:costMap.has(p.id)?costMap.get(p.id):null
+ }));
 
-productCache=(data||[]).map(p=>({
-...p,
-cost_price:costMap.has(p.id)?costMap.get(p.id):null
-}));
+ const body=el("productsBody");
+ body.replaceChildren();
 
-const body=el("productsBody");
-body.replaceChildren();
+ productCache.forEach(p=>{
+  const tr=document.createElement("tr");
+  const cost=Number(p.cost_price||0);
+  const selling=Number(p.price||0);
 
-productCache.forEach(p=>{
-const tr=document.createElement("tr");
-const cost=Number(p.cost_price||0);
-const selling=Number(p.price||0);
+  [p.name,p.cost_price==null?"Not set":money(cost),money(selling),
+   p.cost_price==null?"—":money(selling-cost),p.category||"—",p.stock_quantity
+  ].forEach(v=>{
+   const td=document.createElement("td");
+   td.textContent=v;
+   tr.append(td);
+  });
 
-[
-p.name,
-p.cost_price==null?"Not set":money(cost),
-money(selling),
-p.cost_price==null?"—":money(selling-cost),
-p.category||"—",
-p.stock_quantity,
-p.is_customisable?"Yes":"No",
-p.is_active?"Yes":"No"
-].forEach(v=>{
-const td=document.createElement("td");
-td.textContent=v;
-tr.appendChild(td);
-});
+  const stockCell=document.createElement("td");
+  const stockBadge=document.createElement("span");
+  const qty=Number(p.stock_quantity||0);
+  stockBadge.className="pill";
+  stockBadge.textContent=qty<=0?"OUT OF STOCK":qty<=3?"LOW STOCK":"IN STOCK";
 
-const action=document.createElement("td");
-const edit=document.createElement("button");
-edit.className="btn light";
-edit.textContent="EDIT";
-edit.onclick=()=>editProduct(p.id);
+  if(qty<=0){
+   stockBadge.style.background="#fde8e7";
+   stockBadge.style.color="#b42318";
+  }else if(qty<=3){
+   stockBadge.style.background="#fff2d8";
+   stockBadge.style.color="#8a5700";
+  }
 
-action.appendChild(edit);
-tr.appendChild(action);
-body.appendChild(tr);
-});
+  stockCell.append(stockBadge);
+  tr.append(stockCell);
+
+  [p.is_customisable?"Yes":"No",p.is_active?"Yes":"No"].forEach(v=>{
+   const td=document.createElement("td");
+   td.textContent=v;
+   tr.append(td);
+  });
+
+  const action=document.createElement("td");
+  const edit=document.createElement("button");
+  edit.className="btn light";
+  edit.textContent="EDIT";
+  edit.onclick=()=>editProduct(p.id);
+  action.append(edit);
+  tr.append(action);
+  body.append(tr);
+ });
 }
 
 function editProduct(id){
-const p=productCache.find(x=>x.id===id);
-if(!p)return;
+ const p=productCache.find(x=>x.id===id);
+ if(!p)return;
+ const f=el("productForm");
 
-const f=el("productForm");
+ ["id","name","cost_price","price","category","image_url","description","stock_quantity"]
+ .forEach(k=>f.elements[k].value=p[k]??"");
 
-[
-"id",
-"name",
-"cost_price",
-"price",
-"category",
-"image_url",
-"description",
-"stock_quantity"
-].forEach(k=>f.elements[k].value=p[k]??"");
+ el("productImageFile").value="";
 
-updateProductProfitPreview();
+ if(p.image_url){
+  el("productImagePreview").src=p.image_url;
+  el("productImagePreview").classList.remove("hidden");
+ }else{
+  el("productImagePreview").src="";
+  el("productImagePreview").classList.add("hidden");
+ }
 
-f.elements.is_customisable.checked=!!p.is_customisable;
-f.elements.is_active.checked=!!p.is_active;
-
-window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+ updateProductProfitPreview();
+ f.elements.is_customisable.checked=!!p.is_customisable;
+ f.elements.is_active.checked=!!p.is_active;
+ f.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 function resetProductForm(){
-el("productForm").reset();
-el("productForm").elements.id.value="";
-el("productForm").elements.stock_quantity.value=0;
-el("productForm").elements.is_active.checked=true;
-el("productMessage").textContent="";
-updateProductProfitPreview();
+ el("productForm").reset();
+ el("productForm").elements.id.value="";
+ el("productForm").elements.stock_quantity.value=0;
+ el("productForm").elements.is_active.checked=true;
+ el("productImageFile").value="";
+ el("productImagePreview").src="";
+ el("productImagePreview").classList.add("hidden");
+ el("productMessage").textContent="";
+ updateProductProfitPreview();
 }
 
 function updateProductProfitPreview(){
-const f=el("productForm");
-const cost=Number(f.elements.cost_price.value||0);
-const selling=Number(f.elements.price.value||0);
-const profit=selling-cost;
-const box=el("productProfitPreview");
+ const f=el("productForm");
+ const profit=Number(f.elements.price.value||0)-Number(f.elements.cost_price.value||0);
+ const box=el("productProfitPreview");
+ box.replaceChildren();
 
-if(box){
-box.replaceChildren();
+ const strong=document.createElement("strong");
+ strong.textContent=money(profit);
+ strong.style.color=profit>=0?"#28784b":"#b42318";
 
-const strong=document.createElement("strong");
-strong.textContent=money(profit);
-strong.style.color=profit>=0?"#28784b":"#b42318";
-
-const note=document.createElement("span");
-note.className="muted";
-note.textContent=profit>=0
-?"Estimated profit per item"
-:"Selling price is below cost price";
-
-box.append(strong,note);
-}
+ const note=document.createElement("span");
+ note.className="muted";
+ note.textContent=profit>=0?"Estimated profit per item":"Selling price is below cost price";
+ box.append(strong,note);
 }
 
 el("productForm").elements.cost_price.addEventListener("input",updateProductProfitPreview);
 el("productForm").elements.price.addEventListener("input",updateProductProfitPreview);
 
+el("productImageFile").addEventListener("change",()=>{
+ const file=el("productImageFile").files[0];
+ const preview=el("productImagePreview");
+
+ if(!file){
+  preview.src="";
+  preview.classList.add("hidden");
+  return;
+ }
+
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+  alert("Please choose a JPG, PNG or WEBP image.");
+  el("productImageFile").value="";
+  preview.src="";
+  preview.classList.add("hidden");
+  return;
+ }
+
+ if(file.size>5*1024*1024){
+  alert("Please choose an image smaller than 5 MB.");
+  el("productImageFile").value="";
+  preview.src="";
+  preview.classList.add("hidden");
+  return;
+ }
+
+ preview.src=URL.createObjectURL(file);
+ preview.classList.remove("hidden");
+});
+
+async function uploadProductPhoto(file){
+ const extension=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const safeExtension=["jpg","jpeg","png","webp"].includes(extension)?extension:"jpg";
+ const path="products/"+crypto.randomUUID()+"."+safeExtension;
+
+ const {error}=await sb.storage.from("Product -image").upload(path,file,{
+  cacheControl:"3600",
+  upsert:false,
+  contentType:file.type
+ });
+
+ if(error){
+  throw new Error("Photo upload failed: "+error.message+". Check Product -image bucket and admin upload permission.");
+ }
+
+ const {data}=sb.storage.from("Product -image").getPublicUrl(path);
+ if(!data?.publicUrl){
+  throw new Error("Photo uploaded, but public URL could not be generated. Check that Product -image is Public.");
+ }
+ return data.publicUrl;
+}
+
 el("productForm").addEventListener("submit",async e=>{
-e.preventDefault();
+ e.preventDefault();
+ const f=e.target;
+ const id=f.elements.id.value;
+ const saveButton=f.querySelector('button[type="submit"]');
+ saveButton.disabled=true;
+ el("productMessage").textContent="Saving product...";
 
-const f=e.target;
-const id=f.elements.id.value;
+ try{
+  let imageUrl=f.elements.image_url.value.trim()||null;
+  const selectedPhoto=el("productImageFile").files[0];
 
-const payload={
-name:f.elements.name.value.trim(),
-price:Number(f.elements.price.value),
-category:f.elements.category.value.trim()||null,
-image_url:f.elements.image_url.value.trim()||null,
-description:f.elements.description.value.trim()||null,
-stock_quantity:Number(f.elements.stock_quantity.value),
-is_customisable:f.elements.is_customisable.checked,
-is_active:f.elements.is_active.checked
-};
+  if(selectedPhoto){
+   el("productMessage").textContent="Uploading product photo...";
+   imageUrl=await uploadProductPhoto(selectedPhoto);
+  }
 
-const result=id
-?await sb.from("store_products").update(payload).eq("id",id).select("id").single()
-:await sb.from("store_products").insert(payload).select("id").single();
+  const payload={
+   name:f.elements.name.value.trim(),
+   price:Number(f.elements.price.value),
+   category:f.elements.category.value.trim()||null,
+   image_url:imageUrl,
+   description:f.elements.description.value.trim()||null,
+   stock_quantity:Number(f.elements.stock_quantity.value),
+   is_customisable:f.elements.is_customisable.checked,
+   is_active:f.elements.is_active.checked
+  };
 
-if(result.error){
-el("productMessage").textContent=result.error.message;
-return;
-}
+  const result=id
+   ?await sb.from("store_products").update(payload).eq("id",id).select("id").single()
+   :await sb.from("store_products").insert(payload).select("id").single();
 
-const productId=id||result.data.id;
+  if(result.error)throw result.error;
 
-const {error:costSaveError}=await sb
-.from("zyra_product_costs")
-.upsert({
-product_id:productId,
-cost_price:Number(f.elements.cost_price.value)
-},{onConflict:"product_id"});
+  const productId=id||result.data.id;
 
-if(costSaveError){
-el("productMessage").textContent="Product details saved, but cost price could not be saved: "+costSaveError.message;
-return;
-}
+  const {error:costError}=await sb.from("zyra_product_costs").upsert({
+   product_id:productId,
+   cost_price:Number(f.elements.cost_price.value)
+  },{onConflict:"product_id"});
 
-el("productMessage").textContent="Product, cost price and profit saved.";
+  if(costError){
+   throw new Error("Product saved, but cost price could not be saved: "+costError.message);
+  }
 
-resetProductForm();
-await loadProducts();
+  el("productMessage").textContent="Product, photo, cost price and profit saved successfully.";
+  resetProductForm();
+  await loadProducts();
+
+ }catch(error){
+  el("productMessage").textContent=error.message||String(error);
+ }finally{
+  saveButton.disabled=false;
+ }
 });
 
 sb.auth.onAuthStateChange((_event,session)=>{
-if(!session)showDashboard(false);
+ if(!session)showDashboard(false);
 });
-
 checkSession();
 </script>
 </body>
