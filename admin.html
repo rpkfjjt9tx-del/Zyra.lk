@@ -3,11 +3,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zyra.lk | Admin Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--ink:#30251f;--muted:#887b72;--cream:#faf7f2;--white:#fff;--line:#eee5dc;--gold:#a98254;--green:#287653;--red:#b94b4b}
+:root {
+ --ink:#30251f;
+ --muted:#887b72;
+ --cream:#faf7f2;
+ --line:#eee5dc;
+ --green:#287653;
+ --red:#b94b4b;
+}
 *{box-sizing:border-box}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,sans-serif}
 button,input,select,textarea{font:inherit}
@@ -15,233 +23,302 @@ button{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:va
 button.secondary{background:#eee7df;color:var(--ink)}
 button.danger{background:var(--red)}
 button.success{background:var(--green)}
+button:disabled{opacity:.4;cursor:not-allowed}
 input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink)}
 textarea{min-height:75px}
 label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
-h1,h2,h3{margin-top:0}
-small,.muted{color:var(--muted)}
-header{background:var(--white);padding:17px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+header{background:white;padding:16px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 .brand{font-size:22px;letter-spacing:2px;font-weight:bold}
-header small{display:block;margin-top:4px}
-#app{display:none}
-.layout{display:flex;min-height:calc(100vh - 68px)}
-nav{width:220px;padding:18px 12px;background:white;border-right:1px solid var(--line);flex-shrink:0}
-nav button{width:100%;text-align:left;background:transparent;color:var(--ink);margin:3px 0}
-nav button.active,nav button:hover{background:var(--cream)}
-main{padding:24px;width:100%;max-width:1500px;margin:auto;min-width:0}
-.tab{display:none}.tab.active{display:block}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:13px;margin:18px 0}
-.card,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:17px;margin-bottom:16px}
-.card small{display:block}.number{font-size:25px;font-weight:bold;margin-top:9px;overflow-wrap:anywhere}
-.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
-.toolbar>*{width:auto}
-.toolbar input,.toolbar select{min-width:145px}
-.tablewrap{overflow:auto;background:white;border:1px solid var(--line);border-radius:10px}
-table{border-collapse:collapse;width:100%;min-width:700px;font-size:13px}
-th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
-th{background:#faf7f2;color:var(--muted)}
-.status{display:inline-block;padding:5px 8px;border-radius:20px;background:#f1eee9;font-size:11px}
-.status.paid{background:#e6f4ec;color:#287653}
-.status.pending{background:#fff3d9;color:#93651b}
-.status.rejected,.status.cancelled{background:#fbe9e9;color:#a33}
-.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.actions{display:flex;gap:6px;flex-wrap:wrap}
-.actions button{font-size:12px;padding:7px 9px}
+header small{color:var(--muted)}
 #login{max-width:390px;margin:12vh auto;padding:25px;background:white;border:1px solid var(--line);border-radius:14px}
 #login button{width:100%;margin-top:16px}
-#message{margin:12px 0;color:var(--red);white-space:pre-wrap}
-#slipModal{display:none;position:fixed;inset:0;background:#0009;z-index:10;padding:20px;overflow:auto}
-.modalbox{background:white;max-width:850px;margin:3vh auto;padding:20px;border-radius:12px}
-#slipContent img,#slipContent iframe{width:100%;max-height:70vh;min-height:450px;object-fit:contain;border:0}
-hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+#message{color:var(--red);white-space:pre-wrap}
+#app{display:none}
+.layout{display:flex;min-height:calc(100vh - 65px)}
+nav{width:215px;flex-shrink:0;background:white;border-right:1px solid var(--line);padding:15px 10px}
+nav button{display:block;width:100%;text-align:left;margin:3px 0;background:transparent;color:var(--ink)}
+nav button.active,nav button:hover{background:var(--cream)}
+main{padding:22px;width:100%;min-width:0;max-width:1500px;margin:auto}
+.tab{display:none}
+.tab.active{display:block}
+.card,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:15px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin:15px 0}
+.card small{color:var(--muted)}
+.number{font-size:23px;font-weight:bold;margin-top:8px;overflow-wrap:anywhere}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.toolbar>*{width:auto}
+.toolbar input,.toolbar select{min-width:140px}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.tablewrap{overflow:auto;background:white;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:700px;font-size:13px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--cream);color:var(--muted)}
+.actions{display:flex;gap:5px;flex-wrap:wrap}
+.actions button{font-size:12px;padding:7px 9px}
+.status{display:inline-block;padding:5px 8px;border-radius:20px;background:#eee;font-size:11px}
+.status.paid{background:#e6f4ec;color:var(--green)}
+.status.pending{background:#fff3d9;color:#93651b}
+.status.rejected{background:#fbe9e9;color:#a33}
+.muted{color:var(--muted)}
+.product-thumb{width:65px;height:65px;object-fit:cover;border-radius:7px;background:var(--cream)}
+.photo-grid{display:flex;gap:12px;flex-wrap:wrap}
+.photo-card{width:min(220px,100%);border:1px solid var(--line);border-radius:9px;padding:10px;overflow:hidden}
+.photo-card img{width:100%;height:170px;object-fit:contain;background:var(--cream)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+details{margin-top:12px}
+summary{cursor:pointer;color:var(--muted)}
+#modal,#slipModal{display:none;position:fixed;inset:0;background:#0009;z-index:20;overflow:auto;padding:15px}
+.modalbox{background:white;max-width:900px;margin:20px auto;padding:20px;border-radius:12px}
+#slipContent img,#slipContent iframe{width:100%;max-height:70vh;min-height:400px;object-fit:contain;border:0}
+hr{border:0;border-top:1px solid var(--line);margin:17px 0}
 @media(max-width:700px){
- .layout{display:block}nav{width:100%;display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+ .layout{display:block}
+ nav{width:100%;display:flex;overflow:auto;padding:7px;border-right:0;border-bottom:1px solid var(--line)}
  nav button{white-space:nowrap;width:auto;flex-shrink:0}
- main{padding:14px}header{padding:14px}
+ main{padding:12px}
 }
 </style>
 </head>
+
 <body>
 
 <div id="login">
-  <div class="brand">ZYRA.LK</div>
-  <p class="muted">Admin Dashboard</p>
-  <label>Email</label>
-  <input id="loginEmail" type="email" autocomplete="username">
-  <label>Password</label>
-  <input id="loginPassword" type="password" autocomplete="current-password">
-  <button onclick="login()">Login</button>
-  <div id="message"></div>
+ <div class="brand">ZYRA.LK</div>
+ <p class="muted">Admin Dashboard</p>
+ <label>Email</label>
+ <input id="loginEmail" type="email" autocomplete="username">
+ <label>Password</label>
+ <input id="loginPassword" type="password" autocomplete="current-password">
+ <button onclick="login()">Login</button>
+ <p id="message"></p>
 </div>
 
 <div id="app">
-<header>
-  <div><div class="brand">ZYRA.LK</div><small>Admin Dashboard</small></div>
-  <button class="secondary" onclick="logout()">Logout</button>
-</header>
-
-<div class="layout">
-<nav>
-  <button class="active" data-tab="overview" onclick="showTab('overview',this)">Overview</button>
-  <button data-tab="orders" onclick="showTab('orders',this)">Store Orders</button>
-  <button data-tab="products" onclick="showTab('products',this)">Products</button>
-  <button data-tab="payments" onclick="showTab('payments',this)">Payments</button>
-  <button data-tab="expenses" onclick="showTab('expenses',this)">Expenses</button>
-  <button data-tab="reports" onclick="showTab('reports',this)">Profit & Reports</button>
-</nav>
-
-<main>
-
-<section id="overview" class="tab active">
-  <h2>Overview</h2>
-  <div class="cards" id="overviewCards"></div>
-  <div class="panel">
-    <h3>Recent Store Orders</h3>
-    <div id="recentOrders"></div>
+ <header>
+  <div>
+   <div class="brand">ZYRA.LK</div>
+   <small>Admin Dashboard</small>
   </div>
-</section>
+  <button class="secondary" onclick="logout()">Logout</button>
+ </header>
 
-<section id="orders" class="tab">
-  <h2>Store Orders</h2>
-  <div class="toolbar">
-    <input id="orderSearch" placeholder="Search customer / order" oninput="renderOrders()">
-    <select id="orderFilter" onchange="renderOrders()">
+ <div class="layout">
+  <nav>
+   <button class="active" onclick="showTab('overview',this)">Overview</button>
+   <button onclick="showTab('orders',this)">Store Orders</button>
+   <button onclick="showTab('products',this)">Products</button>
+   <button onclick="showTab('payments',this)">Payments</button>
+   <button onclick="showTab('expenses',this)">Expenses</button>
+   <button onclick="showTab('reports',this)">Profit & Reports</button>
+  </nav>
+
+  <main>
+   <section id="overview" class="tab active">
+    <h2>Overview</h2>
+    <div class="cards" id="overviewCards"></div>
+    <div class="panel">
+     <h3>Recent Orders</h3>
+     <div id="recentOrders"></div>
+    </div>
+   </section>
+
+   <section id="orders" class="tab">
+    <h2>Store Orders</h2>
+    <div class="toolbar">
+     <input id="orderSearch" placeholder="Search customer / order" oninput="renderOrders()">
+     <select id="orderFilter" onchange="renderOrders()">
       <option value="">All orders</option>
       <option value="pending">Pending</option>
       <option value="processing">Processing</option>
       <option value="dispatched">Dispatched</option>
       <option value="delivered">Delivered</option>
       <option value="cancelled">Cancelled</option>
-    </select>
-    <button onclick="loadOrders()">Refresh</button>
-    <button onclick="openManualOrder()">+ Manual order</button>
-  </div>
-  <div id="ordersTable"></div>
-  <div id="manualOrder" class="panel" style="display:none">
-    <h3>Create Manual Order</h3>
-    <div class="formgrid">
+     </select>
+     <button onclick="loadOrders()">Refresh</button>
+     <button onclick="openManualOrder()">+ Manual Order</button>
+    </div>
+    <div id="ordersTable"></div>
+
+    <div id="manualOrder" class="panel" style="display:none">
+     <h3>Create Manual Order</h3>
+     <div class="formgrid">
       <div><label>Customer name</label><input id="mName"></div>
       <div><label>Phone</label><input id="mPhone"></div>
-      <div><label>Email</label><input id="mEmail" type="email"></div>
+      <div><label>Email</label><input id="mEmail"></div>
       <div><label>Address</label><input id="mAddress"></div>
-      <div><label>Payment method</label><select id="mPayment"><option value="COD">Cash on Delivery</option><option value="BANK_TRANSFER">Bank Transfer</option></select></div>
-      <div><label>Order status</label><select id="mStatus"><option value="pending">Pending</option><option value="processing">Processing</option></select></div>
-    </div>
-    <hr>
-    <div class="formgrid">
+      <div>
+       <label>Payment</label>
+       <select id="mPayment">
+        <option value="COD">Cash on Delivery</option>
+        <option value="BANK_TRANSFER">Bank Transfer</option>
+       </select>
+      </div>
+      <div>
+       <label>Status</label>
+       <select id="mStatus">
+        <option value="pending">Pending</option>
+        <option value="processing">Processing</option>
+       </select>
+      </div>
+     </div>
+     <hr>
+     <div class="formgrid">
       <div><label>Product</label><select id="mProduct" onchange="manualProductChanged()"></select></div>
       <div><label>Quantity</label><input id="mQty" type="number" min="1" value="1"></div>
-      <div><label>Unit price (LKR)</label><input id="mPrice" type="number" min="0"></div>
-    </div>
-    <label>Customisation / order notes</label>
-    <textarea id="mNotes"></textarea>
-    <div class="toolbar">
+      <div><label>Unit price</label><input id="mPrice" type="number" min="0"></div>
+     </div>
+     <label>Customisation details / instructions</label>
+     <textarea id="mNotes"></textarea>
+     <div class="toolbar">
       <button onclick="addManualItem()">Add item</button>
       <button class="secondary" onclick="hideManualOrder()">Cancel</button>
+     </div>
+     <div id="manualItems"></div>
+     <button class="success" onclick="saveManualOrder()">Create Order</button>
     </div>
-    <div id="manualItems"></div>
-    <button class="success" onclick="saveManualOrder()">Create Order</button>
-  </div>
-</section>
+   </section>
 
-<section id="products" class="tab">
-  <h2>Products</h2>
-  <div class="panel">
-    <h3 id="productFormTitle">Add Product</h3>
-    <input type="hidden" id="pId">
-    <div class="formgrid">
+   <section id="products" class="tab">
+    <h2>Products</h2>
+    <div class="panel">
+     <h3 id="productFormTitle">Add Product</h3>
+     <input type="hidden" id="pId">
+     <div class="formgrid">
       <div><label>Product name</label><input id="pName"></div>
-      <div><label>Price (LKR)</label><input id="pPrice" type="number" min="0"></div>
-      <div><label>Cost price (LKR)</label><input id="pCost" type="number" min="0"></div>
+      <div><label>Price</label><input id="pPrice" type="number" min="0"></div>
+      <div><label>Cost price</label><input id="pCost" type="number" min="0"></div>
       <div><label>Category</label><input id="pCategory"></div>
       <div><label>Stock quantity</label><input id="pStock" type="number" min="0"></div>
-      <div><label>Image URL</label><input id="pImage"></div>
-      <div><label>Payment option</label><input id="pPayment" placeholder="e.g. COD / Bank Transfer"></div>
-      <div><label>Customisable?</label><select id="pCustom"><option value="false">No</option><option value="true">Yes</option></select></div>
-      <div><label>Active?</label><select id="pActive"><option value="true">Yes</option><option value="false">No</option></select></div>
+      <div><label>Payment option</label><input id="pPayment"></div>
+      <div>
+       <label>Customisable?</label>
+       <select id="pCustom">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+       </select>
+      </div>
+      <div>
+       <label>Active?</label>
+       <select id="pActive">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+       </select>
+      </div>
+     </div>
+     <label>Product image upload</label>
+     <input id="pImageFile" type="file" accept="image/*">
+     <div id="pImagePreview" style="margin-top:10px"></div>
+     <label>Existing image URL or storage path</label>
+     <input id="pImage" placeholder="Image URL or bucket path">
+     <label>Description</label>
+     <textarea id="pDescription"></textarea>
+     <div class="toolbar">
+      <button onclick="saveProduct()">Save Product</button>
+      <button class="secondary" onclick="clearProductForm()">Clear</button>
+     </div>
     </div>
-    <label>Description</label><textarea id="pDescription"></textarea>
-    <div class="toolbar"><button onclick="saveProduct()">Save Product</button><button class="secondary" onclick="clearProductForm()">Clear</button></div>
-  </div>
-  <div class="toolbar"><input id="productSearch" placeholder="Search products" oninput="renderProducts()"><button onclick="loadProducts()">Refresh</button></div>
-  <div id="productsTable"></div>
-</section>
+    <div class="toolbar">
+     <input id="productSearch" placeholder="Search products" oninput="renderProducts()">
+     <button onclick="loadProducts()">Refresh</button>
+    </div>
+    <div id="productsTable"></div>
+   </section>
 
-<section id="payments" class="tab">
-  <h2>Payment Verification</h2>
-  <p class="muted">Review uploaded bank-transfer slips. Approved payments are marked as PAID.</p>
-  <button onclick="loadOrders()">Refresh payments</button>
-  <div id="paymentsTable"></div>
-</section>
+   <section id="payments" class="tab">
+    <h2>Payment Verification</h2>
+    <p class="muted">Review bank-transfer slips before accepting or rejecting payments.</p>
+    <button onclick="loadOrders()">Refresh</button>
+    <div id="paymentsTable"></div>
+   </section>
 
-<section id="expenses" class="tab">
-  <h2>Expenses</h2>
-  <div class="panel">
-    <h3>Add Expense</h3>
-    <div class="formgrid">
+   <section id="expenses" class="tab">
+    <h2>Expenses</h2>
+    <div class="panel">
+     <h3>Add Expense</h3>
+     <div class="formgrid">
       <div><label>Description</label><input id="eDescription"></div>
-      <div><label>Category</label><select id="eCategory">
-        <option>Product Purchase</option><option>Packaging</option><option>Delivery</option><option>Advertising</option><option>Marketing</option><option>Supplies</option><option>Other</option>
-      </select></div>
+      <div>
+       <label>Category</label>
+       <select id="eCategory">
+        <option>Product Purchase</option>
+        <option>Packaging</option>
+        <option>Delivery</option>
+        <option>Advertising</option>
+        <option>Marketing</option>
+        <option>Supplies</option>
+        <option>Other</option>
+       </select>
+      </div>
       <div><label>Amount (LKR)</label><input id="eAmount" type="number" min="0"></div>
       <div><label>Date</label><input id="eDate" type="date"></div>
+     </div>
+     <button onclick="addExpense()">Save Expense</button>
     </div>
-    <button onclick="addExpense()">Save Expense</button>
-  </div>
-  <div class="toolbar"><button onclick="loadExpenses()">Refresh</button></div>
-  <div id="expensesTable"></div>
-</section>
+    <button onclick="loadExpenses()">Refresh Expenses</button>
+    <div id="expensesTable"></div>
+   </section>
 
-<section id="reports" class="tab">
-  <h2>Profit & Reports</h2>
-  <div class="toolbar">
-    <select id="reportPeriod" onchange="loadReports()">
+   <section id="reports" class="tab">
+    <h2>Profit & Reports</h2>
+    <div class="toolbar">
+     <select id="reportPeriod" onchange="loadReports()">
       <option value="all">All time</option>
       <option value="day">Daily</option>
       <option value="week">Weekly</option>
       <option value="month">Monthly</option>
-    </select>
-    <input type="date" id="reportDate" onchange="loadReports()">
-    <button onclick="loadReports()">Apply</button>
-    <button onclick="exportCSV()">Download CSV</button>
-  </div>
-  <div class="cards" id="reportCards"></div>
-  <div class="panel">
-    <h3>Product-wise Sales & Profit</h3>
-    <div id="productReport"></div>
-  </div>
-  <div class="panel">
-    <h3>Order-wise Profit</h3>
-    <div id="orderReport"></div>
-  </div>
-  <div class="panel">
-    <h3>Expense Breakdown</h3>
-    <div id="expenseReport"></div>
-  </div>
-  <p class="muted">Profit figures are estimates based on the available product cost information and recorded expenses. Historical profit can change if a product's cost price is edited later.</p>
-</section>
-
-</main>
+     </select>
+     <input type="date" id="reportDate" onchange="loadReports()">
+     <button onclick="loadReports()">Apply</button>
+     <button onclick="exportCSV()">Download CSV</button>
+    </div>
+    <div class="cards" id="reportCards"></div>
+    <div class="panel">
+     <h3>Product-wise Sales & Profit</h3>
+     <div id="productReport"></div>
+    </div>
+    <div class="panel">
+     <h3>Order-wise Profit</h3>
+     <div id="orderReport"></div>
+    </div>
+    <div class="panel">
+     <h3>Expense Breakdown</h3>
+     <div id="expenseReport"></div>
+    </div>
+    <p class="muted">Profit is estimated from available item costs and expenses. If an item has no saved cost, the report uses the current product cost where available.</p>
+   </section>
+  </main>
+ </div>
 </div>
+
+<div id="modal">
+ <div class="modalbox">
+  <div class="toolbar" style="justify-content:space-between">
+   <h2>Customer Order Details</h2>
+   <button class="secondary" onclick="closeOrderModal()">Close</button>
+  </div>
+  <div id="orderDetailContent"></div>
+ </div>
 </div>
 
 <div id="slipModal">
-  <div class="modalbox">
-    <div class="toolbar" style="justify-content:space-between">
-      <h3>Payment Slip</h3>
-      <button class="secondary" onclick="closeSlip()">Close</button>
-    </div>
-    <div id="slipContent"></div>
-    <div class="toolbar"><button onclick="downloadSlip()">Download Slip</button></div>
+ <div class="modalbox">
+  <div class="toolbar" style="justify-content:space-between">
+   <h3>Payment Slip</h3>
+   <button class="secondary" onclick="closeSlip()">Close</button>
   </div>
+  <div id="slipContent"></div>
+  <button onclick="downloadSlip()">Download Slip</button>
+ </div>
 </div>
 
 <script>
+/* SUPABASE CONFIGURATION */
 const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
 const SUPABASE_KEY = "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 
-const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* TABLES AND BUCKETS */
 const PRODUCTS = "store_products";
 const ORDERS = "store_orders";
 const ITEMS = "store_order_items";
@@ -259,450 +336,1311 @@ let manualItems = [];
 let activeSlipPath = null;
 let reportData = null;
 
-const money = n => "LKR " + Number(n || 0).toLocaleString("en-LK",{minimumFractionDigits:2,maximumFractionDigits:2});
-const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const norm = v => String(v || "").toLowerCase();
-const dateValue = v => v ? new Date(v).toLocaleString() : "-";
 const el = id => document.getElementById(id);
 
-function msg(text){el("message").textContent=text || ""}
+const money = n => "LKR " + Number(n || 0).toLocaleString("en-LK", {
+ minimumFractionDigits:2,
+ maximumFractionDigits:2
+});
 
-function showTab(id,button){
- document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
- document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
- el(id).classList.add("active");
- if(button)button.classList.add("active");
- if(id==="overview")renderOverview();
- if(id==="orders")renderOrders();
- if(id==="products")renderProducts();
- if(id==="payments")renderPayments();
- if(id==="expenses")renderExpenses();
- if(id==="reports")loadReports();
+const norm = v => String(v || "").toLowerCase();
+
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({
+ "&":"&amp;",
+ "<":"&lt;",
+ ">":"&gt;",
+ '"':"&quot;",
+ "'":"&#39;"
+}[c]));
+
+const dateValue = v => v ? new Date(v).toLocaleString() : "-";
+
+function notify(message) {
+ alert(message);
 }
 
-async function login(){
- msg("");
- const {data,error}=await db.auth.signInWithPassword({
+function showMessage(message) {
+ el("message").textContent = message || "";
+}
+
+function showTab(id, button) {
+ document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+ document.querySelectorAll("nav button").forEach(x => x.classList.remove("active"));
+
+ el(id).classList.add("active");
+ if (button) button.classList.add("active");
+
+ if (id === "overview") renderOverview();
+ if (id === "orders") renderOrders();
+ if (id === "products") renderProducts();
+ if (id === "payments") renderPayments();
+ if (id === "expenses") renderExpenses();
+ if (id === "reports") loadReports();
+}
+
+/* AUTHENTICATION */
+async function login() {
+ showMessage("");
+
+ const { error } = await db.auth.signInWithPassword({
   email:el("loginEmail").value.trim(),
   password:el("loginPassword").value
  });
- if(error){msg(error.message);return}
+
+ if (error) {
+  showMessage(error.message);
+  return;
+ }
+
  await startApp();
 }
 
-async function logout(){
+async function logout() {
  await db.auth.signOut();
- el("app").style.display="none";
- el("login").style.display="block";
+ el("app").style.display = "none";
+ el("login").style.display = "block";
 }
 
-async function startApp(){
- el("login").style.display="none";
- el("app").style.display="block";
- await Promise.all([loadProducts(),loadOrders(),loadExpenses()]);
+async function startApp() {
+ el("login").style.display = "none";
+ el("app").style.display = "block";
+
+ await Promise.all([
+  loadProducts(),
+  loadOrders(),
+  loadExpenses()
+ ]);
+
  renderOverview();
 }
 
-db.auth.getSession().then(({data})=>{
- if(data.session)startApp();
+db.auth.getSession().then(({data}) => {
+ if (data.session) startApp();
 });
 
-function statusClass(s){
- const v=norm(s);
- if(v==="paid"||v==="delivered")return "paid";
- if(v==="rejected"||v==="cancelled")return "rejected";
- if(v==="pending"||v==="processing")return "pending";
- return "";
+/* COMMON HELPERS */
+function table(headers, rows) {
+ if (!rows.length) return "<p class='muted'>No records found.</p>";
+
+ return `
+  <div class="tablewrap">
+   <table>
+    <thead>
+     <tr>${headers.map(x => `<th>${x}</th>`).join("")}</tr>
+    </thead>
+    <tbody>${rows.join("")}</tbody>
+   </table>
+  </div>
+ `;
 }
 
-function table(headers,rows){
- if(!rows.length)return "<p class='muted'>No records found.</p>";
- return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+function orderItems(o) {
+ return Array.isArray(o.store_order_items) ? o.store_order_items : [];
 }
 
-async function loadOrders(){
- let result=await db.from(ORDERS).select("*,store_order_items(*)").order("created_at",{ascending:false});
- if(result.error)result=await db.from(ORDERS).select("*").order("created_at",{ascending:false});
- if(result.error){alert("Could not load store orders: "+result.error.message);return}
- orders=result.data || [];
- renderOrders();renderPayments();renderOverview();
+function customerName(o) {
+ return o.customer_name || o.name || o.full_name || "-";
 }
 
-function orderItems(o){return Array.isArray(o.store_order_items)?o.store_order_items:[]}
-function orderTotal(o){
- if(o.total_amount!=null)return Number(o.total_amount);
- if(o.total!=null)return Number(o.total);
- return orderItems(o).reduce((s,i)=>s+Number(i.unit_price||i.price||0)*Number(i.quantity||1),0);
+function orderStatus(o) {
+ return o.order_status || o.status || "pending";
 }
-function customerName(o){return o.customer_name||o.name||o.full_name||"-"}
-function orderStatus(o){return o.order_status||o.status||"pending"}
-function paymentStatus(o){return norm(o.payment_status)}
-function orderId(o){return o.id}
 
-function renderOrders(){
- const q=norm(el("orderSearch").value);
- const f=norm(el("orderFilter").value);
- const filtered=orders.filter(o=>{
-  const text=norm([customerName(o),o.id,o.phone,o.customer_phone,o.email].join(" "));
-  return (!q||text.includes(q))&&(!f||norm(orderStatus(o))===f);
- });
- el("ordersTable").innerHTML=table(
- ["Order","Customer","Date","Total","Payment","Order status","Actions"],
- filtered.map(o=>`<tr>
- <td>${esc(String(o.id).slice(0,8))}</td>
- <td>${esc(customerName(o))}<br><small>${esc(o.phone||o.customer_phone||o.email||"")}</small></td>
- <td>${dateValue(o.created_at)}</td>
- <td>${money(orderTotal(o))}</td>
- <td><span class="status ${statusClass(o.payment_status)}">${esc(o.payment_status||"-")}</span></td>
- <td><select onchange="updateOrderStatus('${esc(o.id)}',this.value)">
- ${["pending","processing","dispatched","delivered","cancelled"].map(s=>`<option value="${s}" ${norm(orderStatus(o))===s?"selected":""}>${s}</option>`).join("")}
- </select></td>
- <td><div class="actions">
- <button class="secondary" onclick="viewOrder('${esc(o.id)}')">View</button>
- <button class="secondary" onclick="printInvoice('${esc(o.id)}')">Invoice</button>
- <button class="danger" onclick="deleteOrder('${esc(o.id)}')">Delete</button>
- </div></td></tr>`)
+function paymentStatus(o) {
+ return norm(o.payment_status);
+}
+
+function orderTotal(o) {
+ if (o.total_amount != null) return Number(o.total_amount);
+ if (o.total != null) return Number(o.total);
+
+ return orderItems(o).reduce((s, i) =>
+  s + Number(i.unit_price || i.price || 0) * Number(i.quantity || 1), 0
  );
 }
 
-async function updateOrderStatus(id,status){
- const {error}=await db.from(ORDERS).update({order_status:status}).eq("id",id);
- if(error){alert(error.message);loadOrders();return}
- const tracking=await db.from(TRACKING).update({status,updated_at:new Date().toISOString()}).eq("store_order_id",id);
- if(tracking.error)console.warn("Tracking status update:",tracking.error.message);
- await loadOrders();
+function statusClass(s) {
+ const v = norm(s);
+ if (["paid","delivered"].includes(v)) return "paid";
+ if (["rejected","cancelled"].includes(v)) return "rejected";
+ if (["pending","processing"].includes(v)) return "pending";
+ return "";
 }
 
-async function deleteOrder(id){
- if(!confirm("Delete this store order?"))return;
- const {error}=await db.rpc("delete_zyra_store_order",{p_order_id:id});
- if(error){alert("Could not delete order: "+error.message);return}
- await loadOrders();
-}
+/* ORDERS */
+async function loadOrders() {
+ let result = await db.from(ORDERS)
+  .select("*,store_order_items(*)")
+  .order("created_at", {ascending:false});
 
-function viewOrder(id){
- const o=orders.find(x=>String(x.id)===String(id));if(!o)return;
- const items=orderItems(o);
- const itemText=items.map(i=>`${i.product_name||i.name||"Product"} × ${i.quantity||1} — ${money(Number(i.unit_price||i.price||0)*Number(i.quantity||1))}`).join("\n");
- alert(`Order: ${o.id}\nCustomer: ${customerName(o)}\nPhone: ${o.phone||o.customer_phone||"-"}\nAddress: ${o.address||o.delivery_address||"-"}\nPayment: ${o.payment_status||"-"}\nTotal: ${money(orderTotal(o))}\n\n${itemText}\n\nNotes: ${o.notes||o.customisation||"-"}`);
-}
-
-function renderOverview(){
- const paid=orders.filter(o=>paymentStatus(o)==="paid"&&norm(orderStatus(o))!=="cancelled");
- const pending=orders.filter(o=>["pending",""].includes(paymentStatus(o))&&norm(orderStatus(o))!=="cancelled");
- const pendingSlips=pending.filter(o=>o.payment_slip_path);
- const revenue=paid.reduce((s,o)=>s+orderTotal(o),0);
- const pendingValue=pending.reduce((s,o)=>s+orderTotal(o),0);
- const cards=[
- ["Total Orders",orders.length],
- ["Paid Revenue",money(revenue)],
- ["Pending Payments",pending.length],
- ["Pending Value",money(pendingValue)],
- ["Slips to Verify",pendingSlips.length],
- ["Products",products.length]
- ];
- el("overviewCards").innerHTML=cards.map(([a,b])=>`<div class="card"><small>${a}</small><div class="number">${b}</div></div>`).join("");
- el("recentOrders").innerHTML=table(["Order","Customer","Total","Status"],orders.slice(0,7).map(o=>`<tr><td>${esc(String(o.id).slice(0,8))}</td><td>${esc(customerName(o))}</td><td>${money(orderTotal(o))}</td><td><span class="status ${statusClass(orderStatus(o))}">${esc(orderStatus(o))}</span></td></tr>`));
-}
-
-function renderPayments(){
- const list=orders.filter(o=>paymentStatus(o)!=="paid"&&paymentStatus(o)!=="rejected"&&paymentStatus(o)!=="not_required"&&norm(orderStatus(o))!=="cancelled");
- el("paymentsTable").innerHTML=table(["Order","Customer","Amount","Slip","Payment status","Decision"],list.map(o=>{
- const hasSlip=!!o.payment_slip_path;
- return `<tr>
- <td>${esc(String(o.id).slice(0,8))}<br><small>${dateValue(o.created_at)}</small></td>
- <td>${esc(customerName(o))}</td><td>${money(orderTotal(o))}</td>
- <td>${hasSlip?`<button class="secondary" onclick="openSlip('${esc(o.payment_slip_path)}','${esc(o.payment_slip_file_name||"")}')">View slip</button>`:"No slip uploaded"}</td>
- <td><span class="status pending">${hasSlip?"Pending verification":esc(o.payment_status||"Pending")}</span></td>
- <td><div class="actions">
- <button class="success" ${hasSlip?"":"disabled"} onclick="verifyPayment('${esc(o.id)}','ACCEPT')">Accept</button>
- <button class="danger" ${hasSlip?"":"disabled"} onclick="verifyPayment('${esc(o.id)}','REJECT')">Reject</button>
- </div></td></tr>`;
- }));
-}
-
-async function verifyPayment(id,decision){
- let reason="";
- if(decision==="REJECT"){
-  reason=prompt("Enter the reason for rejecting this payment slip:");
-  if(reason===null)return;
-  if(!reason.trim()){alert("A rejection reason is required.");return}
+ if (result.error) {
+  result = await db.from(ORDERS)
+   .select("*")
+   .order("created_at", {ascending:false});
  }
- const {error}=await db.rpc("verify_zyra_payment",{
-  p_order_id:id,p_decision:decision,p_rejection_reason:reason
- });
- if(error){alert("Payment verification failed: "+error.message);return}
- alert(decision==="ACCEPT"?"Payment marked as paid.":"Payment rejected.");
- await loadOrders();
-}
 
-async function openSlip(path,fileName){
- activeSlipPath=path;
- const {data,error}=await db.storage.from(PAYMENT_BUCKET).createSignedUrl(path,300);
- if(error){alert("Unable to open payment slip: "+error.message);return}
- const url=data.signedUrl;
- const ext=(fileName||path).split(".").pop().toLowerCase().split("?")[0];
- if(["jpg","jpeg","png","webp","gif"].includes(ext)){
-  el("slipContent").innerHTML=`<img src="${url}" alt="Payment slip">`;
- }else if(ext==="pdf"){
-  el("slipContent").innerHTML=`<iframe src="${url}"></iframe>`;
- }else{
-  el("slipContent").innerHTML=`<a href="${url}" target="_blank" rel="noopener">Open payment slip</a>`;
- }
- el("slipModal").style.display="block";
-}
-function closeSlip(){el("slipModal").style.display="none";el("slipContent").innerHTML=""}
-async function downloadSlip(){
- if(!activeSlipPath)return;
- const {data,error}=await db.storage.from(PAYMENT_BUCKET).download(activeSlipPath);
- if(error){alert(error.message);return}
- const url=URL.createObjectURL(data);
- const a=document.createElement("a");a.href=url;a.download=activeSlipPath.split("/").pop()||"payment-slip";
- a.click();URL.revokeObjectURL(url);
-}
-
-async function loadProducts(){
- const {data,error}=await db.from(PRODUCTS).select("*").order("name");
- if(error){alert("Products: "+error.message);return}
- products=data||[];
- renderProducts();renderManualProductOptions();renderOverview();
-}
-
-function renderProducts(){
- const q=norm(el("productSearch").value);
- const list=products.filter(p=>norm(p.name).includes(q)||norm(p.category).includes(q));
- el("productsTable").innerHTML=table(["Product","Category","Price","Cost","Stock","Active","Actions"],list.map(p=>`<tr>
- <td>${esc(p.name)}<br><small>${esc(p.description||"")}</small></td>
- <td>${esc(p.category||"-")}</td><td>${money(p.price)}</td><td>${money(p.cost_price)}</td>
- <td>${esc(p.stock_quantity??"-")}</td><td>${p.is_active?"Yes":"No"}</td>
- <td><div class="actions"><button class="secondary" onclick="editProduct('${esc(p.id)}')">Edit</button><button class="danger" onclick="deleteProduct('${esc(p.id)}')">Delete</button></div></td>
- </tr>`));
-}
-
-function clearProductForm(){
- ["pId","pName","pPrice","pCost","pCategory","pStock","pImage","pPayment","pDescription"].forEach(id=>el(id).value="");
- el("pCustom").value="false";el("pActive").value="true";el("productFormTitle").textContent="Add Product";
-}
-function editProduct(id){
- const p=products.find(x=>String(x.id)===String(id));if(!p)return;
- el("pId").value=p.id;el("pName").value=p.name||"";el("pPrice").value=p.price??"";
- el("pCost").value=p.cost_price??"";el("pCategory").value=p.category||"";
- el("pStock").value=p.stock_quantity??0;el("pImage").value=p.image_url||"";
- el("pPayment").value=p.payment_option||"";el("pDescription").value=p.description||"";
- el("pCustom").value=String(!!p.is_customisable);el("pActive").value=String(!!p.is_active);
- el("productFormTitle").textContent="Edit Product";
- window.scrollTo({top:0,behavior:"smooth"});
-}
-async function saveProduct(){
- const name=el("pName").value.trim(),price=Number(el("pPrice").value);
- if(!name||!Number.isFinite(price)){alert("Enter a product name and valid price.");return}
- const payload={
-  name,price,category:el("pCategory").value.trim(),
-  stock_quantity:Number(el("pStock").value||0),
-  image_url:el("pImage").value.trim(),
-  description:el("pDescription").value.trim(),
-  is_customisable:el("pCustom").value==="true",
-  is_active:el("pActive").value==="true",
-  payment_option:el("pPayment").value.trim()
- };
- if(el("pCost").value!=="")payload.cost_price=Number(el("pCost").value);
- const id=el("pId").value;
- const result=id?await db.from(PRODUCTS).update(payload).eq("id",id):await db.from(PRODUCTS).insert(payload);
- if(result.error){alert("Product save failed: "+result.error.message);return}
- alert("Product saved.");clearProductForm();await loadProducts();
-}
-async function deleteProduct(id){
- if(!confirm("Delete this product?"))return;
- const {error}=await db.from(PRODUCTS).delete().eq("id",id);
- if(error){alert(error.message);return}await loadProducts();
-}
-
-function renderManualProductOptions(){
- el("mProduct").innerHTML=products.filter(p=>p.is_active).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
- manualProductChanged();
-}
-function manualProductChanged(){
- const p=products.find(x=>String(x.id)===el("mProduct").value);
- if(p)el("mPrice").value=p.price??"";
-}
-function openManualOrder(){
- manualItems=[];el("manualOrder").style.display="block";renderManualProductOptions();renderManualItems();
-}
-function hideManualOrder(){el("manualOrder").style.display="none"}
-function addManualItem(){
- const p=products.find(x=>String(x.id)===el("mProduct").value);
- const qty=Number(el("mQty").value),price=Number(el("mPrice").value);
- if(!p||qty<1||price<0||!Number.isFinite(price)){alert("Select a product and enter valid quantity and price.");return}
- manualItems.push({product_id:p.id,product_name:p.name,quantity:qty,unit_price:price});
- renderManualItems();
-}
-function renderManualItems(){
- el("manualItems").innerHTML=manualItems.map((i,n)=>`<p>${esc(i.product_name)} × ${i.quantity} — ${money(i.quantity*i.unit_price)} <button class="danger" onclick="manualItems.splice(${n},1);renderManualItems()">Remove</button></p>`).join("")+
- `<p><b>Total: ${money(manualItems.reduce((s,i)=>s+i.quantity*i.unit_price,0))}</b></p>`;
-}
-async function saveManualOrder(){
- const name=el("mName").value.trim();
- if(!name||!manualItems.length){alert("Enter customer name and add at least one product.");return}
- const total=manualItems.reduce((s,i)=>s+i.quantity*i.unit_price,0);
- const payment=el("mPayment").value;
- const payload={
-  customer_name:name,phone:el("mPhone").value.trim(),
-  email:el("mEmail").value.trim(),address:el("mAddress").value.trim(),
-  payment_method:payment,payment_status:payment==="COD"?"not_required":"pending",
-  order_status:el("mStatus").value,total_amount:total,
-  notes:el("mNotes").value.trim()
- };
- const {data,error}=await db.from(ORDERS).insert(payload).select().single();
- if(error){alert("Could not create order: "+error.message);return}
- const items=manualItems.map(i=>({
-  order_id:data.id,product_id:i.product_id,product_name:i.product_name,
-  quantity:i.quantity,unit_price:i.unit_price
- }));
- const itemResult=await db.from(ITEMS).insert(items);
- if(itemResult.error){
-  alert("Order was created, but its items could not be saved: "+itemResult.error.message);
+ if (result.error) {
+  notify("Could not load orders: " + result.error.message);
   return;
  }
- const tracking=await db.from(TRACKING).insert({
-  store_order_id:data.id,status:payload.order_status
- });
- if(tracking.error)console.warn("Tracking row could not be created:",tracking.error.message);
- alert("Manual order created.");
- hideManualOrder();await loadOrders();
+
+ orders = result.data || [];
+
+ renderOrders();
+ renderPayments();
+ renderOverview();
 }
 
-async function loadExpenses(){
- const {data,error}=await db.from(EXPENSES).select("*").order("expense_date",{ascending:false});
- if(error){alert("Expenses: "+error.message);return}
- expenses=data||[];renderExpenses();
-}
-async function addExpense(){
- const description=el("eDescription").value.trim();
- const amount=Number(el("eAmount").value);
- const date=el("eDate").value||new Date().toISOString().slice(0,10);
- if(!description||!Number.isFinite(amount)||amount<=0){alert("Enter an expense description and a valid amount.");return}
- const {error}=await db.from(EXPENSES).insert({
-  description,category:el("eCategory").value,amount,expense_date:date
+function renderOrders() {
+ const q = norm(el("orderSearch").value);
+ const f = norm(el("orderFilter").value);
+
+ const list = orders.filter(o => {
+  const text = norm([
+   customerName(o),
+   o.id,
+   o.phone,
+   o.customer_phone,
+   o.email
+  ].join(" "));
+
+  return (!q || text.includes(q)) &&
+   (!f || norm(orderStatus(o)) === f);
  });
- if(error){alert("Expense could not be saved: "+error.message);return}
- el("eDescription").value="";el("eAmount").value="";
- await loadExpenses();await loadReports();
-}
-function renderExpenses(){
- el("expensesTable").innerHTML=table(["Date","Description","Category","Amount","Action"],expenses.map(e=>`<tr>
- <td>${esc(e.expense_date||"-")}</td><td>${esc(e.description||"-")}</td><td>${esc(e.category||"-")}</td>
- <td>${money(e.amount)}</td><td><button class="danger" onclick="deleteExpense('${esc(e.id)}')">Delete</button></td></tr>`));
-}
-async function deleteExpense(id){
- if(!confirm("Delete this expense?"))return;
- const {error}=await db.from(EXPENSES).delete().eq("id",id);
- if(error){alert(error.message);return}await loadExpenses();await loadReports();
+
+ el("ordersTable").innerHTML = table(
+  ["Order","Customer","Date","Total","Payment","Status","Actions"],
+  list.map(o => `
+   <tr>
+    <td>${esc(String(o.id).slice(0,8))}</td>
+    <td>
+     ${esc(customerName(o))}
+     <br><small>${esc(o.phone || o.customer_phone || o.email || "")}</small>
+    </td>
+    <td>${dateValue(o.created_at)}</td>
+    <td>${money(orderTotal(o))}</td>
+    <td>
+     <span class="status ${statusClass(o.payment_status)}">
+      ${esc(o.payment_status || "-")}
+     </span>
+    </td>
+    <td>
+     <select onchange="updateOrderStatus('${esc(o.id)}',this.value)">
+      ${["pending","processing","dispatched","delivered","cancelled"].map(s => `
+       <option value="${s}" ${norm(orderStatus(o)) === s ? "selected" : ""}>${s}</option>
+      `).join("")}
+     </select>
+    </td>
+    <td>
+     <div class="actions">
+      <button class="secondary" onclick="viewOrder('${esc(o.id)}')">Details</button>
+      <button class="secondary" onclick="printInvoice('${esc(o.id)}')">Invoice</button>
+      <button class="danger" onclick="deleteOrder('${esc(o.id)}')">Delete</button>
+     </div>
+    </td>
+   </tr>
+  `)
+ );
 }
 
-function dateRange(){
- const period=el("reportPeriod").value;
- const selected=el("reportDate").value?new Date(el("reportDate").value+"T12:00:00"):new Date();
- let start=null,end=null;
- if(period==="day"){
-  start=new Date(selected);start.setHours(0,0,0,0);
-  end=new Date(start);end.setDate(end.getDate()+1);
- }else if(period==="week"){
-  start=new Date(selected);start.setHours(0,0,0,0);
-  const day=(start.getDay()+6)%7;start.setDate(start.getDate()-day);
-  end=new Date(start);end.setDate(end.getDate()+7);
- }else if(period==="month"){
-  start=new Date(selected.getFullYear(),selected.getMonth(),1);
-  end=new Date(selected.getFullYear(),selected.getMonth()+1,1);
+async function updateOrderStatus(id, status) {
+ const {error} = await db.from(ORDERS)
+  .update({order_status:status})
+  .eq("id",id);
+
+ if (error) {
+  notify(error.message);
+  await loadOrders();
+  return;
  }
+
+ const tracking = await db.from(TRACKING)
+  .update({
+   status,
+   updated_at:new Date().toISOString()
+  })
+  .eq("store_order_id",id);
+
+ if (tracking.error) {
+  console.warn("Tracking update:",tracking.error.message);
+ }
+
+ await loadOrders();
+}
+
+async function deleteOrder(id) {
+ if (!confirm("Delete this store order?")) return;
+
+ const {error} = await db.rpc("delete_zyra_store_order", {
+  p_order_id:id
+ });
+
+ if (error) {
+  notify("Delete failed: " + error.message);
+  return;
+ }
+
+ await loadOrders();
+}
+
+/* CUSTOMER CUSTOMISATION AND PHOTOS */
+function isPhotoKey(key) {
+ return /photo|image|picture|attachment|upload|file/i.test(key);
+}
+
+function isCustomKey(key) {
+ return /custom|personal|engrave|initial|name|letter|date|note|option|variant|size|colour|color|design|message|specification|instruction/i.test(key);
+}
+
+function prettyKey(key) {
+ return key.replace(/_/g," ").replace(/\b\w/g,c => c.toUpperCase());
+}
+
+function formatValue(value) {
+ if (value === null || value === undefined || value === "") return "-";
+ if (typeof value === "object") return JSON.stringify(value,null,2);
+ return String(value);
+}
+
+function customFieldsHTML(record) {
+ if (!record || typeof record !== "object") return "";
+
+ return Object.entries(record)
+  .filter(([key,value]) =>
+   isCustomKey(key) &&
+   !isPhotoKey(key) &&
+   value !== null &&
+   value !== ""
+  )
+  .map(([key,value]) => `
+   <div style="padding:9px 0;border-bottom:1px solid #eee">
+    <small>${esc(prettyKey(key))}</small>
+    <div style="white-space:pre-wrap;overflow-wrap:anywhere">
+     ${esc(formatValue(value))}
+    </div>
+   </div>
+  `).join("");
+}
+
+function collectPhotoPaths(value, key = "", out = []) {
+ if (value === null || value === undefined) return [...new Set(out)];
+
+ if (typeof value === "string") {
+  const s = value.trim();
+
+  if (
+   isPhotoKey(key) &&
+   s &&
+   !/^https?:\/\//i.test(s) &&
+   !/^data:/i.test(s)
+  ) {
+   out.push(s);
+  }
+
+  return [...new Set(out)];
+ }
+
+ if (Array.isArray(value)) {
+  value.forEach(v => collectPhotoPaths(v,key,out));
+  return [...new Set(out)];
+ }
+
+ if (typeof value === "object") {
+  Object.entries(value).forEach(([k,v]) => {
+   collectPhotoPaths(v,k,out);
+  });
+ }
+
+ return [...new Set(out)];
+}
+
+async function renderCustomerPhotos(records) {
+ const paths = [...new Set(records.flatMap(r => collectPhotoPaths(r)))];
+
+ if (!paths.length) {
+  return "<p class='muted'>No customer photo paths were found in the order or item records.</p>";
+ }
+
+ const html = await Promise.all(paths.map(async path => {
+  const {data,error} = await db.storage
+   .from(CUSTOMER_BUCKET)
+   .createSignedUrl(path,300);
+
+  if (error) {
+   return `<p>Could not access ${esc(path)}: ${esc(error.message)}</p>`;
+  }
+
+  return `
+   <div class="photo-card">
+    <img src="${data.signedUrl}" alt="Customer uploaded photo">
+    <p style="font-size:11px;overflow-wrap:anywhere">${esc(path)}</p>
+    <div class="actions">
+     <button class="secondary" onclick="openCustomerPhoto('${esc(path)}')">Open</button>
+     <button onclick="downloadCustomerPhoto('${esc(path)}')">Download</button>
+    </div>
+   </div>
+  `;
+ }));
+
+ return `<div class="photo-grid">${html.join("")}</div>`;
+}
+
+async function openCustomerPhoto(path) {
+ const {data,error} = await db.storage
+  .from(CUSTOMER_BUCKET)
+  .createSignedUrl(path,300);
+
+ if (error) {
+  notify(error.message);
+  return;
+ }
+
+ window.open(data.signedUrl,"_blank","noopener");
+}
+
+async function downloadCustomerPhoto(path) {
+ const {data,error} = await db.storage
+  .from(CUSTOMER_BUCKET)
+  .download(path);
+
+ if (error) {
+  notify("Photo download failed: " + error.message);
+  return;
+ }
+
+ downloadBlob(data,path.split("/").pop() || "customer-photo");
+}
+
+function downloadBlob(blob, filename) {
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement("a");
+
+ a.href = url;
+ a.download = filename;
+
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+
+ setTimeout(() => URL.revokeObjectURL(url),1000);
+}
+
+async function viewOrder(id) {
+ const o = orders.find(x => String(x.id) === String(id));
+ if (!o) return;
+
+ const items = orderItems(o);
+
+ el("modal").style.display = "block";
+ el("orderDetailContent").innerHTML = "<p>Loading customer details...</p>";
+
+ const photos = await renderCustomerPhotos([o,...items]);
+
+ el("orderDetailContent").innerHTML = `
+  <div class="panel">
+   <h3>Customer Information</h3>
+   <p><b>Name:</b> ${esc(customerName(o))}</p>
+   <p><b>Phone:</b> ${esc(o.phone || o.customer_phone || "-")}</p>
+   <p><b>Email:</b> ${esc(o.email || "-")}</p>
+   <p><b>Address:</b> ${esc(o.address || o.delivery_address || "-")}</p>
+   <p><b>Order ID:</b> ${esc(o.id)}</p>
+   <p><b>Date:</b> ${dateValue(o.created_at)}</p>
+   <p><b>Payment:</b> ${esc(o.payment_status || "-")}</p>
+   <p><b>Order Status:</b> ${esc(orderStatus(o))}</p>
+   <p><b>Total:</b> ${money(orderTotal(o))}</p>
+  </div>
+
+  <h3>Products and Customisation Details</h3>
+
+  ${items.length ? items.map((item,index) => `
+   <div class="panel">
+    <h3>${index+1}. ${esc(item.product_name || item.name || "Product")}</h3>
+    <p><b>Quantity:</b> ${esc(item.quantity || 1)}</p>
+    <p><b>Unit Price:</b> ${money(item.unit_price || item.price || 0)}</p>
+
+    <h4>Personalisation / Customisation</h4>
+
+    ${customFieldsHTML(item) || "<p class='muted'>No recognised customisation fields were found. Open the full saved record below to inspect it.</p>"}
+
+    <details>
+     <summary>View all saved item information</summary>
+     <pre>${esc(JSON.stringify(item,null,2))}</pre>
+    </details>
+   </div>
+  `).join("") : "<p>No order items were returned. Check the order-items table relationship.</p>"}
+
+  <div class="panel">
+   <h3>Customer Instructions and Order Notes</h3>
+   ${customFieldsHTML(o)}
+   <p>${esc(o.notes || o.customisation || o.customization || "No general notes saved.")}</p>
+
+   <details>
+    <summary>View all saved order information</summary>
+    <pre>${esc(JSON.stringify(o,null,2))}</pre>
+   </details>
+  </div>
+
+  <div class="panel">
+   <h3>Customer Uploaded Photos</h3>
+   ${photos}
+  </div>
+ `;
+}
+
+function closeOrderModal() {
+ el("modal").style.display = "none";
+ el("orderDetailContent").innerHTML = "";
+}
+
+/* PAYMENT SLIPS */
+function renderPayments() {
+ const list = orders.filter(o =>
+  !["paid","rejected","not_required"].includes(paymentStatus(o)) &&
+  norm(orderStatus(o)) !== "cancelled"
+ );
+
+ el("paymentsTable").innerHTML = table(
+  ["Order","Customer","Amount","Slip","Status","Decision"],
+  list.map(o => {
+   const hasSlip = !!o.payment_slip_path;
+
+   return `
+    <tr>
+     <td>${esc(String(o.id).slice(0,8))}<br><small>${dateValue(o.created_at)}</small></td>
+     <td>${esc(customerName(o))}</td>
+     <td>${money(orderTotal(o))}</td>
+     <td>
+      ${hasSlip
+       ? `<button class="secondary" onclick="openSlip('${esc(o.payment_slip_path)}','${esc(o.payment_slip_file_name || "")}')">View Slip</button>`
+       : "No slip uploaded"}
+     </td>
+     <td>
+      <span class="status pending">
+       ${hasSlip ? "Pending verification" : esc(o.payment_status || "Pending")}
+      </span>
+     </td>
+     <td>
+      <div class="actions">
+       <button class="success" ${hasSlip ? "" : "disabled"} onclick="verifyPayment('${esc(o.id)}','ACCEPT')">Accept</button>
+       <button class="danger" ${hasSlip ? "" : "disabled"} onclick="verifyPayment('${esc(o.id)}','REJECT')">Reject</button>
+      </div>
+     </td>
+    </tr>
+   `;
+  })
+ );
+}
+
+async function verifyPayment(id,decision) {
+ let reason = "";
+
+ if (decision === "REJECT") {
+  reason = prompt("Enter rejection reason:");
+  if (reason === null) return;
+
+  if (!reason.trim()) {
+   notify("Rejection reason is required.");
+   return;
+  }
+ }
+
+ const {error} = await db.rpc("verify_zyra_payment", {
+  p_order_id:id,
+  p_decision:decision,
+  p_rejection_reason:reason
+ });
+
+ if (error) {
+  notify("Verification failed: " + error.message);
+  return;
+ }
+
+ notify(decision === "ACCEPT" ? "Payment marked as paid." : "Payment rejected.");
+ await loadOrders();
+}
+
+async function openSlip(path,fileName) {
+ activeSlipPath = path;
+
+ const {data,error} = await db.storage
+  .from(PAYMENT_BUCKET)
+  .createSignedUrl(path,300);
+
+ if (error) {
+  notify("Cannot open slip: " + error.message);
+  return;
+ }
+
+ const ext = (fileName || path).split(".").pop().toLowerCase().split("?")[0];
+
+ if (["jpg","jpeg","png","webp","gif"].includes(ext)) {
+  el("slipContent").innerHTML =
+   `<img src="${data.signedUrl}" alt="Payment slip">`;
+ } else if (ext === "pdf") {
+  el("slipContent").innerHTML =
+   `<iframe src="${data.signedUrl}"></iframe>`;
+ } else {
+  el("slipContent").innerHTML =
+   `<a href="${data.signedUrl}" target="_blank" rel="noopener">Open payment slip</a>`;
+ }
+
+ el("slipModal").style.display = "block";
+}
+
+function closeSlip() {
+ el("slipModal").style.display = "none";
+ el("slipContent").innerHTML = "";
+}
+
+async function downloadSlip() {
+ if (!activeSlipPath) return;
+
+ const {data,error} = await db.storage
+  .from(PAYMENT_BUCKET)
+  .download(activeSlipPath);
+
+ if (error) {
+  notify(error.message);
+  return;
+ }
+
+ downloadBlob(data,activeSlipPath.split("/").pop() || "payment-slip");
+}
+
+/* PRODUCTS */
+async function loadProducts() {
+ const {data,error} = await db.from(PRODUCTS)
+  .select("*")
+  .order("name");
+
+ if (error) {
+  notify("Products: " + error.message);
+  return;
+ }
+
+ products = data || [];
+
+ renderProducts();
+ renderManualProductOptions();
+ renderOverview();
+}
+
+async function productImageUrl(value) {
+ if (!value) return "";
+
+ if (/^https?:\/\//i.test(value)) return value;
+
+ const {data,error} = await db.storage
+  .from(PRODUCT_BUCKET)
+  .createSignedUrl(value,300);
+
+ if (error) return "";
+
+ return data.signedUrl;
+}
+
+async function renderProducts() {
+ const q = norm(el("productSearch").value);
+
+ const list = products.filter(p =>
+  norm(p.name).includes(q) ||
+  norm(p.category).includes(q)
+ );
+
+ const rows = await Promise.all(list.map(async p => {
+  const image = await productImageUrl(p.image_url);
+
+  return `
+   <tr>
+    <td>${image ? `<img class="product-thumb" src="${image}" alt="">` : "No image"}</td>
+    <td>${esc(p.name)}<br><small>${esc(p.description || "")}</small></td>
+    <td>${esc(p.category || "-")}</td>
+    <td>${money(p.price)}</td>
+    <td>${money(p.cost_price)}</td>
+    <td>${esc(p.stock_quantity ?? "-")}</td>
+    <td>${p.is_active ? "Yes" : "No"}</td>
+    <td>
+     <div class="actions">
+      <button class="secondary" onclick="editProduct('${esc(p.id)}')">Edit</button>
+      ${p.image_url ? `<button class="secondary" onclick="downloadProductImage('${esc(p.id)}')">Download image</button>` : ""}
+      <button class="danger" onclick="deleteProduct('${esc(p.id)}')">Delete</button>
+     </div>
+    </td>
+   </tr>
+  `;
+ }));
+
+ el("productsTable").innerHTML = table(
+  ["Image","Product","Category","Price","Cost","Stock","Active","Actions"],
+  rows
+ );
+}
+
+function clearProductForm() {
+ [
+  "pId","pName","pPrice","pCost","pCategory","pStock",
+  "pPayment","pImage","pDescription","pImageFile"
+ ].forEach(id => el(id).value = "");
+
+ el("pCustom").value = "false";
+ el("pActive").value = "true";
+ el("pImagePreview").innerHTML = "";
+ el("productFormTitle").textContent = "Add Product";
+}
+
+async function editProduct(id) {
+ const p = products.find(x => String(x.id) === String(id));
+ if (!p) return;
+
+ el("pId").value = p.id;
+ el("pName").value = p.name || "";
+ el("pPrice").value = p.price ?? "";
+ el("pCost").value = p.cost_price ?? "";
+ el("pCategory").value = p.category || "";
+ el("pStock").value = p.stock_quantity ?? 0;
+ el("pImage").value = p.image_url || "";
+ el("pPayment").value = p.payment_option || "";
+ el("pDescription").value = p.description || "";
+ el("pCustom").value = String(!!p.is_customisable);
+ el("pActive").value = String(!!p.is_active);
+ el("productFormTitle").textContent = "Edit Product";
+
+ const url = await productImageUrl(p.image_url);
+
+ el("pImagePreview").innerHTML = url
+  ? `<img src="${url}" style="max-width:150px;max-height:150px;object-fit:contain">`
+  : "";
+
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function uploadProductImage(file) {
+ const ext = (file.name.split(".").pop() || "jpg").replace(/[^a-z0-9]/gi,"");
+ const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+ const {data,error} = await db.storage.from(PRODUCT_BUCKET).upload(path,file,{
+  upsert:false,
+  contentType:file.type || "image/jpeg"
+ });
+
+ if (error) throw error;
+
+ return data.path || path;
+}
+
+async function saveProduct() {
+ const name = el("pName").value.trim();
+ const price = Number(el("pPrice").value);
+
+ if (!name || !Number.isFinite(price) || price < 0) {
+  notify("Enter a valid product name and price.");
+  return;
+ }
+
+ const payload = {
+  name,
+  price,
+  category:el("pCategory").value.trim(),
+  stock_quantity:Number(el("pStock").value || 0),
+  image_url:el("pImage").value.trim(),
+  description:el("pDescription").value.trim(),
+  is_customisable:el("pCustom").value === "true",
+  is_active:el("pActive").value === "true",
+  payment_option:el("pPayment").value.trim()
+ };
+
+ if (el("pCost").value !== "") {
+  payload.cost_price = Number(el("pCost").value);
+ }
+
+ const file = el("pImageFile").files[0];
+
+ if (file) {
+  try {
+   payload.image_url = await uploadProductImage(file);
+  } catch (error) {
+   notify("Product image upload failed: " + error.message);
+   return;
+  }
+ }
+
+ const id = el("pId").value;
+
+ const result = id
+  ? await db.from(PRODUCTS).update(payload).eq("id",id)
+  : await db.from(PRODUCTS).insert(payload);
+
+ if (result.error) {
+  notify("Product save failed: " + result.error.message);
+  return;
+ }
+
+ notify("Product saved.");
+ clearProductForm();
+ await loadProducts();
+}
+
+async function downloadProductImage(id) {
+ const p = products.find(x => String(x.id) === String(id));
+ if (!p || !p.image_url) return;
+
+ if (/^https?:\/\//i.test(p.image_url)) {
+  window.open(p.image_url,"_blank","noopener");
+  return;
+ }
+
+ const {data,error} = await db.storage
+  .from(PRODUCT_BUCKET)
+  .download(p.image_url);
+
+ if (error) {
+  notify("Image download failed: " + error.message);
+  return;
+ }
+
+ downloadBlob(data,p.image_url.split("/").pop() || "product-image");
+}
+
+async function deleteProduct(id) {
+ if (!confirm("Delete this product?")) return;
+
+ const {error} = await db.from(PRODUCTS).delete().eq("id",id);
+
+ if (error) {
+  notify(error.message);
+  return;
+ }
+
+ await loadProducts();
+}
+
+/* MANUAL ORDERS */
+function renderManualProductOptions() {
+ el("mProduct").innerHTML = products
+  .filter(p => p.is_active)
+  .map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`)
+  .join("");
+
+ manualProductChanged();
+}
+
+function manualProductChanged() {
+ const p = products.find(x => String(x.id) === el("mProduct").value);
+ if (p) el("mPrice").value = p.price ?? "";
+}
+
+function openManualOrder() {
+ manualItems = [];
+ el("manualOrder").style.display = "block";
+ renderManualProductOptions();
+ renderManualItems();
+}
+
+function hideManualOrder() {
+ el("manualOrder").style.display = "none";
+}
+
+function addManualItem() {
+ const p = products.find(x => String(x.id) === el("mProduct").value);
+ const quantity = Number(el("mQty").value);
+ const price = Number(el("mPrice").value);
+
+ if (!p || quantity < 1 || price < 0 || !Number.isFinite(price)) {
+  notify("Select a product and enter valid quantity and price.");
+  return;
+ }
+
+ manualItems.push({
+  product_id:p.id,
+  product_name:p.name,
+  quantity,
+  unit_price:price
+ });
+
+ renderManualItems();
+}
+
+function renderManualItems() {
+ el("manualItems").innerHTML = manualItems.map((i,n) => `
+  <p>
+   ${esc(i.product_name)} × ${i.quantity} — ${money(i.quantity*i.unit_price)}
+   <button class="danger" onclick="manualItems.splice(${n},1);renderManualItems()">Remove</button>
+  </p>
+ `).join("") + `
+  <p><b>Total: ${money(manualItems.reduce((s,i) => s+i.quantity*i.unit_price,0))}</b></p>
+ `;
+}
+
+async function saveManualOrder() {
+ const name = el("mName").value.trim();
+
+ if (!name || !manualItems.length) {
+  notify("Enter customer name and add at least one product.");
+  return;
+ }
+
+ const payment = el("mPayment").value;
+ const total = manualItems.reduce((s,i) => s+i.quantity*i.unit_price,0);
+
+ const payload = {
+  customer_name:name,
+  phone:el("mPhone").value.trim(),
+  email:el("mEmail").value.trim(),
+  address:el("mAddress").value.trim(),
+  payment_method:payment,
+  payment_status:payment === "COD" ? "not_required" : "pending",
+  order_status:el("mStatus").value,
+  total_amount:total,
+  notes:el("mNotes").value.trim()
+ };
+
+ const {data,error} = await db.from(ORDERS)
+  .insert(payload)
+  .select()
+  .single();
+
+ if (error) {
+  notify("Could not create order: " + error.message);
+  return;
+ }
+
+ const itemRows = manualItems.map(i => ({
+  order_id:data.id,
+  product_id:i.product_id,
+  product_name:i.product_name,
+  quantity:i.quantity,
+  unit_price:i.unit_price
+ }));
+
+ const itemResult = await db.from(ITEMS).insert(itemRows);
+
+ if (itemResult.error) {
+  notify("Order created, but item insertion failed: " + itemResult.error.message);
+  return;
+ }
+
+ const tracking = await db.from(TRACKING).insert({
+  store_order_id:data.id,
+  status:payload.order_status
+ });
+
+ if (tracking.error) {
+  console.warn("Tracking insert failed:",tracking.error.message);
+ }
+
+ notify("Manual order created.");
+ hideManualOrder();
+ await loadOrders();
+}
+
+/* EXPENSES */
+async function loadExpenses() {
+ const {data,error} = await db.from(EXPENSES)
+  .select("*")
+  .order("expense_date",{ascending:false});
+
+ if (error) {
+  notify("Expenses could not be loaded: " + error.message);
+  return;
+ }
+
+ expenses = data || [];
+ renderExpenses();
+}
+
+async function addExpense() {
+ const description = el("eDescription").value.trim();
+ const amount = Number(el("eAmount").value);
+ const expense_date = el("eDate").value || new Date().toISOString().slice(0,10);
+
+ if (!description || !Number.isFinite(amount) || amount <= 0) {
+  notify("Enter a description and valid expense amount.");
+  return;
+ }
+
+ const {error} = await db.from(EXPENSES).insert({
+  description,
+  category:el("eCategory").value,
+  amount,
+  expense_date
+ });
+
+ if (error) {
+  notify("Expense could not be saved: " + error.message);
+  return;
+ }
+
+ el("eDescription").value = "";
+ el("eAmount").value = "";
+
+ await loadExpenses();
+ await loadReports();
+}
+
+function renderExpenses() {
+ el("expensesTable").innerHTML = table(
+  ["Date","Description","Category","Amount","Action"],
+  expenses.map(e => `
+   <tr>
+    <td>${esc(e.expense_date || "-")}</td>
+    <td>${esc(e.description || "-")}</td>
+    <td>${esc(e.category || "-")}</td>
+    <td>${money(e.amount)}</td>
+    <td><button class="danger" onclick="deleteExpense('${esc(e.id)}')">Delete</button></td>
+   </tr>
+  `)
+ );
+}
+
+async function deleteExpense(id) {
+ if (!confirm("Delete this expense?")) return;
+
+ const {error} = await db.from(EXPENSES).delete().eq("id",id);
+
+ if (error) {
+  notify(error.message);
+  return;
+ }
+
+ await loadExpenses();
+ await loadReports();
+}
+
+/* REPORTS */
+function dateRange() {
+ const period = el("reportPeriod").value;
+
+ const selected = el("reportDate").value
+  ? new Date(el("reportDate").value + "T12:00:00")
+  : new Date();
+
+ let start = null;
+ let end = null;
+
+ if (period === "day") {
+  start = new Date(selected);
+  start.setHours(0,0,0,0);
+  end = new Date(start);
+  end.setDate(end.getDate()+1);
+ } else if (period === "week") {
+  start = new Date(selected);
+  start.setHours(0,0,0,0);
+  start.setDate(start.getDate()-((start.getDay()+6)%7));
+  end = new Date(start);
+  end.setDate(end.getDate()+7);
+ } else if (period === "month") {
+  start = new Date(selected.getFullYear(),selected.getMonth(),1);
+  end = new Date(selected.getFullYear(),selected.getMonth()+1,1);
+ }
+
  return {start,end};
 }
-function inRange(value,range){
- if(!range.start)return true;
- const d=new Date(value);
- return d>=range.start&&d<range.end;
-}
-function itemRevenue(i){return Number(i.unit_price??i.price??0)*Number(i.quantity??1)}
-function itemCost(i,p){
- const unit=Number(i.unit_cost??i.cost_price??p?.cost_price??0);
- return unit*Number(i.quantity??1);
+
+function inRange(value,range) {
+ if (!range.start) return true;
+ if (!value) return false;
+
+ const d = new Date(value);
+ return d >= range.start && d < range.end;
 }
 
-async function loadReports(){
- if(!orders.length)await loadOrders();
- if(!expenses.length)await loadExpenses();
- const range=dateRange();
- const filteredOrders=orders.filter(o=>inRange(o.created_at,range));
- const paid=filteredOrders.filter(o=>paymentStatus(o)==="paid"&&norm(orderStatus(o))!=="cancelled");
- const filteredExpenses=expenses.filter(e=>inRange(e.expense_date||e.created_at,range));
- const revenue=paid.reduce((s,o)=>s+orderTotal(o),0);
- let productCosts=0,units=0;
- const productMap={};
- const orderRows=[];
- paid.forEach(o=>{
-  let orderCost=0;
-  orderItems(o).forEach(i=>{
-   const p=products.find(x=>String(x.id)===String(i.product_id));
-   const rev=itemRevenue(i),cost=itemCost(i,p);
-   productCosts+=cost;orderCost+=cost;units+=Number(i.quantity||1);
-   const key=i.product_id||i.product_name||i.name||"Unknown";
-   if(!productMap[key])productMap[key]={name:i.product_name||i.name||p?.name||"Product",quantity:0,revenue:0,cost:0};
-   productMap[key].quantity+=Number(i.quantity||1);
-   productMap[key].revenue+=rev;
-   productMap[key].cost+=cost;
+function itemRevenue(i) {
+ return Number(i.unit_price ?? i.price ?? 0) * Number(i.quantity ?? 1);
+}
+
+function itemCost(i,product) {
+ const unit = Number(i.unit_cost ?? i.cost_price ?? product?.cost_price ?? 0);
+ return unit * Number(i.quantity ?? 1);
+}
+
+async function loadReports() {
+ if (!orders.length) await loadOrders();
+ if (!products.length) await loadProducts();
+ if (!expenses.length) await loadExpenses();
+
+ const range = dateRange();
+
+ const selectedOrders = orders.filter(o => inRange(o.created_at,range));
+
+ const paid = selectedOrders.filter(o =>
+  paymentStatus(o) === "paid" &&
+  norm(orderStatus(o)) !== "cancelled"
+ );
+
+ const selectedExpenses = expenses.filter(e =>
+  inRange(e.expense_date || e.created_at,range)
+ );
+
+ let revenue = 0;
+ let productCosts = 0;
+ let units = 0;
+
+ const productMap = {};
+ const orderRows = [];
+
+ paid.forEach(o => {
+  const items = orderItems(o);
+  const orderRevenue = orderTotal(o);
+  let cost = 0;
+
+  items.forEach(i => {
+   const product = products.find(p => String(p.id) === String(i.product_id));
+   const r = itemRevenue(i);
+   const c = itemCost(i,product);
+
+   cost += c;
+   productCosts += c;
+   units += Number(i.quantity || 1);
+
+   const key = String(i.product_id || i.product_name || i.name || "unknown");
+
+   if (!productMap[key]) {
+    productMap[key] = {
+     name:i.product_name || i.name || product?.name || "Product",
+     quantity:0,
+     revenue:0,
+     cost:0
+    };
+   }
+
+   productMap[key].quantity += Number(i.quantity || 1);
+   productMap[key].revenue += r;
+   productMap[key].cost += c;
   });
-  orderRows.push({id:o.id,revenue:orderTotal(o),cost:orderCost,profit:orderTotal(o)-orderCost});
+
+  revenue += orderRevenue;
+
+  orderRows.push({
+   id:o.id,
+   revenue:orderRevenue,
+   cost,
+   profit:orderRevenue-cost
+  });
  });
- const expenseTotal=filteredExpenses.reduce((s,e)=>s+Number(e.amount||0),0);
- const grossProfit=revenue-productCosts;
- const netProfit=grossProfit-expenseTotal;
- reportData={range,paid,filteredExpenses,revenue,productCosts,expenseTotal,grossProfit,netProfit,units,productMap,orderRows};
- el("reportCards").innerHTML=[
-  ["Paid Revenue",money(revenue)],["Product Costs",money(productCosts)],
-  ["Gross Profit",money(grossProfit)],["Expenses",money(expenseTotal)],
-  ["Estimated Net Profit",money(netProfit)],["Units Sold",units]
- ].map(([a,b])=>`<div class="card"><small>${a}</small><div class="number">${b}</div></div>`).join("");
- el("productReport").innerHTML=table(["Product","Units","Sales","Product Cost","Profit"],Object.values(productMap).map(p=>`<tr><td>${esc(p.name)}</td><td>${p.quantity}</td><td>${money(p.revenue)}</td><td>${money(p.cost)}</td><td>${money(p.revenue-p.cost)}</td></tr>`));
- el("orderReport").innerHTML=table(["Order","Revenue","Product Cost","Profit"],orderRows.map(o=>`<tr><td>${esc(String(o.id).slice(0,8))}</td><td>${money(o.revenue)}</td><td>${money(o.cost)}</td><td>${money(o.profit)}</td></tr>`));
- const cats={};filteredExpenses.forEach(e=>{const k=e.category||"Other";cats[k]=(cats[k]||0)+Number(e.amount||0)});
- el("expenseReport").innerHTML=table(["Category","Total"],Object.entries(cats).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`));
+
+ const expenseTotal = selectedExpenses.reduce(
+  (s,e) => s + Number(e.amount || 0),0
+ );
+
+ const grossProfit = revenue-productCosts;
+ const netProfit = grossProfit-expenseTotal;
+
+ reportData = {
+  paid,
+  selectedExpenses,
+  revenue,
+  productCosts,
+  expenseTotal,
+  grossProfit,
+  netProfit,
+  units,
+  productMap,
+  orderRows
+ };
+
+ el("reportCards").innerHTML = [
+  ["Paid Revenue",money(revenue)],
+  ["Product Costs",money(productCosts)],
+  ["Gross Profit",money(grossProfit)],
+  ["Expenses",money(expenseTotal)],
+  ["Estimated Net Profit",money(netProfit)],
+  ["Units Sold",units]
+ ].map(([a,b]) => `
+  <div class="card">
+   <small>${a}</small>
+   <div class="number">${b}</div>
+  </div>
+ `).join("");
+
+ el("productReport").innerHTML = table(
+  ["Product","Units","Sales","Product Cost","Profit"],
+  Object.values(productMap).map(p => `
+   <tr>
+    <td>${esc(p.name)}</td>
+    <td>${p.quantity}</td>
+    <td>${money(p.revenue)}</td>
+    <td>${money(p.cost)}</td>
+    <td>${money(p.revenue-p.cost)}</td>
+   </tr>
+  `)
+ );
+
+ el("orderReport").innerHTML = table(
+  ["Order","Revenue","Product Cost","Profit"],
+  orderRows.map(o => `
+   <tr>
+    <td>${esc(String(o.id).slice(0,8))}</td>
+    <td>${money(o.revenue)}</td>
+    <td>${money(o.cost)}</td>
+    <td>${money(o.profit)}</td>
+   </tr>
+  `)
+ );
+
+ const categories = {};
+
+ selectedExpenses.forEach(e => {
+  const key = e.category || "Other";
+  categories[key] = (categories[key] || 0) + Number(e.amount || 0);
+ });
+
+ el("expenseReport").innerHTML = table(
+  ["Category","Total"],
+  Object.entries(categories).map(([k,v]) => `
+   <tr><td>${esc(k)}</td><td>${money(v)}</td></tr>
+  `)
+ );
 }
 
-function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
-function downloadCSV(filename,rows){
- const csv=rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
- const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");a.href=url;a.download=filename;a.click();
- URL.revokeObjectURL(url);
+function csvCell(value) {
+ return '"' + String(value ?? "").replace(/"/g,'""') + '"';
 }
-function exportCSV(){
- if(!reportData){alert("Load the report first.");return}
- const rows=[["Zyra.lk Profit Report"],["Order / Product","Quantity","Revenue","Cost","Profit"]];
- reportData.orderRows.forEach(o=>rows.push([o.id,"",o.revenue,o.cost,o.profit]));
+
+function exportCSV() {
+ if (!reportData) {
+  notify("Load the report first.");
+  return;
+ }
+
+ const rows = [
+  ["Zyra.lk Profit Report"],
+  ["Order","Revenue","Product Cost","Profit"]
+ ];
+
+ reportData.orderRows.forEach(o =>
+  rows.push([o.id,o.revenue,o.cost,o.profit])
+ );
+
  rows.push([]);
- rows.push(["Product-wise report"]);
  rows.push(["Product","Quantity","Revenue","Cost","Profit"]);
- Object.values(reportData.productMap).forEach(p=>rows.push([p.name,p.quantity,p.revenue,p.cost,p.revenue-p.cost]));
+
+ Object.values(reportData.productMap).forEach(p =>
+  rows.push([p.name,p.quantity,p.revenue,p.cost,p.revenue-p.cost])
+ );
+
  rows.push([]);
  rows.push(["Paid Revenue",reportData.revenue]);
  rows.push(["Product Costs",reportData.productCosts]);
  rows.push(["Expenses",reportData.expenseTotal]);
  rows.push(["Estimated Net Profit",reportData.netProfit]);
- downloadCSV("zyra-profit-report.csv",rows);
+
+ const csv = rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+ const blob = new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+
+ downloadBlob(blob,"zyra-profit-report.csv");
 }
 
-function printInvoice(id){
- const o=orders.find(x=>String(x.id)===String(id));if(!o)return;
- const items=orderItems(o);
- const html=`<!DOCTYPE html><html><head><title>Zyra Invoice</title><style>body{font-family:Arial;padding:35px;color:#30251f}table{width:100%;border-collapse:collapse;margin-top:25px}td,th{padding:12px;border-bottom:1px solid #ddd;text-align:left}h1{letter-spacing:4px}</style></head><body>
- <h1>ZYRA.LK</h1><p>Order Invoice</p><hr>
- <p><b>Order:</b> ${esc(o.id)}<br><b>Date:</b> ${dateValue(o.created_at)}<br><b>Customer:</b> ${esc(customerName(o))}<br><b>Phone:</b> ${esc(o.phone||o.customer_phone||"-")}<br><b>Address:</b> ${esc(o.address||"-")}</p>
- <table><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
- ${items.map(i=>`<tr><td>${esc(i.product_name||i.name||"Product")}</td><td>${i.quantity||1}</td><td>${money(i.unit_price||i.price)}</td><td>${money(itemRevenue(i))}</td></tr>`).join("")}
- </table><h3>Total: ${money(orderTotal(o))}</h3><p>Thank you for shopping with Zyra.lk.</p><script>window.onload=()=>window.print()<\/script></body></html>`;
- const w=window.open("","_blank");if(!w){alert("Please allow pop-ups to print invoices.");return}
- w.document.write(html);w.document.close();
+/* INVOICES */
+function printInvoice(id) {
+ const o = orders.find(x => String(x.id) === String(id));
+ if (!o) return;
+
+ const items = orderItems(o);
+
+ const invoiceHTML = `
+ <!DOCTYPE html>
+ <html>
+ <head>
+  <title>Zyra Invoice</title>
+  <style>
+   body{font-family:Arial;padding:35px;color:#30251f}
+   table{width:100%;border-collapse:collapse;margin-top:25px}
+   td,th{padding:12px;border-bottom:1px solid #ddd;text-align:left}
+   h1{letter-spacing:4px}
+  </style>
+ </head>
+ <body>
+  <h1>ZYRA.LK</h1>
+  <p>Order Invoice</p>
+  <hr>
+  <p>
+   <b>Order:</b> ${esc(o.id)}<br>
+   <b>Date:</b> ${dateValue(o.created_at)}<br>
+   <b>Customer:</b> ${esc(customerName(o))}<br>
+   <b>Phone:</b> ${esc(o.phone || o.customer_phone || "-")}<br>
+   <b>Address:</b> ${esc(o.address || "-")}
+  </p>
+  <table>
+   <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+   ${items.map(i => `
+    <tr>
+     <td>${esc(i.product_name || i.name || "Product")}</td>
+     <td>${i.quantity || 1}</td>
+     <td>${money(i.unit_price || i.price)}</td>
+     <td>${money(itemRevenue(i))}</td>
+    </tr>
+   `).join("")}
+  </table>
+  <h3>Total: ${money(orderTotal(o))}</h3>
+  <p>Thank you for shopping with Zyra.lk.</p>
+ </body>
+ </html>
+ `;
+
+ const w = window.open("","_blank");
+
+ if (!w) {
+  notify("Allow pop-ups to print invoices.");
+  return;
+ }
+
+ w.document.open();
+ w.document.write(invoiceHTML);
+ w.document.close();
+ w.onload = () => w.print();
 }
+
+/* OVERVIEW */
+function renderOverview() {
+ const paidOrders = orders.filter(o =>
+  paymentStatus(o) === "paid" &&
+  norm(orderStatus(o)) !== "cancelled"
+ );
+
+ const pendingOrders = orders.filter(o =>
+  !["paid","rejected","not_required"].includes(paymentStatus(o)) &&
+  norm(orderStatus(o)) !== "cancelled"
+ );
+
+ const revenue = paidOrders.reduce((s,o) => s+orderTotal(o),0);
+ const pendingAmount = pendingOrders.reduce((s,o) => s+orderTotal(o),0);
+
+ el("overviewCards").innerHTML = [
+  ["Total Store Orders",orders.length],
+  ["Products",products.length],
+  ["Paid Revenue",money(revenue)],
+  ["Pending Payments",pendingOrders.length],
+  ["Pending Amount",money(pendingAmount)],
+  ["Expenses",money(expenses.reduce((s,e)=>s+Number(e.amount||0),0))]
+ ].map(([a,b]) => `
+  <div class="card">
+   <small>${a}</small>
+   <div class="number">${b}</div>
+  </div>
+ `).join("");
+
+ const recent = [...orders]
+  .sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))
+  .slice(0,6);
+
+ el("recentOrders").innerHTML = table(
+  ["Order","Customer","Total","Payment","Date"],
+  recent.map(o => `
+   <tr>
+    <td>${esc(String(o.id).slice(0,8))}</td>
+    <td>${esc(customerName(o))}</td>
+    <td>${money(orderTotal(o))}</td>
+    <td>${esc(o.payment_status || "-")}</td>
+    <td>${dateValue(o.created_at)}</td>
+   </tr>
+  `)
+ );
+}
+
+/* INITIAL DATES */
+el("eDate").value = new Date().toISOString().slice(0,10);
+el("reportDate").value = new Date().toISOString().slice(0,10);
+
 </script>
 </body>
 </html>
