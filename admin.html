@@ -167,12 +167,21 @@ th{background:#faf7f2}
 </section>
 
 <section class="panel dashboard-page" data-page="manual">
-<h2 class="section-title">Create Manual Order</h2>
+<h2 class="section-title" id="manualFormTitle">Create Manual Order</h2>
 <p class="muted">Create an order for a customer. Multiple products can be added to one order. Select existing website products or enter products that are not listed online.</p>
 
 <form id="manualOrderForm">
 
+<input type="hidden" name="editing_order_id" value="">
+
 <h3>Customer Details</h3>
+
+<div class="field">
+<label>Order ID *</label>
+<input name="order_number" required maxlength="100" placeholder="Enter your Order ID, e.g. ZYRA-1001">
+<small class="muted">Enter a unique Order ID. You can change it when editing this manual order.</small>
+</div>
+
 <div class="row">
 <div class="field"><label>Customer name *</label><input name="customer_name" required maxlength="200"></div>
 <div class="field"><label>Phone number *</label><input name="phone" required></div>
@@ -258,7 +267,11 @@ th{background:#faf7f2}
 <h2 class="manual-total">Grand total: <strong id="manualGrandTotal">LKR 0</strong></h2>
 </div>
 
+<div class="actions">
 <button class="btn success" type="submit" id="createManualOrderBtn">CREATE MANUAL ORDER</button>
+<button class="btn light" type="button" id="cancelManualEditBtn" onclick="cancelManualEdit()" style="display:none">CANCEL EDIT</button>
+</div>
+
 <p id="manualOrderMessage" class="message" aria-live="polite"></p>
 </form>
 </section>
@@ -481,14 +494,14 @@ tab.setAttribute("aria-selected",active?"true":"false");
 });
 }
 
+/* AUTHENTICATION */
+
 function showDashboard(show){
 el("loginPanel").classList.toggle("hidden",show);
 el("dashboard").classList.toggle("hidden",!show);
 el("logoutBtn").classList.toggle("hidden",!show);
 if(show)showAdminSection("overview");
 }
-
-/* AUTHENTICATION */
 
 async function checkSession(){
 const {data,error}=await sb.auth.getSession();
@@ -603,7 +616,7 @@ loadingOrders=false;
 }
 }
 
-/* SALES REPORT: DISCOUNT IS ALLOCATED PROPORTIONALLY ACROSS ITEMS */
+/* SALES REPORT */
 
 function renderStatsAndReport(orders){
 el("statOrders").textContent=orders.length;
@@ -744,8 +757,6 @@ note.textContent="Order notes: "+order.customer_notes;
 card.append(note);
 }
 
-/* ORDER PRICE BREAKDOWN */
-
 const subtotalValue=Number(order.subtotal_amount??(Number(order.total_amount||0)-Number(order.delivery_fee||0)+Number(order.discount_amount||0)));
 const discountValue=Number(order.discount_amount||0);
 const deliveryValue=Number(order.delivery_fee||0);
@@ -829,6 +840,8 @@ attachmentBox.append(noSlip);
 }
 card.append(attachmentBox);
 
+/* COURIER DETAILS - EDITABLE FOR MANUAL AND WEBSITE ORDERS */
+
 const track=trackingCache.get(order.id)||{};
 const courierBox=document.createElement("div");
 courierBox.className="subpanel";
@@ -843,9 +856,7 @@ grid.className="row";
 const courier=makeInput("Courier company",track.courier||"");
 const ref=makeInput("Courier reference",track.courier_reference||"");
 const tracking=makeInput("Tracking ID",track.tracking_id||"");
-
 const trackStatus=makeSelect("Courier status",["Pending","Processing","Picked up","In transit","Out for delivery","Delivered","Delivery failed","Returned"],track.status||"Pending");
-
 const location=makeInput("Current location",track.location||"");
 const estimated=makeInput("Estimated delivery (date / note)",track.estimated_delivery||"");
 const note=makeInput("Courier update / note",track.note||"");
@@ -869,9 +880,6 @@ note:note.input.value.trim()
 },saveTrack);
 
 courierBox.append(saveTrack);
-const trackMsg=document.createElement("p");
-trackMsg.className="message";
-courierBox.append(trackMsg);
 card.append(courierBox);
 
 const actions=document.createElement("div");
@@ -902,6 +910,15 @@ del.className="btn danger";
 del.type="button";
 del.textContent="DELETE ORDER";
 del.onclick=()=>deleteOrder(order.id,order.order_number||order.id,del);
+
+if(order.order_source==="manual"){
+const editManual=document.createElement("button");
+editManual.className="btn light";
+editManual.type="button";
+editManual.textContent="EDIT MANUAL ORDER";
+editManual.onclick=()=>editManualOrder(order.id);
+actions.append(editManual);
+}
 
 actions.append(status.wrap,save,invoice,pdfInvoice,del);
 card.append(actions);
@@ -1133,7 +1150,7 @@ button.textContent=old;
 }
 }
 
-/* PRINT INVOICE - INCLUDES DISCOUNT */
+/* PRINT INVOICE */
 
 function printInvoice(o,track={}){
 const rows=(o.store_order_items||[]).map(i=>
@@ -1211,8 +1228,6 @@ const now=new Date();
 const local=new Date(now.getTime()-now.getTimezoneOffset()*60000);
 input.value=local.toISOString().slice(0,16);
 }
-
-/* REFRESH PRODUCT OPTIONS FOR ALL MANUAL ITEM ROWS */
 
 function refreshManualProductOptions(){
 document.querySelectorAll(".manual-item").forEach(box=>{
@@ -1400,8 +1415,6 @@ updateProduct();
 calculateManualTotal();
 }
 
-/* LIVE SUBTOTAL, DISCOUNT, DELIVERY AND GRAND TOTAL */
-
 function calculateManualTotal(){
 let subtotal=0;
 
@@ -1454,11 +1467,11 @@ let unitCost=null;
 const isCustomProduct=d.type.value==="custom";
 
 if(!isCustomProduct){
-const p=productCache.find(x=>x.id===d.product.value&&x.is_active===true);
-if(!p)throw new Error("Please select a valid active website product.");
+const p=productCache.find(x=>x.id===d.product.value);
+if(!p)throw new Error("Please select a valid website product.");
 productId=p.id;
 productName=p.name;
-unitCost=p.cost_price;
+unitCost=d.cost.value===""?null:Number(d.cost.value);
 }else{
 productName=d.customName.value.trim();
 if(!productName)throw new Error("Enter the name of every custom product.");
@@ -1483,7 +1496,125 @@ if(!items.length)throw new Error("Please add at least one product.");
 return items;
 }
 
-/* CREATE MANUAL ORDER - SECURE RPC */
+/* MANUAL ORDER EDITING */
+
+function cancelManualEdit(){
+const form=el("manualOrderForm");
+
+form.reset();
+form.elements.editing_order_id.value="";
+form.elements.order_number.value="";
+
+el("manualItems").replaceChildren();
+manualItemCount=0;
+
+el("createManualOrderBtn").textContent="CREATE MANUAL ORDER";
+el("manualFormTitle").textContent="Create Manual Order";
+el("cancelManualEditBtn").style.display="none";
+el("manualOrderMessage").textContent="";
+
+setManualOrderDate();
+addManualItem();
+refreshManualProductOptions();
+calculateManualTotal();
+
+showAdminSection("manual");
+}
+
+function editManualOrder(orderId){
+const order=orderCache.find(o=>o.id===orderId);
+
+if(!order||order.order_source!=="manual"){
+alert("This manual order could not be found.");
+return;
+}
+
+const form=el("manualOrderForm");
+
+form.reset();
+form.elements.editing_order_id.value=order.id;
+form.elements.order_number.value=order.order_number||"";
+
+form.elements.customer_name.value=order.customer_name||"";
+form.elements.phone.value=order.phone||"";
+form.elements.email.value=order.email||"";
+form.elements.delivery_address.value=order.delivery_address||"";
+form.elements.district.value=order.district||"";
+form.elements.city.value=order.city||"";
+form.elements.postal_code.value=order.postal_code||"";
+
+if(order.created_at){
+const date=new Date(order.created_at);
+const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+form.elements.order_date.value=local.toISOString().slice(0,16);
+}
+
+form.elements.payment_method.value=order.payment_method||"";
+form.elements.payment_status.value=order.payment_status||"pending";
+form.elements.order_status.value=order.order_status||"pending";
+form.elements.discount_amount.value=Number(order.discount_amount||0);
+form.elements.delivery_fee.value=Number(order.delivery_fee||0);
+form.elements.customer_notes.value=order.customer_notes||"";
+
+el("manualItems").replaceChildren();
+manualItemCount=0;
+
+const items=order.store_order_items||[];
+
+if(!items.length){
+addManualItem();
+}else{
+items.forEach(item=>{
+addManualItem();
+
+const box=el("manualItems").lastElementChild;
+const d=box._manual;
+
+if(item.product_id){
+d.type.value="existing";
+d.type.dispatchEvent(new Event("change"));
+
+let option=Array.from(d.product.options).find(o=>o.value===item.product_id);
+
+if(!option){
+option=document.createElement("option");
+option.value=item.product_id;
+option.textContent=(item.product_name||"Historical product")+" (inactive / historical)";
+d.product.appendChild(option);
+}
+
+d.product.value=item.product_id;
+d.price.value=Number(item.unit_price||0);
+d.cost.value=item.unit_cost_price??"";
+d.price.readOnly=false;
+d.cost.readOnly=false;
+}else{
+d.type.value="custom";
+d.type.dispatchEvent(new Event("change"));
+d.customName.value=item.product_name||"";
+d.price.value=Number(item.unit_price||0);
+d.cost.value=item.unit_cost_price??"";
+}
+
+d.quantity.value=Number(item.quantity||1);
+
+const details=parseCustomisationDetails(item.customisation_details);
+d.customDetails.value=details.instructions||"";
+});
+}
+
+calculateManualTotal();
+
+el("createManualOrderBtn").textContent="SAVE MANUAL ORDER CHANGES";
+el("manualFormTitle").textContent="Edit Manual Order";
+el("cancelManualEditBtn").style.display="inline-block";
+el("manualOrderMessage").textContent="Editing manual order: "+(order.order_number||order.id);
+
+showAdminSection("manual");
+form.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* CREATE AND UPDATE MANUAL ORDERS */
 
 el("manualOrderForm").addEventListener("submit",async e=>{
 e.preventDefault();
@@ -1491,14 +1622,19 @@ e.preventDefault();
 const form=e.target;
 const button=el("createManualOrderBtn");
 const message=el("manualOrderMessage");
+const editingId=form.elements.editing_order_id.value.trim();
 
 button.disabled=true;
-button.textContent="CREATING ORDER...";
-message.textContent="Saving your manual order...";
+button.textContent=editingId?"SAVING CHANGES...":"CREATING ORDER...";
+message.textContent=editingId?"Updating manual order...":"Creating manual order...";
 
 try{
 const f=new FormData(form);
 const items=getManualItems();
+
+const orderNumber=String(f.get("order_number")||"").trim();
+
+if(!orderNumber)throw new Error("Please enter an Order ID.");
 
 const subtotal=items.reduce((total,item)=>total+item.unit_price*item.quantity,0);
 const delivery=Number(f.get("delivery_fee")||0);
@@ -1514,6 +1650,7 @@ const localDate=new Date(f.get("order_date"));
 if(Number.isNaN(localDate.getTime()))throw new Error("Please select a valid order date.");
 
 const orderPayload={
+order_number:orderNumber,
 customer_name:String(f.get("customer_name")||"").trim(),
 phone:String(f.get("phone")||"").trim(),
 email:String(f.get("email")||"").trim()||null,
@@ -1538,38 +1675,53 @@ if(!orderPayload.customer_name||!orderPayload.phone||!orderPayload.delivery_addr
 throw new Error("Please complete all required customer details.");
 }
 
-/* ONE SECURE DATABASE CALL CREATES THE ORDER, ITEMS AND COURIER RECORD */
+let savedOrder;
+let saveError;
 
-const {data:savedOrder,error:saveError}=await sb.rpc("create_zyra_manual_order",{
+if(editingId){
+const result=await sb.rpc("update_zyra_manual_order",{
+p_order_id:editingId,
 p_order:orderPayload,
 p_items:items
 });
+savedOrder=result.data;
+saveError=result.error;
+}else{
+const result=await sb.rpc("create_zyra_manual_order_with_number",{
+p_order:orderPayload,
+p_items:items
+});
+savedOrder=result.data;
+saveError=result.error;
+}
 
 if(saveError)throw saveError;
-if(!savedOrder||!savedOrder.id)throw new Error("The database did not return a saved order ID.");
+if(!savedOrder||!savedOrder.id)throw new Error("The database did not return a saved order.");
 
-const order={
+let finalOrder={
 ...orderPayload,
 ...savedOrder,
 store_order_items:items
 };
 
-const tracking={
-tracking_id:"ZYRA-"+String(savedOrder.id).slice(0,8).toUpperCase(),
-courier:"Not assigned",
-status:"Order Confirmed"
-};
-
 try{
 await loadOrders();
+const refreshed=orderCache.find(o=>o.id===savedOrder.id);
+if(refreshed)finalOrder=refreshed;
 }catch(refreshError){
 console.error("Order saved, but dashboard refresh failed:",refreshError);
 }
 
+const successMessage=(editingId?"Manual order updated successfully! Order ID: ":"Manual order created successfully! Order ID: ")+(savedOrder.order_number||orderNumber);
+
+if(editingId){
+alert(successMessage);
+cancelManualEdit();
+}else{
 message.replaceChildren();
 
 const successText=document.createElement("span");
-successText.textContent="Manual order created successfully! Order ID: "+(savedOrder.order_number||savedOrder.id);
+successText.textContent=successMessage;
 message.append(successText);
 
 const pdfButton=document.createElement("button");
@@ -1577,27 +1729,32 @@ pdfButton.type="button";
 pdfButton.className="btn success";
 pdfButton.textContent="DOWNLOAD PDF INVOICE";
 pdfButton.style.marginTop="10px";
-pdfButton.onclick=()=>downloadInvoicePDF(order,tracking);
+pdfButton.onclick=()=>downloadInvoicePDF(finalOrder,trackingCache.get(savedOrder.id)||{});
+
 message.append(document.createElement("br"),pdfButton);
 
 form.reset();
+form.elements.editing_order_id.value="";
 el("manualItems").replaceChildren();
 manualItemCount=0;
 
 setManualOrderDate();
 addManualItem();
-refreshManualProductOptions();
 calculateManualTotal();
-
+}
 }catch(error){
-message.textContent="Could not create manual order: "+(error.message||String(error));
+message.textContent="Could not save manual order: "+(error.message||String(error));
 }finally{
 button.disabled=false;
+if(form.elements.editing_order_id.value){
+button.textContent="SAVE MANUAL ORDER CHANGES";
+}else{
 button.textContent="CREATE MANUAL ORDER";
+}
 }
 });
 
-/* PDF INVOICE - INCLUDES DISCOUNT */
+/* PDF INVOICE */
 
 function downloadInvoicePDF(order,track={}){
 if(!window.jspdf||!window.jspdf.jsPDF){
