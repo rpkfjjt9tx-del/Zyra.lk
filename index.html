@@ -432,8 +432,9 @@ if(d==="colombo")return {area:"Colombo suburbs",fee:400};
 return {area:"Outside Colombo",fee:450};
 }
 
+/* FIXED: FormData uses .get(), not .elements */
 function deliveryForForm(form){
-return deliveryInfo(form.elements.district?.value,form.elements.city?.value);
+return deliveryInfo(form.get("district"),form.get("city"));
 }
 
 function updateDeliveryDisplay(){
@@ -1224,7 +1225,8 @@ $("paymentRestrictionMessage").hidden=true;
 
 }catch(err){
 console.error("Order submission error:",err);
-msg.textContent=err.message||"We couldn't submit your order. Please try again.";
+msg.textContent=(err.message||"We couldn't submit your order. Please try again.")+
+"\n\nIf you need assistance, please contact Zyra.lk on 074 153 9576.";
 }finally{
 button.disabled=false;
 button.textContent="PLACE ORDER";
