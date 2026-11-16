@@ -251,27 +251,53 @@ let productCache=[],orderCache=[],trackingCache=new Map(),productCostMap=new Map
 const money=n=>"LKR "+Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
 const el=id=>document.getElementById(id);
 
+/* ZYRA BANK ACCOUNTS */
 const ZYRA_BANKS=[
-{bank:"Commercial Bank",holder:"ENTER ACCOUNT HOLDER",number:"ENTER ACCOUNT NUMBER",branch:"ENTER BRANCH"},
-{bank:"Nations Trust Bank",holder:"ENTER ACCOUNT HOLDER",number:"ENTER ACCOUNT NUMBER",branch:"ENTER BRANCH"},
-{bank:"Amana Bank PLC",holder:"ENTER ACCOUNT HOLDER",number:"ENTER ACCOUNT NUMBER",branch:"ENTER BRANCH"},
-{bank:"HNB",holder:"ENTER ACCOUNT HOLDER",number:"ENTER ACCOUNT NUMBER",branch:"ENTER BRANCH"}
+{
+bank:"Commercial Bank",
+holder:"Hamrah",
+number:"8031077367",
+branch:"Mutwal"
+},
+{
+bank:"Nations Trust Bank",
+holder:"MF Hamrah",
+number:"200190100485",
+branch:"Union Place"
+},
+{
+bank:"Amana Bank PLC",
+holder:"MOHAMMED ILMY FATHIMA HAMRAH",
+number:"0290244734002",
+branch:"Kollupitiya"
+},
+{
+bank:"HNB",
+holder:"Miss Hilmey F H M",
+number:"096020094073",
+branch:"Kotahena"
+}
 ];
 
 function renderAdminBankAccounts(){
 const root=el("adminBankAccounts");
 root.replaceChildren();
+
 ZYRA_BANKS.forEach(b=>{
 const card=document.createElement("div");
 card.className="order-card";
+
 const title=document.createElement("strong");
 title.textContent=b.bank;
+
 const details=document.createElement("p");
 details.className="muted";
 details.textContent=`Account name: ${b.holder} · Account number: ${b.number} · Branch: ${b.branch}`;
+
 const copy=document.createElement("button");
 copy.className="btn light";
 copy.textContent="COPY ACCOUNT NUMBER";
+
 copy.onclick=async()=>{
 try{
 await navigator.clipboard.writeText(b.number);
@@ -280,6 +306,7 @@ copy.textContent="COPIED";
 alert("Copy is unavailable. Account number: "+b.number);
 }
 };
+
 card.append(title,details,copy);
 root.append(card);
 });
@@ -437,7 +464,6 @@ async function refreshAll(){
 await Promise.all([loadOrders(),loadProducts()]);
 }
 
-// Reports have their own refresh handler and visible error reporting.
 async function refreshReport(){
 const button=el("refreshReportBtn");
 button.disabled=true;
@@ -471,7 +497,6 @@ if(costError)throw new Error("Orders loaded, but saved product costs could not b
 
 productCostMap=new Map((costRows||[]).map(x=>[x.product_id,Number(x.cost_price)]));
 
-// Tracking is kept in zyra_orders and linked by store_order_id.
 const ids=orders.map(o=>o.id).filter(Boolean);
 trackingCache=new Map();
 
@@ -786,11 +811,12 @@ const old=button.textContent;
 button.textContent="DELETING...";
 
 try{
-// Remove known child records first so foreign-key constraints do not block the order deletion.
+/* Delete courier record using its linked store order ID. */
 const {error:courierError}=await sb.from("zyra_orders").delete().eq("store_order_id",id);
 if(courierError)throw new Error("Could not remove courier record: "+courierError.message);
 
-const {error:itemError}=await sb.from("store_order_items").delete().eq("store_order_id",id);
+/* IMPORTANT: store_order_items uses order_id, not store_order_id. */
+const {error:itemError}=await sb.from("store_order_items").delete().eq("order_id",id);
 if(itemError)throw new Error("Could not remove order items: "+itemError.message);
 
 const {data,error}=await sb.from("store_orders").delete().eq("id",id).select("id");
@@ -939,28 +965,6 @@ actions.append(accept,reject);
 card.append(actions);
 root.append(card);
 });
-}
-
-async function viewPaymentSlip(path,button){
-const win=window.open("about:blank","_blank");
-if(!win){
-alert("Please allow pop-ups to view payment slips.");
-return;
-}
-button.disabled=true;
-const old=button.textContent;
-button.textContent="OPENING...";
-try{
-const {data,error}=await sb.storage.from("payment-slips").createSignedUrl(path,300);
-if(error)throw error;
-win.location.href=data.signedUrl;
-}catch(e){
-win.close();
-alert("Could not open payment slip: "+e.message+"\nCheck the payment-slips bucket and admin read permissions.");
-}finally{
-button.disabled=false;
-button.textContent=old;
-}
 }
 
 async function verifyPayment(orderId,decision,button){
@@ -1305,4 +1309,3 @@ checkSession();
 </script>
 </body>
 </html>
->
