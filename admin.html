@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1704,104 +1704,9 @@ customNameLabel.textContent="Custom product name";
 const customName=document.createElement("input");
 customName.type="text";
 customName.placeholder="Enter product name";
-customNameField.append(customNameLabel,customName);
-box.appendChild(customNameField);
-
-const row=document.createElement("div");
-row.className="row";
-
-const price=makeInput("Unit selling price (LKR)",existing?.unit_price??"");
-price.input.type="number";
-price.input.min="0";
-price.input.step="0.01";
-
-const quantity=makeInput("Quantity",existing?.quantity??1);
-quantity.input.type="number";
-quantity.input.min="1";
-quantity.input.step="1";
-
-const cost=makeInput("Unit cost price (LKR)",existing?.unit_cost_price??"");
-cost.input.type="number";
-cost.input.min="0";
-cost.input.step="0.01";
-
-row.append(price.wrap,quantity.wrap,cost.wrap);
-box.appendChild(row);
-
-const customDetails=makeInput("Customisation details / customer instructions",existing?.customisation_details?.instructions||"");
-customDetails.input.placeholder="Example: Name 1, Name 2, engraving text, colour or other instructions";
-box.appendChild(customDetails.wrap);
-
-const remove=document.createElement("button");
-remove.type="button";
-remove.className="btn danger";
-remove.textContent="REMOVE PRODUCT";
-remove.onclick=()=>{
-box.remove();
-calculateManualTotal();
-};
-
-box.appendChild(remove);
-
-/* STORE REFERENCES FOR PART 3 */
-box._manual={
-productSelect,
-customName,
-price:price.input,
-quantity:quantity.input,
-cost:cost.input,
-customDetails:customDetails.input,
-existing:existing||null
-};
-
-productSelect.addEventListener("change",()=>{
-const selected=productCache.find(product=>String(product.id)===String(productSelect.value));
-
-if(productSelect.value==="__custom__"){
-customNameField.classList.remove("hidden");
-customName.required=true;
-}else if(selected){
-customName.value=selected.name;
-customNameField.classList.add("hidden");
-customName.required=false;
-price.input.value=selected.price??"";
-
-const productCost=productCostMap.get(selected.id);
-if(productCost!==undefined)cost.input.value=productCost;
-}else{
-customName.value="";
-customNameField.classList.add("hidden");
-customName.required=false;
-}
-calculateManualTotal();
-});
-
-[price.input,quantity.input,cost.input,customDetails.input,customName].forEach(input=>{
-input.addEventListener("input",calculateManualTotal);
-});
-
-if(existing){
-if(existing.product_id){
-productSelect.value=String(existing.product_id);
-const selected=productCache.find(product=>String(product.id)===String(existing.product_id));
-if(selected)customNameField.classList.add("hidden");
-}else{
-productSelect.value="__custom__";
-customNameField.classList.remove("hidden");
-customName.value=existing.product_name||"";
-}
-}else{
-customNameField.classList.add("hidden");
-}
-
-el("manualItems").appendChild(box);
-calculateManualTotal();
-}
-
-/* END PART 2 */
-
+c
 /* ==========================================
-   PART 3 — COMPLETE UPDATED ADMIN CODE
+   PART 3 — UPDATED ZYRA.LK ADMIN CODE
    ========================================== */
 
 
@@ -1907,6 +1812,10 @@ addManualItem=function(existing=null){
     "display:flex;flex-wrap:wrap;gap:8px;margin-top:10px";
 
   const oldPhotos=document.createElement("div");
+
+  /* FIX: This class is required by editManualOrder(). */
+  oldPhotos.className="manual-existing-customer-photos";
+
   oldPhotos.style.cssText=
     "display:flex;flex-wrap:wrap;gap:8px;margin-top:10px";
 
@@ -1959,7 +1868,10 @@ addManualItem=function(existing=null){
   renderManualCustomerPhotos(box,oldPhotos);
 };
 
+
 async function renderManualCustomerPhotos(box,container){
+  if(!container)return;
+
   container.replaceChildren();
 
   const paths=box._customerPhotoPaths||[];
@@ -2006,8 +1918,10 @@ async function renderManualCustomerPhotos(box,container){
         .createSignedUrl(path,3600);
 
       if(error||!data?.signedUrl){
-        alert("Could not open this customer photo: "+
-          (error?.message||"Storage access unavailable"));
+        alert(
+          "Could not open this customer photo: "+
+          (error?.message||"Storage access unavailable")
+        );
         return;
       }
 
@@ -2033,11 +1947,14 @@ async function renderManualCustomerPhotos(box,container){
   }
 }
 
+
 async function uploadManualCustomerPhoto(file,orderNumber){
   const extension=(file.name.split(".").pop()||"jpg").toLowerCase();
-  const safeExtension=["jpg","jpeg","png","webp"].includes(extension)
-    ?extension
-    :"jpg";
+
+  const safeExtension=
+    ["jpg","jpeg","png","webp"].includes(extension)
+      ?extension
+      :"jpg";
 
   const safeOrder=String(orderNumber||"manual")
     .replace(/[^a-zA-Z0-9_-]/g,"_");
@@ -2151,7 +2068,8 @@ getManualItems=function(){
       unit_price:price,
       quantity:qty,
       unit_cost_price:unitCost,
-      is_customised:!!instructions||photoPaths.length>0||hasNewPhotos,
+      is_customised:
+        !!instructions||photoPaths.length>0||hasNewPhotos,
       customisation_details:
         instructions||photoPaths.length||hasNewPhotos
           ?customisation
@@ -2262,7 +2180,7 @@ function editManualOrder(orderId){
 
       addManualItem({
         ...item,
-        photo_paths:details.photo_paths||[]
+        customisation_details:details
       });
 
       const box=el("manualItems").lastElementChild;
@@ -2301,12 +2219,17 @@ function editManualOrder(orderId){
 
       d.customDetails.value=details.instructions||"";
 
-      box._customerPhotoPaths=details.photo_paths||[];
-      renderManualCustomerPhotos(
-        box,
-        box.querySelector(".manual-existing-customer-photos")||
-        box.querySelector(".manual-customer-photo-area")
-      );
+      box._customerPhotoPaths=
+        Array.isArray(details.photo_paths)
+          ?details.photo_paths.slice()
+          :[];
+
+      const photoContainer=
+        box.querySelector(".manual-existing-customer-photos");
+
+      if(photoContainer){
+        renderManualCustomerPhotos(box,photoContainer);
+      }
     });
   }
 
@@ -2425,7 +2348,7 @@ el("manualOrderForm").addEventListener("submit",async e=>{
       throw new Error("Please complete all required customer details.");
     }
 
-    /* Upload any newly selected customer photos. */
+    /* Upload newly selected customer photos. */
 
     const boxes=Array.from(
       document.querySelectorAll(".manual-item")
@@ -2451,6 +2374,7 @@ el("manualOrderForm").addEventListener("submit",async e=>{
       const details=items[i].customisation_details||{};
 
       details.photo_paths=paths;
+
       items[i].customisation_details=
         details.instructions||paths.length
           ?details
@@ -2784,10 +2708,10 @@ async function loadProducts(){
     .select("product_id,cost_price");
 
   if(costError){
-    el("productMessage").textContent=
-      "Products loaded, but private cost prices could not be loaded: "+
-      costError.message;
-    return;
+    console.warn(
+      "Product costs could not be loaded:",
+      costError.message
+    );
   }
 
   const costMap=new Map(
@@ -2812,14 +2736,14 @@ async function loadProducts(){
   productCache.forEach(p=>{
     const tr=document.createElement("tr");
 
-    const cost=Number(p.cost_price||0);
+    const cost=p.cost_price;
     const selling=Number(p.price||0);
 
     [
       p.name,
-      p.cost_price==null?"Not set":money(cost),
+      cost==null?"Not set":money(cost),
       money(selling),
-      p.cost_price==null?"—":money(selling-cost),
+      cost==null?"—":money(selling-cost),
       p.category||"—",
       p.stock_quantity
     ].forEach(value=>{
@@ -2881,6 +2805,12 @@ async function loadProducts(){
 
     body.append(tr);
   });
+
+  if(costError){
+    el("productMessage").textContent=
+      "Products loaded, but cost prices are unavailable: "+
+      costError.message;
+  }
 }
 
 
@@ -3197,12 +3127,19 @@ el("productForm").addEventListener("submit",async e=>{
     if(result.error)throw result.error;
 
     const productId=id||result.data.id;
+    const costPrice=f.elements.cost_price.value;
+
+    if(costPrice===""){
+      throw new Error(
+        "Product was saved, but cost price is empty. Enter a cost price before completing this save."
+      );
+    }
 
     const {error:costError}=await sb
       .from("zyra_product_costs")
       .upsert({
         product_id:productId,
-        cost_price:Number(f.elements.cost_price.value)
+        cost_price:Number(costPrice)
       },{
         onConflict:"product_id"
       });
@@ -3249,6 +3186,15 @@ function expenseCell(value){
   return td;
 }
 
+function localExpenseDate(){
+  const now=new Date();
+  const offset=now.getTimezoneOffset()*60000;
+
+  return new Date(now.getTime()-offset)
+    .toISOString()
+    .slice(0,10);
+}
+
 function getSalesSectionForExpenses(){
   return (
     document.getElementById("sales")||
@@ -3256,6 +3202,7 @@ function getSalesSectionForExpenses(){
     document.querySelector('[data-section="sales"]')
   );
 }
+
 
 function createExpensesInterface(){
   const salesSection=getSalesSectionForExpenses();
@@ -3281,7 +3228,7 @@ function createExpensesInterface(){
   const description=document.createElement("p");
   description.className="muted";
   description.textContent=
-    "Record and manage business expenses. These expenses are shown separately from product costs and courier costs.";
+    "Record and manage business expenses. These expenses are separate from product costs and courier costs.";
 
   const stats=document.createElement("div");
   stats.style.cssText=
@@ -3392,8 +3339,7 @@ function createExpensesInterface(){
 
   salesSection.append(panel);
 
-  const dateInput=form.elements.expense_date;
-  dateInput.value=new Date().toISOString().slice(0,10);
+  form.elements.expense_date.value=localExpenseDate();
 
   form.addEventListener("submit",saveZyraExpense);
 
@@ -3410,8 +3356,7 @@ function resetZyraExpenseForm(){
 
   form.reset();
   form.elements.id.value="";
-  form.elements.expense_date.value=
-    new Date().toISOString().slice(0,10);
+  form.elements.expense_date.value=localExpenseDate();
 
   el("zyraExpenseSave").textContent="ADD EXPENSE";
   el("zyraExpenseCancel").style.display="none";
@@ -3439,31 +3384,102 @@ async function loadZyraExpenses(){
 }
 
 
+/*
+  Only orders with a completed payment status are included
+  in this estimate. Missing product costs are NOT treated
+  as zero-profit costs.
+*/
+
+function getPaidOrdersForEstimate(){
+  return (orderCache||[]).filter(order=>{
+    const payment=String(
+      order.payment_status||""
+    ).toLowerCase();
+
+    const status=String(
+      order.order_status||""
+    ).toLowerCase();
+
+    const paidStatuses=[
+      "paid",
+      "verified",
+      "confirmed",
+      "completed"
+    ];
+
+    const cancelledStatuses=[
+      "cancelled",
+      "canceled"
+    ];
+
+    return (
+      paidStatuses.includes(payment)&&
+      !cancelledStatuses.includes(status)
+    );
+  });
+}
+
+
 function estimateProductGrossProfit(){
   let total=0;
+  let missingCosts=0;
 
-  (orderCache||[]).forEach(order=>{
+  const paidOrders=getPaidOrdersForEstimate();
+
+  paidOrders.forEach(order=>{
+    let orderMargin=0;
+
     (order.store_order_items||[]).forEach(item=>{
-      const cost=Number(item.unit_cost_price);
+      const rawCost=item.unit_cost_price;
 
-      if(Number.isFinite(cost)){
-        total+=(
-          Number(item.unit_price||0)-cost
-        )*Number(item.quantity||0);
+      if(
+        rawCost===null||
+        rawCost===undefined||
+        rawCost===""
+      ){
+        missingCosts++;
+        return;
       }
+
+      const cost=Number(rawCost);
+      const price=Number(item.unit_price||0);
+      const quantity=Number(item.quantity||0);
+
+      if(
+        !Number.isFinite(cost)||
+        !Number.isFinite(price)||
+        !Number.isFinite(quantity)
+      ){
+        missingCosts++;
+        return;
+      }
+
+      orderMargin+=(price-cost)*quantity;
     });
+
+    const discount=Number(order.discount_amount||0);
+
+    total+=orderMargin-Math.max(0,discount);
   });
 
-  return total;
+  return {
+    total,
+    missingCosts,
+    paidOrderCount:paidOrders.length
+  };
 }
 
 
 function estimateCourierCosts(){
   let total=0;
 
-  if(trackingCache&&typeof trackingCache.values==="function"){
+  if(trackingCache&&typeof trackingCache.forEach==="function"){
     trackingCache.forEach(track=>{
-      total+=Number(track.courier_cost||0);
+      const cost=Number(track?.courier_cost);
+
+      if(Number.isFinite(cost)&&cost>0){
+        total+=cost;
+      }
     });
   }
 
@@ -3486,11 +3502,11 @@ function renderZyraExpenses(){
   el("zyraExpenseCount").textContent=
     String(zyraExpenseCache.length);
 
-  const grossProfit=estimateProductGrossProfit();
+  const profitData=estimateProductGrossProfit();
   const courierCosts=estimateCourierCosts();
 
   const estimatedNet=
-    grossProfit-total-courierCosts;
+    profitData.total-total-courierCosts;
 
   el("zyraNetAfterExpenses").textContent=
     expenseMoney(estimatedNet);
@@ -3528,6 +3544,17 @@ function renderZyraExpenses(){
 
     body.append(tr);
   });
+
+  const note=document.createElement("p");
+  note.className="muted";
+  note.style.marginTop="10px";
+
+  note.textContent=
+    "Estimate uses completed-payment orders and recorded product costs. "+
+    "Orders with missing product costs: "+profitData.missingCosts+
+    ". Discounts are deducted; other accounting adjustments may not be included.";
+
+  body.parentElement.parentElement.append(note);
 
   renderZyraExpenseChart();
 }
@@ -3750,6 +3777,12 @@ createExpensesInterface();
 sb.auth.onAuthStateChange((_event,session)=>{
   if(!session){
     showDashboard(false);
+  }else{
+    /*
+      Refresh expenses after an authenticated session
+      becomes available.
+    */
+    loadZyraExpenses();
   }
 });
 
