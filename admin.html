@@ -926,6 +926,8 @@ card.append(actions);
 });
 }
 
+/* END PART 1 */
+
 /* =========================
    PART 2 — ORDER FUNCTIONS
 ========================= */
@@ -1704,7 +1706,102 @@ customNameLabel.textContent="Custom product name";
 const customName=document.createElement("input");
 customName.type="text";
 customName.placeholder="Enter product name";
-c
+customNameField.append(customNameLabel,customName);
+box.appendChild(customNameField);
+
+const row=document.createElement("div");
+row.className="row";
+
+const price=makeInput("Unit selling price (LKR)",existing?.unit_price??"");
+price.input.type="number";
+price.input.min="0";
+price.input.step="0.01";
+
+const quantity=makeInput("Quantity",existing?.quantity??1);
+quantity.input.type="number";
+quantity.input.min="1";
+quantity.input.step="1";
+
+const cost=makeInput("Unit cost price (LKR)",existing?.unit_cost_price??"");
+cost.input.type="number";
+cost.input.min="0";
+cost.input.step="0.01";
+
+row.append(price.wrap,quantity.wrap,cost.wrap);
+box.appendChild(row);
+
+const customDetails=makeInput("Customisation details / customer instructions",existing?.customisation_details?.instructions||"");
+customDetails.input.placeholder="Example: Name 1, Name 2, engraving text, colour or other instructions";
+box.appendChild(customDetails.wrap);
+
+const remove=document.createElement("button");
+remove.type="button";
+remove.className="btn danger";
+remove.textContent="REMOVE PRODUCT";
+remove.onclick=()=>{
+box.remove();
+calculateManualTotal();
+};
+
+box.appendChild(remove);
+
+/* STORE REFERENCES FOR PART 3 */
+box._manual={
+productSelect,
+customName,
+price:price.input,
+quantity:quantity.input,
+cost:cost.input,
+customDetails:customDetails.input,
+existing:existing||null
+};
+
+productSelect.addEventListener("change",()=>{
+const selected=productCache.find(product=>String(product.id)===String(productSelect.value));
+
+if(productSelect.value==="__custom__"){
+customNameField.classList.remove("hidden");
+customName.required=true;
+}else if(selected){
+customName.value=selected.name;
+customNameField.classList.add("hidden");
+customName.required=false;
+price.input.value=selected.price??"";
+
+const productCost=productCostMap.get(selected.id);
+if(productCost!==undefined)cost.input.value=productCost;
+}else{
+customName.value="";
+customNameField.classList.add("hidden");
+customName.required=false;
+}
+calculateManualTotal();
+});
+
+[price.input,quantity.input,cost.input,customDetails.input,customName].forEach(input=>{
+input.addEventListener("input",calculateManualTotal);
+});
+
+if(existing){
+if(existing.product_id){
+productSelect.value=String(existing.product_id);
+const selected=productCache.find(product=>String(product.id)===String(existing.product_id));
+if(selected)customNameField.classList.add("hidden");
+}else{
+productSelect.value="__custom__";
+customNameField.classList.remove("hidden");
+customName.value=existing.product_name||"";
+}
+}else{
+customNameField.classList.add("hidden");
+}
+
+el("manualItems").appendChild(box);
+calculateManualTotal();
+}
+
+/* END PART 2 */
+
 /* ==========================================
    PART 3 — UPDATED ZYRA.LK ADMIN CODE
    ========================================== */
