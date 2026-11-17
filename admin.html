@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1492,10 +1491,7 @@ const courierPayload = {
   updated_at: new Date().toISOString()
 };
 
-/* Save only when courier and tracking ID are provided */
-
 if (courierPayload.courier && courierPayload.tracking_id) {
-
   const { error: trackError } = await sb
     .from("zyra_orders")
     .upsert(courierPayload, {
@@ -1504,12 +1500,57 @@ if (courierPayload.courier && courierPayload.tracking_id) {
 
   if (trackError) {
     console.error("Courier saving error:", trackError);
-
     throw new Error(
       "Order saved, but courier details failed: " + trackError.message
     );
   }
 }
+
+let finalOrder={...orderPayload,...savedOrder,store_order_items:items};
+
+try{
+await loadOrders({quiet:true});
+const refreshed=orderCache.find(o=>o.id===savedOrder.id);
+if(refreshed)finalOrder=refreshed;
+}catch(refreshError){
+console.warn(refreshError);
+}
+
+const successMessage=(editingId?"Manual order updated: ":"Manual order created: ")+
+(savedOrder.order_number||orderNumber);
+
+if(editingId){
+alert(successMessage);
+cancelManualEdit();
+}else{
+message.textContent=successMessage;
+
+const pdfButton=document.createElement("button");
+pdfButton.type="button";
+pdfButton.className="success";
+pdfButton.style.marginTop="10px";
+pdfButton.textContent="DOWNLOAD PDF INVOICE";
+pdfButton.onclick=()=>downloadInvoicePDF(savedOrder.id);
+message.append(document.createElement("br"),pdfButton);
+
+form.reset();
+form.elements.editing_order_id.value="";
+el("manualItems").replaceChildren();
+manualItemCount=0;
+
+setManualOrderDate();
+addManualItem();
+calculateManualTotal();
+}
+}catch(error){
+message.textContent="Could not save order: "+(error.message||String(error));
+}finally{
+button.disabled=false;
+button.textContent=form.elements.editing_order_id.value?
+"SAVE MANUAL ORDER CHANGES":"CREATE MANUAL ORDER";
+}
+});
+
 /* INVOICE DATA */
 
 function getOrderById(id){
