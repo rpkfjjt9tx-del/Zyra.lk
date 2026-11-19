@@ -1,4 +1,3 @@
-<
 
 
 <!DOCTYPE html>
@@ -1371,89 +1370,145 @@ $("footerContact").textContent = SUPPORT_CONTACT;
 </body>
 </html>
 
-/* =========================================================
-   PRODUCT IMAGE HELPERS
-========================================================= */
+// =====================================================
+// PART 2 — PRODUCTS, PRODUCT DISPLAY, CART & CUSTOMISATION
+// =====================================================
 
-function getProductImage(product){
-    const image =
-        product.image_url ||
-        product.image ||
-        product.product_image ||
-        product.photo ||
+// -----------------------------------------------------
+// PRODUCT HELPERS
+// -----------------------------------------------------
+
+function getProductName(product) {
+    return product?.name ||
+        product?.product_name ||
+        product?.title ||
+        "Product";
+}
+
+function getProductPrice(product) {
+    return Number(
+        product?.price ??
+        product?.selling_price ??
+        product?.amount ??
+        0
+    );
+}
+
+function getProductImage(product) {
+    return product?.image_url ||
+        product?.image ||
+        product?.photo_url ||
+        product?.product_image ||
         "";
-
-    if(!image) return "";
-
-    if(/^https?:\/\//i.test(image)) return image;
-
-    const {data} = db.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(image);
-
-    return data?.publicUrl || "";
 }
 
-function getProductCategory(product){
-    return String(
-        product.category ||
-        product.product_category ||
-        "Other"
-    ).trim();
+function getProductCategory(product) {
+    return product?.category ||
+        product?.category_name ||
+        "All";
 }
 
-/* =========================================================
-   LOAD PRODUCTS
-========================================================= */
+function getProductDescription(product) {
+    return product?.description ||
+        product?.details ||
+        "";
+}
 
-async function loadProducts(){
-    const grid = $("productGrid");
-    const message = $("productMessage");
+function getProductId(product) {
+    return product?.id ||
+        product?.product_id ||
+        getProductName(product);
+}
 
-    try{
-        const {data,error} = await db
+function productIsVisible(product) {
+    const status = String(
+        product?.status ??
+        product?.product_status ??
+        ""
+    ).toLowerCase();
+
+    if (product?.is_active === false) return false;
+    if (product?.active === false) return false;
+
+    if (["inactive", "disabled", "hidden", "archived"].includes(status)) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// -----------------------------------------------------
+// UPDATED PRODUCT LOADING
+// -----------------------------------------------------
+
+async function loadProducts() {
+    const container =
+        document.getElementById("productGrid") ||
+        document.getElementById("productsGrid") ||
+        document.getElementById("productsContainer");
+
+    if (!container) {
+        console.error(
+            "Zyra: Product display container was not found. " +
+            "Check the product grid ID in Part 1."
+        );
+        return;
+    }
+
+    container.innerHTML = "<p>Loading products...</p>";
+
+    try {
+        // Do not apply an active-only filter during diagnosis.
+        // This prevents incorrectly hiding products because
+        // the database uses a different active-status column.
+        const { data, error } = await db
             .from(PRODUCT_TABLE)
-            .select("*")
-            .eq("is_active",true)
-            .order("created_at",{ascending:false});
+            .select("*");
 
-        if(error) throw error;
+        if (error) throw error;
 
-        products = Array.isArray(data) ? data : [];
+        console.log("Zyra database products:", data);
 
-        renderCategories();
+        if (!Array.isArray(data) || data.length === 0) {
+            products = [];
+            container.innerHTML = `
+                <div class="empty-products">
+                    <p>No products were found.</p>
+                    <small>Please check your Supabase product table.</small>
+                </div>
+            `;
+            return;
+        }
+
+        // Load all records first.
+        products = data;
+
+        // Render products using the display function below.
         renderProducts();
 
-        message.textContent = products.length
-            ? ""
-            : "Our collection is being updated. Please check again soon.";
+    } catch (error) {
+        console.error("Zyra product loading failed:", error);
 
-    }catch(error){
-        console.error("Product loading error:",error);
+        products = [];
 
-        grid.innerHTML =
-            '<p class="fine">Unable to load products right now. Please refresh the page.</p>';
-
-        message.textContent = error.message || "Product loading failed.";
+        container.innerHTML = `
+            <div class="empty-products">
+                <p>Unable to load products.</p>
+                <small>${invoiceEscape(
+                    error?.message || String(error)
+                )}</small>
+            </div>
+        `;
     }
 }
 
-/* =========================================================
-   CATEGORY FILTERS
-========================================================= */
 
-function renderCategories(){
-    const holder = $("categoryFilters");
+// -----------------------------------------------------
+// CATEGORY FILTERS
+// -----------------------------------------------------
 
-    holder.innerHTML = "";
-
-    const allButton = document.createElement("button");
-    allButton.className = "category-button active";
-    allButton.textContent = "All Products";
-    allButton.onclick = ()=>filterProducts("all",allButton);
-
-    holder.appendChild(allButton);
-
+function getProductCategories() {
     const categories = [
         ...new Set(
             products
@@ -1462,199 +1517,343 @@ function renderCategories(){
         )
     ];
 
-    categories.forEach(category=>{
-        const button = document.createElement("button");
-
-        button.className = "category-button";
-        button.textContent = category;
-
-        button.onclick = ()=>{
-            filterProducts(category,button);
-        };
-
-        holder.appendChild(button);
-    });
+    return ["All", ...categories];
 }
 
-function filterProducts(category,button){
-    selectedCategory = category;
+function renderCategoryFilters() {
+    const container =
+        document.getElementById("categoryFilters");
 
-    document.querySelectorAll(".category-button")
-        .forEach(element=>{
-            element.classList.remove("active");
+    if (!container) return;
+
+    const categories = getProductCategories();
+
+    container.innerHTML = categories.map(category => `
+        <button
+            type="button"
+            class="category-filter ${
+                normaliseName(selectedCategory) ===
+                normaliseName(category) ? "active" : ""
+            }"
+            data-category="${invoiceEscape(category)}"
+        >
+            ${invoiceEscape(category)}
+        </button>
+    `).join("");
+
+    container.querySelectorAll("[data-category]").forEach(button => {
+        button.addEventListener("click", () => {
+            selectedCategory = button.dataset.category;
+            renderProducts();
         });
-
-    if(button) button.classList.add("active");
-
-    renderProducts();
+    });
 }
 
-/* =========================================================
-   RENDER PRODUCT CARDS
-========================================================= */
+function getFilteredProducts() {
+    if (
+        !selectedCategory ||
+        normaliseName(selectedCategory) === "all"
+    ) {
+        return products;
+    }
 
-function renderProducts(){
-    const grid = $("productGrid");
-    grid.innerHTML = "";
+    return products.filter(product =>
+        normaliseName(getProductCategory(product)) ===
+        normaliseName(selectedCategory)
+    );
+}
 
-    const filtered = products.filter(product=>{
-        return selectedCategory === "all" ||
-               getProductCategory(product) === selectedCategory;
-    });
 
-    if(!filtered.length){
-        grid.innerHTML =
-            '<p class="fine">No products available in this category.</p>';
+// -----------------------------------------------------
+// PRODUCT CARD DISPLAY
+// -----------------------------------------------------
+
+function renderProducts() {
+    const container =
+        document.getElementById("productGrid") ||
+        document.getElementById("productsGrid") ||
+        document.getElementById("productsContainer");
+
+    if (!container) {
+        console.error("Zyra product grid was not found.");
         return;
     }
 
-    filtered.forEach(product=>{
-        const card = document.createElement("article");
-        card.className = "product-card";
+    renderCategoryFilters();
 
-        const imageWrap = document.createElement("div");
-        imageWrap.className = "product-image";
+    const filtered = getFilteredProducts();
 
-        const imageUrl = getProductImage(product);
+    if (!filtered.length) {
+        container.innerHTML = `
+            <div class="empty-products">
+                <p>No products available in this category.</p>
+            </div>
+        `;
+        return;
+    }
 
-        if(imageUrl){
-            const img = document.createElement("img");
-            img.src = imageUrl;
-            img.alt = product.name || "Zyra product";
-            img.loading = "lazy";
+    container.innerHTML = filtered.map(product => {
+        const id = getProductId(product);
+        const name = getProductName(product);
+        const price = getProductPrice(product);
+        const image = getProductImage(product);
+        const description = getProductDescription(product);
 
-            img.onerror = ()=>{
-                imageWrap.innerHTML =
-                    '<div class="product-image-placeholder">Zyra.lk</div>';
-            };
+        const escapedId = invoiceEscape(id);
+        const escapedName = invoiceEscape(name);
 
-            imageWrap.appendChild(img);
-        }else{
-            imageWrap.innerHTML =
-                '<div class="product-image-placeholder">Zyra.lk</div>';
-        }
+        return `
+            <article class="product-card">
 
-        const info = document.createElement("div");
-        info.className = "product-info";
+                <div class="product-image-wrap">
+                    ${
+                        image
+                            ? `
+                                <img
+                                    class="product-image"
+                                    src="${invoiceEscape(image)}"
+                                    alt="${escapedName}"
+                                    loading="lazy"
+                                    onerror="
+                                        this.style.display='none';
+                                        this.nextElementSibling.style.display='flex';
+                                    "
+                                >
+                                <div
+                                    class="product-image-placeholder"
+                                    style="display:none"
+                                >
+                                    Image unavailable
+                                </div>
+                            `
+                            : `
+                                <div class="product-image-placeholder">
+                                    Image unavailable
+                                </div>
+                            `
+                    }
+                </div>
 
-        const name = document.createElement("h3");
-        name.textContent = product.name || "Zyra Product";
+                <div class="product-card-content">
 
-        const price = document.createElement("div");
-        price.className = "product-price";
-        price.textContent = "LKR " + money(product.price);
+                    <h3>${escapedName}</h3>
 
-        const description = document.createElement("div");
-        description.className = "product-description";
-        description.textContent =
-            product.description || "A special piece from Zyra.lk.";
+                    ${
+                        description
+                            ? `<p>${invoiceEscape(description)}</p>`
+                            : ""
+                    }
 
-        const addButton = document.createElement("button");
-        addButton.className = "product-add";
-        addButton.textContent = "ADD TO BAG";
+                    <div class="product-price">
+                        ${money(price)}
+                    </div>
 
-        const available =
-            product.stock === undefined ||
-            product.stock === null ||
-            Number(product.stock) > 0;
+                    <button
+                        type="button"
+                        class="add-to-cart-btn"
+                        data-product-id="${escapedId}"
+                    >
+                        Add to cart
+                    </button>
 
-        if(!available){
-            addButton.disabled = true;
-            addButton.classList.add("out-of-stock");
-            addButton.textContent = "OUT OF STOCK";
-        }else{
-            addButton.onclick = ()=>{
-                addToCart(product.id);
-            };
-        }
+                </div>
+            </article>
+        `;
+    }).join("");
 
-        info.append(name,price,description,addButton);
-        card.append(imageWrap,info);
-        grid.appendChild(card);
+    container.querySelectorAll("[data-product-id]").forEach(button => {
+        button.addEventListener("click", () => {
+            const product = products.find(item =>
+                String(getProductId(item)) ===
+                String(button.dataset.productId)
+            );
+
+            if (product) addToCart(product);
+        });
     });
 }
 
-/* =========================================================
-   CREATE INDEPENDENT CUSTOMISATION UNITS
-========================================================= */
 
-function createEmptyUnit(){
+// -----------------------------------------------------
+// CUSTOMISATION CONFIGURATION HELPERS
+// -----------------------------------------------------
+
+function getProductCustomizationFields(product) {
+    const possibleValues = [
+        product?.customization_fields,
+        product?.customisation_fields,
+        product?.custom_fields,
+        product?.personalization_fields,
+        product?.personalisation_fields
+    ];
+
+    for (const value of possibleValues) {
+        const parsed = parseJSONValue(value);
+
+        if (Array.isArray(parsed)) return parsed;
+
+        if (parsed && Array.isArray(parsed.fields)) {
+            return parsed.fields;
+        }
+    }
+
+    return [];
+}
+
+function getProductCustomizationOptions(product) {
+    const possibleValues = [
+        product?.customization_options,
+        product?.customisation_options,
+        product?.customization_settings,
+        product?.customisation_settings,
+        product?.custom_fields_config
+    ];
+
+    for (const value of possibleValues) {
+        const parsed = parseJSONValue(value);
+
+        if (parsed && typeof parsed === "object") {
+            return parsed;
+        }
+    }
+
+    return {};
+}
+
+function productHasAdminCustomization(product) {
+    const fields = getProductCustomizationFields(product);
+    const options = getProductCustomizationOptions(product);
+
+    return (
+        fields.length > 0 ||
+        options.enabled === true ||
+        options.customization_enabled === true ||
+        options.customisation_enabled === true ||
+        options.enable_customization === true ||
+        options.enable_customisation === true ||
+        options.phone_model_enabled === true ||
+        options.enable_phone_model === true ||
+        options.photo_required === true ||
+        options.photos_required === true
+    );
+}
+
+function getConfiguredPhotoCount(product) {
+    const options = getProductCustomizationOptions(product);
+
+    const configured =
+        options.photo_count ??
+        options.required_photo_count ??
+        options.max_photos ??
+        product?.photo_count ??
+        product?.required_photo_count;
+
+    const count = Number(configured);
+
+    if (Number.isFinite(count) && count >= 0) {
+        return Math.floor(count);
+    }
+
+    return isPhotoProduct(product) ? photoCountFor(product) : 0;
+}
+
+
+// -----------------------------------------------------
+// ADMIN FIELD LENGTH RULES
+// -----------------------------------------------------
+
+function zyraGetFieldMaxLength(field, product) {
+    const options = getProductCustomizationOptions(product);
+
+    const configured =
+        field?.max_length ??
+        field?.maxlength ??
+        field?.maxLength ??
+        field?.character_limit ??
+        field?.limit ??
+        options.default_max_length;
+
+    const number = Number(configured);
+
+    if (
+        configured !== undefined &&
+        configured !== null &&
+        Number.isFinite(number) &&
+        number > 0
+    ) {
+        return Math.floor(number);
+    }
+
+    return 8;
+}
+
+
+// -----------------------------------------------------
+// UNIT DATA STRUCTURE
+// -----------------------------------------------------
+
+function createEmptyUnit() {
     return {
-        details:{},
-        photoFiles:[],
-        photoMeta:null
+        details: {},
+        photoFiles: []
     };
 }
 
-function createCartItem(product){
+function createCartItem(product) {
     const item = {
-        id:product.id,
-        name:product.name,
-        price:Number(product.price || 0),
-        quantity:1,
-
-        is_customisable:
-            !!product.is_customisable ||
-            isPhotoProduct(product.name) ||
-            productHasAdminCustomization(product),
-
-        productSnapshot:{...product},
-
-        details:{},
-        photoFiles:[],
-        units:[createEmptyUnit()]
+        id: getProductId(product),
+        product_id: product?.id || product?.product_id || null,
+        name: getProductName(product),
+        price: getProductPrice(product),
+        qty: 1,
+        product,
+        details: {},
+        photoFiles: [],
+        units: [createEmptyUnit()]
     };
 
     return item;
 }
 
-/* =========================================================
-   KEEP UNIT COUNT MATCHED TO QUANTITY
-========================================================= */
-
-function syncItemUnits(item){
-    if(!Array.isArray(item.units)){
+function syncItemUnits(item) {
+    if (!Array.isArray(item.units)) {
         item.units = [];
     }
 
-    while(item.units.length < item.quantity){
-        item.units.push(createEmptyUnit());
+    const oldUnits = item.units.slice();
+    const quantity = Math.max(1, Number(item.qty || 1));
+
+    while (oldUnits.length < quantity) {
+        oldUnits.push(createEmptyUnit());
     }
 
-    if(item.units.length > item.quantity){
-        item.units = item.units.slice(0,item.quantity);
-    }
+    item.units = oldUnits.slice(0, quantity);
 
-    item.units.forEach(unit=>{
-        unit.details = unit.details || {};
-        unit.photoFiles = unit.photoFiles || [];
-    });
-
-    if(item.units.length){
+    // Maintain compatibility with older cart functions.
+    if (item.units.length) {
         item.details = item.units[0].details;
         item.photoFiles = item.units[0].photoFiles;
     }
+
+    return item.units;
 }
 
-/* =========================================================
-   ADD TO CART
-========================================================= */
 
-function addToCart(id){
-    const product = products.find(
-        item=>String(item.id)===String(id)
+// -----------------------------------------------------
+// ADD TO CART
+// -----------------------------------------------------
+
+function addToCart(product) {
+    const id = getProductId(product);
+
+    const existing = cart.find(item =>
+        String(item.id) === String(id)
     );
 
-    if(!product) return;
-
-    const existing = cart.find(
-        item=>String(item.id)===String(id)
-    );
-
-    if(existing){
-        existing.quantity++;
+    if (existing) {
+        existing.qty = Number(existing.qty || 1) + 1;
         syncItemUnits(existing);
-    }else{
+    } else {
         cart.push(createCartItem(product));
     }
 
@@ -1662,608 +1861,723 @@ function addToCart(id){
     openCart();
 }
 
-/* =========================================================
-   CHANGE QUANTITY
-========================================================= */
 
-function changeQty(id,delta){
-    const item = cart.find(
-        product=>String(product.id)===String(id)
+// -----------------------------------------------------
+// CHANGE QUANTITY
+// -----------------------------------------------------
+
+function changeQty(id, change) {
+    const item = cart.find(entry =>
+        String(entry.id) === String(id)
     );
 
-    if(!item) return;
+    if (!item) return;
 
-    item.quantity = Number(item.quantity || 1) + Number(delta);
+    const newQty = Number(item.qty || 1) + Number(change);
 
-    if(item.quantity < 1){
-        cart = cart.filter(
-            product=>String(product.id)!==String(id)
-        );
-    }else{
-        syncItemUnits(item);
+    if (newQty <= 0) {
+        removeCartItem(id);
+        return;
     }
 
+    // Existing unit data is preserved when quantity increases.
+    item.qty = newQty;
+    syncItemUnits(item);
+
     renderCart();
 }
 
-/* =========================================================
-   REMOVE ITEM
-========================================================= */
 
-function removeCartItem(id){
-    cart = cart.filter(
-        item=>String(item.id)!==String(id)
+// -----------------------------------------------------
+// REMOVE CART ITEM
+// -----------------------------------------------------
+
+function removeCartItem(id) {
+    cart = cart.filter(item =>
+        String(item.id) !== String(id)
     );
 
     renderCart();
 }
 
-/* =========================================================
-   CUSTOMISATION FIELD RENDERING
-========================================================= */
 
-function createCustomInput(
-    unit,
-    key,
+// -----------------------------------------------------
+// CUSTOM FIELD HTML
+// -----------------------------------------------------
+
+function customInput(
     label,
-    placeholder,
+    name,
+    value = "",
     maxLength = 8,
     required = true
-){
-    const safeMax = Number.isInteger(Number(maxLength)) &&
-                    Number(maxLength) > 0
-        ? Number(maxLength)
-        : 8;
+) {
+    const safeValue = invoiceEscape(value);
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "custom-field";
+    return `
+        <div class="custom-field">
+            <label>
+                ${invoiceEscape(label)}
+                ${required ? "*" : ""}
+            </label>
 
-    const title = document.createElement("label");
-    title.textContent = label + (required ? " *" : "");
-
-    const input = document.createElement("input");
-    input.type = "text";
-    input.maxLength = safeMax;
-    input.placeholder = placeholder || "";
-    input.value = unit.details[key] || "";
-
-    input.addEventListener("input",()=>{
-        unit.details[key] = input.value.slice(0,safeMax);
-        input.value = unit.details[key];
-    });
-
-    input.addEventListener("change",()=>{
-        unit.details[key] = input.value.trim();
-    });
-
-    if(required){
-        input.dataset.required = "true";
-    }
-
-    wrapper.append(title,input);
-
-    return wrapper;
+            <input
+                type="text"
+                data-custom-key="${invoiceEscape(name)}"
+                value="${safeValue}"
+                maxlength="${Number(maxLength)}"
+                ${required ? "required" : ""}
+                placeholder="Enter ${invoiceEscape(label)}"
+            >
+        </div>
+    `;
 }
 
-/* =========================================================
-   ADMIN-CREATED TEXT FIELDS
-========================================================= */
 
-function renderAdminTextFields(unit,product,container){
+// -----------------------------------------------------
+// ADMIN-DEFINED CUSTOMISATION FIELDS
+// -----------------------------------------------------
+
+function renderAdminCustomizationFields(product, unit, itemIndex, unitIndex) {
     const fields = getProductCustomizationFields(product);
-
-    if(!fields.length) return;
-
-    fields.forEach(field=>{
-        const key = field.key;
-        const label = field.label;
-
-        const maxLength = zyraGetFieldMaxLength(field);
-        const required = field.required !== false;
-
-        /*
-         * Special Date always has a six-digit DDMMYY limit.
-         */
-
-        const isSpecialDate =
-            normaliseName(label) === "special date" ||
-            normaliseName(key) === "special date";
-
-        const actualMax = isSpecialDate ? 6 : maxLength;
-
-        const fieldElement = createCustomInput(
-            unit,
-            key,
-            label,
-            isSpecialDate
-                ? "DDMMYY"
-                : "Maximum " + actualMax + " characters",
-            actualMax,
-            required
-        );
-
-        if(isSpecialDate){
-            const input = fieldElement.querySelector("input");
-
-            input.inputMode = "numeric";
-            input.pattern = "[0-9]{6}";
-            input.placeholder = "DDMMYY";
-
-            input.addEventListener("input",()=>{
-                const digits = input.value.replace(/[^0-9]/g,"").slice(0,6);
-
-                input.value = digits;
-                unit.details[key] = digits;
-            });
-        }
-
-        container.appendChild(fieldElement);
-    });
-}
-
-/* =========================================================
-   ADMIN PHONE MODEL SELECTION
-========================================================= */
-
-function renderPhoneModelField(unit,product,container){
     const options = getProductCustomizationOptions(product);
 
-    const enabled =
-        options.phone_enabled === true ||
-        options.enable_phone_model === true ||
-        options.phone_model_enabled === true;
+    let html = "";
+
+    fields.forEach((field, fieldIndex) => {
+        const key =
+            field.name ||
+            field.key ||
+            field.id ||
+            `field_${fieldIndex}`;
+
+        const label =
+            field.label ||
+            field.title ||
+            key;
+
+        const value = unit.details?.[key] ?? "";
+        const required = field.required === true;
 
-    if(!enabled) return;
-
-    const models = Array.isArray(options.phone_models)
-        ? options.phone_models
-        : [];
-
-    if(!models.length) return;
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "custom-field";
-
-    const label = document.createElement("label");
-    label.textContent = "Phone Model *";
-
-    const select = document.createElement("select");
-    select.required = true;
-
-    const initial = document.createElement("option");
-    initial.value = "";
-    initial.textContent = "Select phone model";
-
-    select.appendChild(initial);
-
-    models.forEach(model=>{
-        const value = typeof model === "string"
-            ? model
-            : model.name || model.label || model.value || "";
-
-        if(!value) return;
-
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-
-        select.appendChild(option);
-    });
-
-    select.value = unit.details.phone_model || "";
-
-    select.addEventListener("change",()=>{
-        unit.details.phone_model = select.value;
-    });
-
-    wrapper.append(label,select);
-    container.appendChild(wrapper);
-}
-
-/* =========================================================
-   PHOTO UPLOAD FIELD
-========================================================= */
-
-function renderUnitPhotoField(unit,product,container){
-    const adminType = String(
-        product.customization_type || ""
-    ).toLowerCase();
-
-    const adminPhotoEnabled =
-        adminType === "photo" ||
-        adminType === "text_photo";
-
-    const legacyPhotoEnabled = isPhotoProduct(product.name);
-
-    if(!adminPhotoEnabled && !legacyPhotoEnabled) return;
-
-    const count = adminPhotoEnabled
-        ? getConfiguredPhotoCount(product)
-        : photoCountFor(product.name);
-
-    const options = getProductCustomizationOptions(product);
-
-    const required = adminPhotoEnabled
-        ? product.customization_photo_required !== false
-        : true;
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "photo-upload";
-
-    const label = document.createElement("label");
-    label.textContent =
-        "Upload " + count + " photo(s)" +
-        (required ? " *" : " (optional)");
-
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/jpeg,image/png,image/webp";
-    input.multiple = count > 1;
-
-    input.addEventListener("change",()=>{
-        const files = Array.from(input.files || []);
-
-        if(files.length > count){
-            alert("Please select no more than " + count + " photo(s).");
-            input.value = "";
-            unit.photoFiles = [];
-            return;
-        }
-
-        for(const file of files){
-            if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
-                alert("Only JPG, PNG and WEBP images are accepted.");
-                input.value = "";
-                unit.photoFiles = [];
-                return;
-            }
-
-            if(file.size > PHOTO_MAX_BYTES){
-                alert("Each photo must be 5MB or smaller.");
-                input.value = "";
-                unit.photoFiles = [];
-                return;
-            }
-        }
-
-        unit.photoFiles = files;
-        unit.photoMeta = null;
-
-        const status = wrapper.querySelector(".photo-count");
-        if(status){
-            status.textContent =
-                files.length + " of " + count + " photo(s) selected";
-        }
-    });
-
-    const status = document.createElement("div");
-    status.className = "photo-count fine";
-    status.textContent = "0 of " + count + " photo(s) selected";
-
-    wrapper.append(label,input,status);
-
-    /*
-     * Optional birthday message for legacy photo roll products.
-     */
-
-    if(normaliseName(product.name).includes("photo roll")){
-        const birthday = createCustomInput(
-            unit,
-            "birthday_message",
-            "Birthday Message",
-            "Enter birthday message",
-            120,
-            false
-        );
-
-        wrapper.appendChild(birthday);
-    }
-
-    container.appendChild(wrapper);
-
-    unit.requiredPhotoCount = count;
-    unit.photoRequired = required;
-}
-
-/* =========================================================
-   LEGACY CUSTOMISATION FIELDS
-   Preserve existing product-specific character limits.
-========================================================= */
-
-function renderLegacyCustomFields(unit,product,container){
-    const n = normaliseName(product.name);
-    const grid = document.createElement("div");
-    grid.className = "custom-fields-grid";
-
-    let hasFields = false;
-
-    function add(key,label,max=8){
-        grid.appendChild(
-            createCustomInput(
-                unit,
-                key,
-                label,
-                "Enter " + label,
-                max,
-                true
-            )
-        );
-
-        hasFields = true;
-    }
-
-    if(n.includes("initial couple ring")){
-        add("first_box_initial","First Box Initial",1);
-        add("second_box_initial","Second Box Initial",1);
-    }
-
-    else if(
-        n.includes("customised ring") ||
-        n.includes("customized ring") ||
-        n.includes("customise ring") ||
-        n.includes("customize ring")
-    ){
-        add("name","Name",6);
-    }
-
-    else if(n.includes("double layered name necklace")){
-        add("first_layer_name","First Layer Name",8);
-        add("second_layer_name","Second Layer Name",8);
-    }
-
-    else if(n.includes("name necklace with design") ||
-            n.includes("infinity")){
-        add("name_one","First Name",6);
-        add("name_two","Second Name",6);
-
-        const date = createCustomInput(
-            unit,
-            "special_date",
-            "Special Date",
-            "DDMMYY",
-            6,
-            true
-        );
-
-        const dateInput = date.querySelector("input");
-        dateInput.inputMode = "numeric";
-        dateInput.pattern = "[0-9]{6}";
-
-        dateInput.addEventListener("input",()=>{
-            const digits = dateInput.value
-                .replace(/[^0-9]/g,"")
-                .slice(0,6);
-
-            dateInput.value = digits;
-            unit.details.special_date = digits;
-        });
-
-        grid.appendChild(date);
-        hasFields = true;
-    }
-
-    else if(
-        n.includes("couple name necklace") ||
-        n.includes("double name couple necklace")
-    ){
-        add("first_name","First Name",6);
-        add("second_name","Second Name",6);
-    }
-
-    else if(
-        n.includes("name bracelet & necklace combo") ||
-        n.includes("name bracelet and necklace combo") ||
-        n.includes("bracelet necklace combo")
-    ){
-        add("bracelet_name","Bracelet Name",8);
-        add("necklace_name","Necklace Name",8);
-    }
-
-    else if(n.includes("name necklace with bst")){
-        add("name","Name",12);
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "custom-field";
-
-        const label = document.createElement("label");
-        label.textContent = "Birthstone Month *";
-
-        const select = document.createElement("select");
-        select.innerHTML =
-            '<option value="">Select month</option>' +
-            [
-                "January","February","March","April",
-                "May","June","July","August",
-                "September","October","November","December"
-            ].map(month=>
-                '<option value="'+month+'">'+month+'</option>'
-            ).join("");
-
-        select.value = unit.details.birthstone_month || "";
-
-        select.addEventListener("change",()=>{
-            unit.details.birthstone_month = select.value;
-        });
-
-        wrapper.append(label,select);
-        grid.appendChild(wrapper);
-        hasFields = true;
-    }
-
-    else if(n.includes("name necklace") || n.includes("name bracelet")){
-        add("name","Name",8);
-    }
-
-    else{
-        const wrapper = document.createElement("div");
-        wrapper.className = "custom-field";
-
-        const label = document.createElement("label");
-        label.textContent = "Customisation Instructions *";
-
-        const textarea = document.createElement("textarea");
-        textarea.maxLength = 500;
-        textarea.placeholder = "Enter your customisation details";
-        textarea.value = unit.details.instructions || "";
-
-        textarea.addEventListener("input",()=>{
-            unit.details.instructions = textarea.value;
-        });
-
-        wrapper.append(label,textarea);
-        grid.appendChild(wrapper);
-        hasFields = true;
-    }
-
-    if(hasFields){
-        container.appendChild(grid);
-    }
-}
-
-/* =========================================================
-   RENDER ONE UNIT'S CUSTOMISATION
-========================================================= */
-
-function renderOneUnitCustomization(item,unit,index){
-    const product = item.productSnapshot || item;
-
-    const box = document.createElement("div");
-    box.className = "unit-customisation";
-
-    const heading = document.createElement("h5");
-    heading.textContent =
-        "Unit " + (index+1) + " — " + item.name;
-
-    box.appendChild(heading);
-
-    const adminConfigured = productHasAdminCustomization(product);
-
-    if(adminConfigured){
         const type = String(
-            product.customization_type || ""
+            field.type || field.input_type || "text"
         ).toLowerCase();
 
-        if(type === "text" || type === "text_photo"){
-            renderAdminTextFields(unit,product,box);
+        if (
+            type === "select" ||
+            type === "dropdown"
+        ) {
+            const choices =
+                field.options ||
+                field.choices ||
+                [];
+
+            const choiceList = Array.isArray(choices)
+                ? choices
+                : String(choices).split(",").map(x => x.trim());
+
+            html += `
+                <div class="custom-field">
+                    <label>
+                        ${invoiceEscape(label)}
+                        ${required ? "*" : ""}
+                    </label>
+
+                    <select
+                        data-custom-key="${invoiceEscape(key)}"
+                        ${required ? "required" : ""}
+                    >
+                        <option value="">Select ${invoiceEscape(label)}</option>
+
+                        ${choiceList.map(choice => `
+                            <option
+                                value="${invoiceEscape(choice)}"
+                                ${String(value) === String(choice) ? "selected" : ""}
+                            >
+                                ${invoiceEscape(choice)}
+                            </option>
+                        `).join("")}
+                    </select>
+                </div>
+            `;
+        } else if (type === "textarea") {
+            const max = zyraGetFieldMaxLength(field, product);
+
+            html += `
+                <div class="custom-field">
+                    <label>
+                        ${invoiceEscape(label)}
+                        ${required ? "*" : ""}
+                    </label>
+
+                    <textarea
+                        data-custom-key="${invoiceEscape(key)}"
+                        maxlength="${max}"
+                        ${required ? "required" : ""}
+                    >${invoiceEscape(value)}</textarea>
+                </div>
+            `;
+        } else {
+            const max = zyraGetFieldMaxLength(field, product);
+
+            const specialDate =
+                normaliseName(`${key} ${label}`).includes("date");
+
+            html += `
+                <div class="custom-field">
+                    <label>
+                        ${invoiceEscape(label)}
+                        ${required ? "*" : ""}
+                    </label>
+
+                    <input
+                        type="text"
+                        data-custom-key="${invoiceEscape(key)}"
+                        value="${invoiceEscape(value)}"
+                        maxlength="${specialDate ? 6 : max}"
+                        placeholder="${
+                            specialDate
+                                ? "DDMMYY"
+                                : `Maximum ${max} characters`
+                        }"
+                        ${required ? "required" : ""}
+                    >
+                </div>
+            `;
         }
+    });
 
-        renderPhoneModelField(unit,product,box);
+    // Admin-controlled phone model dropdown.
+    const phoneEnabled =
+        options.phone_model_enabled === true ||
+        options.enable_phone_model === true ||
+        options.phoneModelEnabled === true;
 
-        renderUnitPhotoField(unit,product,box);
+    if (phoneEnabled) {
+        const models =
+            options.phone_models ||
+            options.phoneModels ||
+            options.models ||
+            [];
+
+        const modelList = Array.isArray(models)
+            ? models
+            : String(models).split(",").map(x => x.trim());
+
+        html += `
+            <div class="custom-field">
+                <label>Phone model *</label>
+
+                <select
+                    data-custom-key="phone_model"
+                    required
+                >
+                    <option value="">Select phone model</option>
+
+                    ${modelList.map(model => `
+                        <option
+                            value="${invoiceEscape(model)}"
+                            ${
+                                unit.details?.phone_model === model
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            ${invoiceEscape(model)}
+                        </option>
+                    `).join("")}
+                </select>
+            </div>
+        `;
     }
 
-    else{
-        const photoOnly = isPhotoProduct(product.name);
-
-        if(item.is_customisable && !photoOnly){
-            renderLegacyCustomFields(unit,product,box);
-        }
-
-        renderUnitPhotoField(unit,product,box);
-    }
-
-    return box;
+    return html;
 }
 
-/* =========================================================
-   RENDER CART
-========================================================= */
 
-function renderCart(){
-    const holder = $("cartItems");
-    holder.innerHTML = "";
+// -----------------------------------------------------
+// LEGACY CUSTOMISATION FIELDS
+// -----------------------------------------------------
 
-    $("cartCount").textContent = cart.reduce(
-        (sum,item)=>sum+Number(item.quantity || 0),
-        0
+function renderLegacyCustomizationFields(item, unit) {
+    const name = normaliseName(item.name);
+    const details = unit.details || {};
+
+    let html = "";
+
+    if (name.includes("couple ring")) {
+        html += customInput("First name", "name1", details.name1 || "", 1);
+        html += customInput("Second name", "name2", details.name2 || "", 1);
+    }
+
+    else if (name.includes("customized ring")) {
+        html += customInput("Name", "name", details.name || "", 6);
+    }
+
+    else if (name.includes("double layer")) {
+        html += customInput("First name", "name1", details.name1 || "", 8);
+        html += customInput("Second name", "name2", details.name2 || "", 8);
+    }
+
+    else if (name.includes("infinity")) {
+        html += customInput("First name", "name1", details.name1 || "", 6);
+        html += customInput("Second name", "name2", details.name2 || "", 6);
+        html += customInput(
+            "Special date (DDMMYY)",
+            "special_date",
+            details.special_date || "",
+            6
+        );
+    }
+
+    else if (name.includes("design necklace")) {
+        html += customInput("First name", "name1", details.name1 || "", 6);
+        html += customInput("Second name", "name2", details.name2 || "", 6);
+        html += customInput(
+            "Special date (DDMMYY)",
+            "special_date",
+            details.special_date || "",
+            6
+        );
+    }
+
+    else if (name.includes("couple name necklace")) {
+        html += customInput("First name", "name1", details.name1 || "", 6);
+        html += customInput("Second name", "name2", details.name2 || "", 6);
+    }
+
+    else if (
+        name.includes("bracelet") &&
+        name.includes("necklace")
+    ) {
+        html += customInput("First name", "name1", details.name1 || "", 8);
+        html += customInput("Second name", "name2", details.name2 || "", 8);
+    }
+
+    else if (
+        name.includes("name necklace") &&
+        name.includes("bst")
+    ) {
+        html += customInput("Name", "name", details.name || "", 12);
+
+        html += `
+            <div class="custom-field">
+                <label>Birthstone *</label>
+
+                <select data-custom-key="birthstone" required>
+                    <option value="">Select birthstone</option>
+
+                    ${[
+                        "January - Garnet",
+                        "February - Amethyst",
+                        "March - Aquamarine",
+                        "April - Diamond",
+                        "May - Emerald",
+                        "June - Pearl",
+                        "July - Ruby",
+                        "August - Peridot",
+                        "September - Sapphire",
+                        "October - Opal",
+                        "November - Topaz",
+                        "December - Turquoise"
+                    ].map(stone => `
+                        <option
+                            value="${invoiceEscape(stone)}"
+                            ${
+                                details.birthstone === stone
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            ${invoiceEscape(stone)}
+                        </option>
+                    `).join("")}
+                </select>
+            </div>
+        `;
+    }
+
+    else if (
+        name.includes("name necklace") ||
+        name.includes("name bracelet")
+    ) {
+        html += customInput("Name", "name", details.name || "", 8);
+    }
+
+    return html;
+}
+
+
+// -----------------------------------------------------
+// PHOTO UPLOAD FIELD
+// -----------------------------------------------------
+
+function renderUnitPhotoField(item, unit, itemIndex, unitIndex) {
+    const product = item.product || item;
+    const options = getProductCustomizationOptions(product);
+
+    const configuredCount = getConfiguredPhotoCount(product);
+
+    const required =
+        productHasAdminCustomization(product)
+            ? options.photo_required === true ||
+              options.photos_required === true
+            : isPhotoProduct(product);
+
+    if (!configuredCount && !required) return "";
+
+    const files = unit.photoFiles || [];
+
+    return `
+        <div class="custom-field photo-upload-field">
+            <label>
+                Upload customer photo(s)
+                ${required ? "*" : ""}
+            </label>
+
+            <input
+                type="file"
+                accept="image/*"
+                multiple
+                data-photo-upload="true"
+                data-photo-item="${itemIndex}"
+                data-photo-unit="${unitIndex}"
+                ${required ? "required" : ""}
+            >
+
+            <small>
+                ${
+                    required
+                        ? `Upload ${configuredCount} photo(s) for this item.`
+                        : `Maximum ${configuredCount} photo(s).`
+                }
+                Each image must be 5 MB or smaller.
+            </small>
+
+            <div class="selected-photo-names">
+                ${files.map(file => `
+                    <span>${invoiceEscape(file.name)}</span>
+                `).join("")}
+            </div>
+        </div>
+    `;
+}
+
+
+// -----------------------------------------------------
+// ONE QUANTITY UNIT'S CUSTOMISATION
+// -----------------------------------------------------
+
+function renderOneUnitCustomization(item, itemIndex, unit, unitIndex) {
+    const product = item.product || item;
+
+    let fields = "";
+
+    if (productHasAdminCustomization(product)) {
+        fields = renderAdminCustomizationFields(
+            product,
+            unit,
+            itemIndex,
+            unitIndex
+        );
+    } else {
+        fields = renderLegacyCustomizationFields(item, unit);
+    }
+
+    const photoField = renderUnitPhotoField(
+        item,
+        unit,
+        itemIndex,
+        unitIndex
     );
 
-    if(!cart.length){
-        holder.innerHTML =
-            '<p class="fine">Your shopping bag is currently empty.</p>';
+    if (!fields && !photoField) {
+        return "";
+    }
 
-        $("cartSubtotal").textContent = "LKR 0.00";
-        $("checkoutButton").disabled = true;
+    return `
+        <div class="unit-customisation">
+            <h4>Item ${unitIndex + 1} customisation</h4>
+
+            ${fields}
+            ${photoField}
+        </div>
+    `;
+}
+
+
+// -----------------------------------------------------
+// SAVE CUSTOMISATION CHANGES
+// -----------------------------------------------------
+
+function updateUnitCustomisation(itemIndex, unitIndex, key, value) {
+    const item = cart[itemIndex];
+
+    if (!item) return;
+
+    syncItemUnits(item);
+
+    const unit = item.units[unitIndex];
+
+    if (!unit) return;
+
+    unit.details[key] = value;
+
+    if (unitIndex === 0) {
+        item.details = unit.details;
+    }
+}
+
+
+// -----------------------------------------------------
+// CART DISPLAY
+// -----------------------------------------------------
+
+function renderCart() {
+    const container =
+        document.getElementById("cartItems");
+
+    const subtotalElement =
+        document.getElementById("cartSubtotal");
+
+    const countElement =
+        document.getElementById("cartCount");
+
+    if (!container) return;
+
+    if (!cart.length) {
+        container.innerHTML = `
+            <div class="empty-cart">
+                <p>Your bag is currently empty.</p>
+            </div>
+        `;
+
+        if (subtotalElement) {
+            subtotalElement.textContent = money(0);
+        }
+
+        if (countElement) {
+            countElement.textContent = "0";
+        }
 
         return;
     }
 
-    $("checkoutButton").disabled = false;
-
-    cart.forEach(item=>{
+    container.innerHTML = cart.map((item, itemIndex) => {
         syncItemUnits(item);
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "cart-item";
+        const unitsHTML = item.units.map((unit, unitIndex) =>
+            renderOneUnitCustomization(
+                item,
+                itemIndex,
+                unit,
+                unitIndex
+            )
+        ).join("");
 
-        const info = document.createElement("div");
+        return `
+            <div class="cart-item">
 
-        const name = document.createElement("h3");
-        name.textContent = item.name;
+                <div class="cart-item-heading">
+                    <div>
+                        <h3>${invoiceEscape(item.name)}</h3>
+                        <p>${money(item.price)} each</p>
+                    </div>
 
-        const price = document.createElement("div");
-        price.className = "cart-price";
-        price.textContent =
-            "LKR " + money(item.price) + " each";
+                    <button
+                        type="button"
+                        class="remove-cart-item"
+                        data-remove="${itemIndex}"
+                    >
+                        Remove
+                    </button>
+                </div>
 
-        const quantity = document.createElement("div");
-        quantity.className = "quantity-controls";
+                <div class="quantity-control">
+                    <button
+                        type="button"
+                        data-quantity="${itemIndex}"
+                        data-change="-1"
+                    >
+                        −
+                    </button>
 
-        const minus = document.createElement("button");
-        minus.type = "button";
-        minus.textContent = "−";
-        minus.onclick = ()=>changeQty(item.id,-1);
+                    <span>${item.qty}</span>
 
-        const amount = document.createElement("span");
-        amount.textContent = item.quantity;
+                    <button
+                        type="button"
+                        data-quantity="${itemIndex}"
+                        data-change="1"
+                    >
+                        +
+                    </button>
+                </div>
 
-        const plus = document.createElement("button");
-        plus.type = "button";
-        plus.textContent = "+";
-        plus.onclick = ()=>changeQty(item.id,1);
+                <div class="cart-item-total">
+                    ${money(item.price * item.qty)}
+                </div>
 
-        quantity.append(minus,amount,plus);
+                ${unitsHTML}
 
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "remove-button";
-        remove.textContent = "REMOVE ITEM";
-        remove.onclick = ()=>removeCartItem(item.id);
+            </div>
+        `;
+    }).join("");
 
-        info.append(name,price,quantity,remove);
+    container.querySelectorAll("[data-remove]").forEach(button => {
+        button.addEventListener("click", () => {
+            const item = cart[Number(button.dataset.remove)];
+            if (item) removeCartItem(item.id);
+        });
+    });
 
-        const subtotal = document.createElement("strong");
-        subtotal.textContent =
-            "LKR " + money(item.price * item.quantity);
+    container.querySelectorAll("[data-quantity]").forEach(button => {
+        button.addEventListener("click", () => {
+            const index = Number(button.dataset.quantity);
+            const item = cart[index];
 
-        wrapper.append(info,subtotal);
-        holder.appendChild(wrapper);
+            if (item) {
+                changeQty(
+                    item.id,
+                    Number(button.dataset.change)
+                );
+            }
+        });
+    });
 
-        /*
-         * Each unit has its own separate customisation form.
-         * Changing quantity creates or removes individual forms.
-         */
+    container.querySelectorAll("[data-custom-key]").forEach(input => {
+        input.addEventListener("input", () => {
+            const unitElement = input.closest(".unit-customisation");
+            const itemElement = input.closest(".cart-item");
 
-        const unitsHolder = document.createElement("div");
+            if (!unitElement || !itemElement) return;
 
-        item.units.forEach((unit,index)=>{
-            unitsHolder.appendChild(
-                renderOneUnitCustomization(item,unit,index)
+            const itemIndex = Array.from(
+                container.querySelectorAll(".cart-item")
+            ).indexOf(itemElement);
+
+            const unitIndex = Array.from(
+                itemElement.querySelectorAll(".unit-customisation")
+            ).indexOf(unitElement);
+
+            if (itemIndex < 0 || unitIndex < 0) return;
+
+            updateUnitCustomisation(
+                itemIndex,
+                unitIndex,
+                input.dataset.customKey,
+                input.value
             );
         });
 
-        holder.appendChild(unitsHolder);
+        input.addEventListener("change", () => {
+            const unitElement = input.closest(".unit-customisation");
+            const itemElement = input.closest(".cart-item");
+
+            if (!unitElement || !itemElement) return;
+
+            const itemIndex = Array.from(
+                container.querySelectorAll(".cart-item")
+            ).indexOf(itemElement);
+
+            const unitIndex = Array.from(
+                itemElement.querySelectorAll(".unit-customisation")
+            ).indexOf(unitElement);
+
+            if (itemIndex < 0 || unitIndex < 0) return;
+
+            updateUnitCustomisation(
+                itemIndex,
+                unitIndex,
+                input.dataset.customKey,
+                input.value
+            );
+        });
     });
 
-    $("cartSubtotal").textContent =
-        "LKR " + money(total());
+    container.querySelectorAll("[data-photo-upload]").forEach(input => {
+        input.addEventListener("change", () => {
+            const itemIndex = Number(input.dataset.photoItem);
+            const unitIndex = Number(input.dataset.photoUnit);
+
+            const item = cart[itemIndex];
+
+            if (!item) return;
+
+            syncItemUnits(item);
+
+            const unit = item.units[unitIndex];
+
+            if (!unit) return;
+
+            const product = item.product || item;
+            const maxPhotos = getConfiguredPhotoCount(product);
+            const files = Array.from(input.files || []);
+
+            if (files.length > maxPhotos) {
+                alert(`You can upload a maximum of ${maxPhotos} photo(s).`);
+                input.value = "";
+                return;
+            }
+
+            const tooLarge = files.some(file =>
+                file.size > PHOTO_MAX_BYTES
+            );
+
+            if (tooLarge) {
+                alert("Each photo must be 5 MB or smaller.");
+                input.value = "";
+                return;
+            }
+
+            const invalidType = files.some(file =>
+                !file.type.startsWith("image/")
+            );
+
+            if (invalidType) {
+                alert("Please select image files only.");
+                input.value = "";
+                return;
+            }
+
+            unit.photoFiles = files;
+
+            if (unitIndex === 0) {
+                item.photoFiles = files;
+            }
+
+            // Update the displayed selected filenames.
+            const names = input.parentElement.querySelector(
+                ".selected-photo-names"
+            );
+
+            if (names) {
+                names.innerHTML = files.map(file => `
+                    <span>${invoiceEscape(file.name)}</span>
+                `).join("");
+            }
+        });
+    });
+
+    if (subtotalElement) {
+        subtotalElement.textContent = money(total());
+    }
+
+    if (countElement) {
+        countElement.textContent = String(
+            cart.reduce(
+                (sum, item) => sum + Number(item.qty || 0),
+                0
+            )
+        );
+    }
 }
 
-/* =========================================================
-   KEEP FIRST UNIT COMPATIBILITY
-========================================================= */
 
-function syncLegacyItemDetails(item){
+// -----------------------------------------------------
+// LEGACY ITEM DETAILS COMPATIBILITY
+// -----------------------------------------------------
+
+function syncLegacyItemDetails(item) {
     syncItemUnits(item);
 
     const first = item.units[0] || createEmptyUnit();
@@ -2273,6 +2587,11 @@ function syncLegacyItemDetails(item){
 
     return item.details;
 }
+
+// =====================================================
+// END OF PART 2
+// PART 3 CONTINUES FROM HERE
+// =====================================================
 
 // =====================================================
 // PART 3 — DELIVERY, PAYMENT, CHECKOUT, ORDER & TRACKING
