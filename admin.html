@@ -267,6 +267,7 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 </div>
 
 <script>
+
 "use strict";
 
 const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
@@ -286,16 +287,25 @@ const parseCustomisationDetails=raw=>{
  if(typeof raw==="string"){try{return JSON.parse(raw)}catch(_){return{instructions:raw}}}
  return raw&&typeof raw==="object"?raw:{};
 };
+
 function showMessage(id,message,isError=false){
  const node=el(id);if(!node)return;
  node.textContent=message;
  node.style.color=isError?"#b83c3c":"#397b55";
 }
+
 function setButtonLoading(button,loading,label){
  if(!button)return;
- if(loading){button.dataset.originalText=button.textContent;button.disabled=true;button.textContent="Please wait…"}
- else{button.disabled=false;button.textContent=button.dataset.originalText||label||"Save"}
+ if(loading){
+  if(!button.dataset.originalText)button.dataset.originalText=button.textContent;
+  button.disabled=true;
+  button.textContent="Please wait…";
+ }else{
+  button.disabled=false;
+  button.textContent=button.dataset.originalText||label||"Save";
+ }
 }
+
 function showPage(page,button){
  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
@@ -309,88 +319,141 @@ function showPage(page,button){
  if(page==="banks")renderAdminBankAccounts();
  if(page==="reports")refreshReport();
 }
+
 async function login(){
  const email=el("loginEmail").value.trim();
  const password=el("loginPassword").value;
- if(!email||!password){showMessage("loginMessage","Enter your email and password.",true);return}
+ if(!email||!password){
+  showMessage("loginMessage","Enter your email and password.",true);
+  return;
+ }
  const {error}=await sb.auth.signInWithPassword({email,password});
- if(error){showMessage("loginMessage",error.message,true);return}
+ if(error){
+  showMessage("loginMessage",error.message,true);
+  return;
+ }
  await checkSession();
 }
+
 async function logout(){
  await sb.auth.signOut();
  showDashboard(false);
 }
+
 function showDashboard(show){
  el("loginPanel").style.display=show?"none":"block";
  el("dashboard").style.display=show?"block":"none";
  el("logoutBtn").style.display=show?"inline-block":"none";
 }
+
 async function checkSession(){
  const {data,error}=await sb.auth.getSession();
- if(error||!data.session){showDashboard(false);return}
+ if(error||!data.session){
+  showDashboard(false);
+  return;
+ }
  showDashboard(true);
  await refreshAll();
 }
+
 sb.auth.onAuthStateChange((_event,session)=>{
  if(!session)showDashboard(false);
 });
+
 async function refreshAll(){
- await Promise.allSettled([loadOrders(),loadProducts(),loadExpenses(),loadPayments()]);
+ await Promise.allSettled([
+  loadOrders(),
+  loadProducts(),
+  loadExpenses(),
+  loadPayments()
+ ]);
  renderStatsAndReport();
  renderManualOrders();
 }
+
 function makeStat(label,value){
  return `<div class="stat"><small>${escapeHtml(label)}</small><strong>${value}</strong></div>`;
 }
 
 /* BANK ACCOUNTS
-   Add your real account details here. No account numbers are invented. */
+   Add your real account details here.
+   No account numbers are invented. */
 const ZYRA_BANKS=[
  {bank:"Commercial Bank",name:"Zyra.lk",branch:""},
  {bank:"Bank of Ceylon",name:"Zyra.lk",branch:""}
 ];
+
 function renderAdminBankAccounts(){
- const target=el("bankList");if(!target)return;
+ const target=el("bankList");
+ if(!target)return;
  target.innerHTML=ZYRA_BANKS.map(b=>`
- <div class="item"><strong>${escapeHtml(b.bank)}</strong>
- <p>${escapeHtml(b.name)}</p><small>${escapeHtml(b.branch)}</small></div>`).join("");
+  <div class="item">
+   <strong>${escapeHtml(b.bank)}</strong>
+   <p>${escapeHtml(b.name)}</p>
+   <small>${escapeHtml(b.branch)}</small>
+  </div>
+ `).join("");
 }
 
 /* ORDERS */
 async function loadOrders(){
  const target=el("ordersList");
  if(target)target.textContent="Loading orders…";
+
  try{
   const {data:orders,error}=await sb.from("store_orders")
    .select("*,store_order_items(*)")
-   .order("created_at",{ascending:false}).limit(300);
+   .order("created_at",{ascending:false})
+   .limit(300);
+
   if(error)throw error;
+
   orderCache=orders||[];
   trackingCache.clear();
+
   const ids=orderCache.map(o=>o.id).filter(Boolean);
+
   if(ids.length){
    const {data:tracks,error:trackError}=await sb.from("zyra_orders")
-    .select("*").in("store_order_id",ids);
-   if(!trackError)(tracks||[]).forEach(t=>trackingCache.set(t.store_order_id,t));
+    .select("*")
+    .in("store_order_id",ids);
+
+   if(!trackError){
+    (tracks||[]).forEach(t=>trackingCache.set(t.store_order_id,t));
+   }
   }
+
   renderOrders(orderCache);
   renderStatsAndReport();
   renderManualOrders();
+
  }catch(error){
   if(target)target.textContent="Could not load orders: "+error.message;
  }
 }
+
 function renderOrders(orders){
- const target=el("ordersList");if(!target)return;
- if(!orders.length){target.textContent="No orders found.";return}
+ const target=el("ordersList");
+ if(!target)return;
+
+ if(!orders.length){
+  target.textContent="No orders found.";
+  return;
+ }
+
  target.innerHTML=orders.map(o=>{
   const track=trackingCache.get(o.id)||{};
+
   const items=(o.store_order_items||[]).map(i=>`
-   <div class="item"><strong>${escapeHtml(i.product_name||"Product")}</strong>
-   × ${Number(i.quantity||1)} — ${money(i.unit_price)}
-   ${i.customisation_details?`<p>${escapeHtml(JSON.stringify(parseCustomisationDetails(i.customisation_details)))}</p>`:""}
-   </div>`).join("");
+   <div class="item">
+    <strong>${escapeHtml(i.product_name||"Product")}</strong>
+    × ${Number(i.quantity||1)} — ${money(i.unit_price)}
+    ${i.customisation_details
+     ?`<p>${escapeHtml(JSON.stringify(parseCustomisationDetails(i.customisation_details)))}</p>`
+     :""}
+   </div>
+  `).join("");
+
   return `<div class="panel">
    <h3>Order ${escapeHtml(o.order_number||o.id)}</h3>
    <p><strong>${escapeHtml(o.customer_name||"")}</strong> · ${escapeHtml(o.phone||"")}</p>
@@ -398,6 +461,7 @@ function renderOrders(orders){
    <p>Payment: ${escapeHtml(o.payment_status||"pending")} · Status: ${escapeHtml(o.order_status||"pending")}</p>
    <p>Total: <strong>${money(o.total_amount)}</strong></p>
    ${items}
+
    <div class="grid">
     <div><label>Courier</label><input id="courier-${o.id}" value="${escapeHtml(track.courier||"Not assigned")}"></div>
     <div><label>Delivery Area</label><input id="area-${o.id}" value="${escapeHtml(track.delivery_area||"")}"></div>
@@ -408,8 +472,13 @@ function renderOrders(orders){
     <div><label>Handover Date</label><input id="handover-${o.id}" type="date" value="${escapeHtml(track.handover_date||"")}"></div>
     <div><label>Estimated Delivery</label><input id="estimate-${o.id}" type="date" value="${escapeHtml(track.courier_estimated_delivery_date||"")}"></div>
    </div>
-   <label>Tracking Location</label><input id="location-${o.id}" value="${escapeHtml(track.location||"")}">
-   <label>Courier Note</label><textarea id="note-${o.id}">${escapeHtml(track.note||"")}</textarea>
+
+   <label>Tracking Location</label>
+   <input id="location-${o.id}" value="${escapeHtml(track.location||"")}">
+
+   <label>Courier Note</label>
+   <textarea id="note-${o.id}">${escapeHtml(track.note||"")}</textarea>
+
    <div class="actions">
     <button onclick="saveCourierDetails('${o.id}')">Save Courier Details</button>
     <button class="secondary" onclick="printInvoice('${o.id}')">Print Invoice</button>
@@ -419,8 +488,10 @@ function renderOrders(orders){
   </div>`;
  }).join("");
 }
+
 async function saveCourierDetails(id){
  const value=key=>el(key+"-"+id)?.value||"";
+
  const payload={
   store_order_id:id,
   courier:value("courier"),
@@ -435,115 +506,240 @@ async function saveCourierDetails(id){
   note:value("note"),
   updated_at:new Date().toISOString()
  };
+
  try{
   const {data:existing,error:findError}=await sb.from("zyra_orders")
-   .select("id").eq("store_order_id",id).maybeSingle();
+   .select("id")
+   .eq("store_order_id",id)
+   .maybeSingle();
+
   if(findError)throw findError;
+
   const result=existing
    ?await sb.from("zyra_orders").update(payload).eq("store_order_id",id)
    :await sb.from("zyra_orders").insert(payload);
+
   if(result.error)throw result.error;
+
   alert("Courier details saved.");
   await loadOrders();
- }catch(error){alert("Could not save courier details: "+error.message)}
+
+ }catch(error){
+  alert("Could not save courier details: "+error.message);
+ }
 }
+
 async function updateOrderStatus(id,status){
- const {error}=await sb.from("store_orders").update({order_status:status}).eq("id",id);
- if(error)alert(error.message);else await loadOrders();
+ const {error}=await sb.from("store_orders")
+  .update({order_status:status})
+  .eq("id",id);
+
+ if(error)alert(error.message);
+ else await loadOrders();
 }
+
 async function deleteOrder(id){
  if(!confirm("Delete this order? This action cannot be undone."))return;
+
  try{
   const courier=await sb.from("zyra_orders").delete().eq("store_order_id",id);
   if(courier.error)throw courier.error;
+
   const items=await sb.from("store_order_items").delete().eq("order_id",id);
   if(items.error)throw items.error;
+
   const result=await sb.from("store_orders").delete().eq("id",id);
   if(result.error)throw result.error;
+
   await loadOrders();
- }catch(error){alert("Could not delete order: "+error.message)}
+
+ }catch(error){
+  alert("Could not delete order: "+error.message);
+ }
 }
 
-/* PAYMENT SLIPS */
+/* PAYMENT SLIPS
+   Correct database column: payment_slip_path
+   Original file name: payment_slip_file_name
+   MIME type: payment_slip_content_type */
 async function loadPayments(){
- const target=el("paymentList");if(!target)return;
+ const target=el("paymentList");
+ if(!target)return;
+
  target.textContent="Loading payment slips…";
+
  try{
-  const {data,error}=await sb.from("store_orders").select("*")
-   .not("payment_slip","is",null).order("created_at",{ascending:false}).limit(200);
+  const {data,error}=await sb.from("store_orders")
+   .select("*")
+   .not("payment_slip_path","is",null)
+   .order("created_at",{ascending:false})
+   .limit(200);
+
   if(error)throw error;
-  target.innerHTML=(data||[]).map(o=>`
+
+  const payments=data||[];
+
+  target.innerHTML=payments.map(o=>`
    <div class="item">
     <strong>${escapeHtml(o.order_number||o.id)}</strong>
     <p>${escapeHtml(o.customer_name||"")} — ${money(o.total_amount)}</p>
     <p>Payment status: ${escapeHtml(o.payment_status||"pending")}</p>
+    ${o.payment_slip_file_name
+     ?`<p class="muted">File: ${escapeHtml(o.payment_slip_file_name)}</p>`
+     :""}
+    ${o.payment_slip_content_type
+     ?`<p class="muted">File type: ${escapeHtml(o.payment_slip_content_type)}</p>`
+     :""}
+    ${o.selected_bank
+     ?`<p>Selected bank: ${escapeHtml(o.selected_bank)}</p>`
+     :""}
+    ${o.bank_transaction_reference
+     ?`<p>Transaction reference: ${escapeHtml(o.bank_transaction_reference)}</p>`
+     :""}
     <div class="actions">
      <button onclick="viewPaymentSlip('${o.id}')">View Slip</button>
      <button onclick="verifyPayment('${o.id}','accepted')">Accept</button>
      <button class="danger" onclick="verifyPayment('${o.id}','rejected')">Reject</button>
     </div>
-   </div>`).join("")||"No payment slips found.";
- }catch(error){target.textContent="Could not load payment slips: "+error.message}
-}
-async function viewPaymentSlip(id){
- let order=orderCache.find(o=>o.id===id);
- if(!order){
-  const {data,error}=await sb.from("store_orders").select("*").eq("id",id).maybeSingle();
-  if(error||!data){alert("Order not found.");return}
-  order=data;
+   </div>
+  `).join("")||"No payment slips found.";
+
+ }catch(error){
+  target.textContent="Could not load payment slips: "+error.message;
  }
- if(!order.payment_slip){alert("Payment slip not found.");return}
- const {data,error}=await sb.storage.from("payment-slips").createSignedUrl(order.payment_slip,300);
- if(error){alert(error.message);return}
- window.open(data.signedUrl,"_blank","noopener");
 }
+
+async function viewPaymentSlip(id){
+ try{
+  let order=orderCache.find(o=>String(o.id)===String(id));
+
+  if(!order){
+   const {data,error}=await sb.from("store_orders")
+    .select("*")
+    .eq("id",id)
+    .maybeSingle();
+
+   if(error)throw error;
+   if(!data)throw new Error("Order not found.");
+
+   order=data;
+  }
+
+  const path=order.payment_slip_path;
+
+  if(!path){
+   throw new Error("Payment slip not found for this order.");
+  }
+
+  const {data,error}=await sb.storage
+   .from("payment-slips")
+   .createSignedUrl(path,300);
+
+  if(error)throw error;
+  if(!data?.signedUrl)throw new Error("Could not create payment slip link.");
+
+  window.open(data.signedUrl,"_blank","noopener");
+
+ }catch(error){
+  alert("Could not open payment slip: "+error.message);
+ }
+}
+
 async function verifyPayment(id,decision){
- const reason=decision==="rejected"?prompt("Enter rejection reason:"):"";
+ const reason=decision==="rejected"
+  ?prompt("Enter rejection reason:")
+  :"";
+
  if(decision==="rejected"&&!reason)return;
+
  try{
   const {error}=await sb.rpc("verify_zyra_payment",{
-   p_order_id:id,p_decision:decision,p_rejection_reason:reason||null
+   p_order_id:id,
+   p_decision:decision,
+   p_rejection_reason:reason||null
   });
+
   if(error)throw error;
+
   alert("Payment "+decision+".");
-  await loadOrders();await loadPayments();
- }catch(error){alert("Payment update failed: "+error.message)}
+
+  await loadOrders();
+  await loadPayments();
+
+ }catch(error){
+  alert("Payment update failed: "+error.message);
+ }
 }
 
 /* INVOICES */
 function invoiceMarkup(o){
  const rows=(o.store_order_items||[]).map(i=>`
- <tr><td>${escapeHtml(i.product_name||"Product")}</td>
- <td>${Number(i.quantity||1)}</td><td>${money(i.unit_price)}</td>
- <td>${money(Number(i.quantity||1)*Number(i.unit_price||0))}</td></tr>`).join("");
- return `<html><head><title>Invoice ${escapeHtml(o.order_number||"")}</title>
- <style>body{font:14px Arial;padding:30px}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}</style>
- </head><body><h1>ZYRA.LK</h1><h2>INVOICE</h2>
- <p>Order: ${escapeHtml(o.order_number||o.id)}</p>
- <p>Date: ${new Date(o.created_at||Date.now()).toLocaleDateString()}</p>
- <p>Customer: ${escapeHtml(o.customer_name||"")}</p>
- <p>Phone: ${escapeHtml(o.phone||"")}</p>
- <p>Address: ${escapeHtml(o.delivery_address||"")}</p>
- <table><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
- <tbody>${rows}</tbody></table>
- <p>Subtotal: ${money(o.subtotal_amount)}</p>
- <p>Discount: ${money(o.discount_amount)}</p>
- <p>Delivery: ${money(o.delivery_fee)}</p>
- <h3>Grand Total: ${money(o.total_amount)}</h3>
- <p>Thank you for shopping with Zyra.lk</p></body></html>`;
+  <tr>
+   <td>${escapeHtml(i.product_name||"Product")}</td>
+   <td>${Number(i.quantity||1)}</td>
+   <td>${money(i.unit_price)}</td>
+   <td>${money(Number(i.quantity||1)*Number(i.unit_price||0))}</td>
+  </tr>
+ `).join("");
+
+ return `<html>
+ <head>
+  <title>Invoice ${escapeHtml(o.order_number||"")}</title>
+  <style>
+   body{font:14px Arial;padding:30px}
+   table{width:100%;border-collapse:collapse}
+   td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+  </style>
+ </head>
+ <body>
+  <h1>ZYRA.LK</h1>
+  <h2>INVOICE</h2>
+  <p>Order: ${escapeHtml(o.order_number||o.id)}</p>
+  <p>Date: ${new Date(o.created_at||Date.now()).toLocaleDateString()}</p>
+  <p>Customer: ${escapeHtml(o.customer_name||"")}</p>
+  <p>Phone: ${escapeHtml(o.phone||"")}</p>
+  <p>Address: ${escapeHtml(o.delivery_address||"")}</p>
+  <table>
+   <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+   <tbody>${rows}</tbody>
+  </table>
+  <p>Subtotal: ${money(o.subtotal_amount)}</p>
+  <p>Discount: ${money(o.discount_amount)}</p>
+  <p>Delivery: ${money(o.delivery_fee)}</p>
+  <h3>Grand Total: ${money(o.total_amount)}</h3>
+  <p>Thank you for shopping with Zyra.lk</p>
+ </body>
+ </html>`;
 }
+
 function printInvoice(id){
- const o=orderCache.find(x=>x.id===id);if(!o)return alert("Order not found.");
- const w=window.open("","_blank");if(!w)return alert("Please allow pop-ups to print the invoice.");
- w.document.write(invoiceMarkup(o));w.document.close();w.focus();w.print();
+ const o=orderCache.find(x=>x.id===id);
+ if(!o)return alert("Order not found.");
+
+ const w=window.open("","_blank");
+ if(!w)return alert("Please allow pop-ups to print the invoice.");
+
+ w.document.write(invoiceMarkup(o));
+ w.document.close();
+ w.focus();
+ w.print();
 }
+
 function downloadInvoicePDF(id){
- const o=orderCache.find(x=>x.id===id);if(!o)return alert("Order not found.");
+ const o=orderCache.find(x=>x.id===id);
+ if(!o)return alert("Order not found.");
+
  if(!window.jspdf?.jsPDF)return printInvoice(id);
+
  const doc=new window.jspdf.jsPDF();
- doc.setFontSize(20);doc.text("ZYRA.LK - INVOICE",15,20);
+
+ doc.setFontSize(20);
+ doc.text("ZYRA.LK - INVOICE",15,20);
+
  doc.setFontSize(11);
+
  let y=32;
+
  const lines=[
   "Order: "+(o.order_number||o.id),
   "Date: "+new Date(o.created_at||Date.now()).toLocaleDateString(),
@@ -551,71 +747,135 @@ function downloadInvoicePDF(id){
   "Phone: "+(o.phone||""),
   "Address: "+(o.delivery_address||"")
  ];
- lines.forEach(line=>{doc.text(line.substring(0,95),15,y);y+=8});
+
+ lines.forEach(line=>{
+  doc.text(line.substring(0,95),15,y);
+  y+=8;
+ });
+
  y+=5;
+
  (o.store_order_items||[]).forEach(i=>{
   const line=(i.product_name||"Product")+" x "+i.quantity+" - "+money(i.unit_price);
-  if(y>275){doc.addPage();y=20}
-  doc.text(line.substring(0,95),15,y);y+=8;
+
+  if(y>275){
+   doc.addPage();
+   y=20;
+  }
+
+  doc.text(line.substring(0,95),15,y);
+  y+=8;
  });
+
  y+=5;
- if(y>275){doc.addPage();y=20}
- doc.text("Subtotal: "+money(o.subtotal_amount),15,y);y+=8;
- doc.text("Discount: "+money(o.discount_amount),15,y);y+=8;
- doc.text("Delivery: "+money(o.delivery_fee),15,y);y+=8;
+
+ if(y>275){
+  doc.addPage();
+  y=20;
+ }
+
+ doc.text("Subtotal: "+money(o.subtotal_amount),15,y);
+ y+=8;
+ doc.text("Discount: "+money(o.discount_amount),15,y);
+ y+=8;
+ doc.text("Delivery: "+money(o.delivery_fee),15,y);
+ y+=8;
  doc.text("Total: "+money(o.total_amount),15,y);
+
  doc.save("Zyra-Invoice-"+(o.order_number||id)+".pdf");
 }
 
 /* EXPENSES */
 function resetExpenseForm(){
- const f=el("expenseForm");if(!f)return;
- f.reset();f.elements.id.value="";
+ const f=el("expenseForm");
+ if(!f)return;
+
+ f.reset();
+ f.elements.id.value="";
  f.elements.expense_date.value=new Date().toISOString().slice(0,10);
 }
+
 async function loadExpenses(){
  try{
   const {data,error}=await sb.from("zyra_business_expenses")
-   .select("*").order("expense_date",{ascending:false});
+   .select("*")
+   .order("expense_date",{ascending:false});
+
   if(error)throw error;
+
   expenseCache=data||[];
-  const target=el("expensesList");if(!target)return;
+
+  const target=el("expensesList");
+  if(!target)return;
+
   target.innerHTML=expenseCache.map(x=>`
-   <div class="item"><strong>${escapeHtml(x.category)}</strong>
-   <p>${escapeHtml(x.description||"")} · ${money(x.amount)}</p>
-   <small>${escapeHtml(x.expense_date||"")}</small>
-   <div class="actions"><button class="secondary" onclick="editExpense('${x.id}')">Edit</button>
-   <button class="danger" onclick="deleteExpense('${x.id}')">Delete</button></div></div>`).join("")||"No expenses recorded.";
- }catch(error){showMessage("expenseMessage","Could not load expenses: "+error.message,true)}
+   <div class="item">
+    <strong>${escapeHtml(x.category)}</strong>
+    <p>${escapeHtml(x.description||"")} · ${money(x.amount)}</p>
+    <small>${escapeHtml(x.expense_date||"")}</small>
+    <div class="actions">
+     <button class="secondary" onclick="editExpense('${x.id}')">Edit</button>
+     <button class="danger" onclick="deleteExpense('${x.id}')">Delete</button>
+    </div>
+   </div>
+  `).join("")||"No expenses recorded.";
+
+ }catch(error){
+  showMessage("expenseMessage","Could not load expenses: "+error.message,true);
+ }
 }
+
 function editExpense(id){
- const x=expenseCache.find(a=>a.id===id);if(!x)return;
+ const x=expenseCache.find(a=>a.id===id);
+ if(!x)return;
+
  const f=el("expenseForm");
- Object.keys(x).forEach(k=>{if(f.elements[k])f.elements[k].value=x[k]??""});
+
+ Object.keys(x).forEach(k=>{
+  if(f.elements[k])f.elements[k].value=x[k]??"";
+ });
 }
+
 el("expenseForm").addEventListener("submit",async event=>{
  event.preventDefault();
+
  const f=event.currentTarget;
+
  const payload={
   expense_date:f.elements.expense_date.value,
   category:f.elements.category.value.trim(),
   description:f.elements.description.value.trim(),
   amount:Number(f.elements.amount.value)
  };
+
  try{
   const id=f.elements.id.value;
+
   const result=id
    ?await sb.from("zyra_business_expenses").update(payload).eq("id",id)
    :await sb.from("zyra_business_expenses").insert(payload);
+
   if(result.error)throw result.error;
+
   showMessage("expenseMessage","Expense saved successfully.");
-  resetExpenseForm();await loadExpenses();
- }catch(error){showMessage("expenseMessage",error.message,true)}
+
+  resetExpenseForm();
+  await loadExpenses();
+
+ }catch(error){
+  showMessage("expenseMessage",error.message,true);
+ }
 });
+
 async function deleteExpense(id){
  if(!confirm("Delete this expense?"))return;
- const {error}=await sb.from("zyra_business_expenses").delete().eq("id",id);
- if(error)alert(error.message);else await loadExpenses();
+
+ const {error}=await sb.from("zyra_business_expenses")
+  .delete()
+  .eq("id",id);
+
+ if(error)alert(error.message);
+ else await loadExpenses();
 }
 
 /* PRODUCT CUSTOMISATION HELPERS */
@@ -624,79 +884,148 @@ function getCustomizationOptions(product){
   return typeof product.customization_options==="string"
    ?JSON.parse(product.customization_options||"{}")
    :(product.customization_options||{});
- }catch(_){return{}}
+ }catch(_){
+  return{};
+ }
 }
+
 function getCustomizationFields(product){
  try{
   return typeof product.customization_fields==="string"
    ?JSON.parse(product.customization_fields||"{}")
    :(product.customization_fields||{});
- }catch(_){return{}}
+ }catch(_){
+  return{};
+ }
 }
+
 function getCustomizationType(product){
  if(product.customization_type)return product.customization_type;
  return product.is_customisable?"text":"none";
 }
+
 function getPhoneModelsFromProduct(product){
  const options=getCustomizationOptions(product);
  return Array.isArray(options.phone_models)?options.phone_models:[];
 }
+
 function updateZyraCustomizationVisibility(){
  const type=el("zyraCustomizationType")?.value||"none";
- el("zyraTextSettings")?.classList.toggle("hidden",!["text","text_photo"].includes(type));
- el("zyraPhotoSettings")?.classList.toggle("hidden",!["photo","text_photo"].includes(type));
+
+ el("zyraTextSettings")?.classList.toggle(
+  "hidden",
+  !["text","text_photo"].includes(type)
+ );
+
+ el("zyraPhotoSettings")?.classList.toggle(
+  "hidden",
+  !["photo","text_photo"].includes(type)
+ );
 }
+
 function loadProductCustomization(product){
  const f=el("productForm");
  if(!product)return;
+
  f.elements.customization_type.value=getCustomizationType(product);
- f.elements.customization_required.value=String(!!product.customization_required);
- f.elements.customization_photo_count.value=Number(product.customization_photo_count||0);
- f.elements.customization_photo_required.value=String(!!product.customization_photo_required);
+
+ f.elements.customization_required.value=
+  String(!!product.customization_required);
+
+ f.elements.customization_photo_count.value=
+  Number(product.customization_photo_count||0);
+
+ f.elements.customization_photo_required.value=
+  String(!!product.customization_photo_required);
+
  const fields=getCustomizationFields(product);
- f.elements.customization_fields.value=Array.isArray(fields.text_fields)
-  ?fields.text_fields.join("\n")
-  :typeof fields==="string"?fields:"";
+
+ f.elements.customization_fields.value=
+  Array.isArray(fields.text_fields)
+   ?fields.text_fields.join("\n")
+   :typeof fields==="string"?fields:"";
+
  const options=getCustomizationOptions(product);
+
  el("zyraPhoneEnabled").checked=!!options.phone_enabled;
- el("zyraPhoneModelsInput").value=getPhoneModelsFromProduct(product).join("\n");
+
+ el("zyraPhoneModelsInput").value=
+  getPhoneModelsFromProduct(product).join("\n");
+
  updateZyraCustomizationVisibility();
 }
+
 function collectProductCustomization(){
  const f=el("productForm");
+
  const type=f.elements.customization_type.value||"none";
- const models=el("zyraPhoneModelsInput").value.split("\n").map(x=>x.trim()).filter(Boolean);
- const uniqueModels=[...new Map(models.map(x=>[x.toLowerCase(),x])).values()];
+
+ const models=el("zyraPhoneModelsInput").value
+  .split("\n")
+  .map(x=>x.trim())
+  .filter(Boolean);
+
+ const uniqueModels=[
+  ...new Map(models.map(x=>[x.toLowerCase(),x])).values()
+ ];
+
  return{
   customization_type:type,
-  customization_required:f.elements.customization_required.value==="true",
-  customization_photo_count:Math.max(0,Number(f.elements.customization_photo_count.value||0)),
-  customization_photo_required:f.elements.customization_photo_required.value==="true",
+
+  customization_required:
+   f.elements.customization_required.value==="true",
+
+  customization_photo_count:
+   Math.max(0,Number(f.elements.customization_photo_count.value||0)),
+
+  customization_photo_required:
+   f.elements.customization_photo_required.value==="true",
+
   customization_fields:{
-   text_fields:f.elements.customization_fields.value.split("\n").map(x=>x.trim()).filter(Boolean)
+   text_fields:f.elements.customization_fields.value
+    .split("\n")
+    .map(x=>x.trim())
+    .filter(Boolean)
   },
+
   customization_options:{
    phone_enabled:el("zyraPhoneEnabled").checked,
    phone_models:el("zyraPhoneEnabled").checked?uniqueModels:[]
   }
  };
 }
+
 function validateProductCustomization(settings){
- if(!["none","text","photo","text_photo"].includes(settings.customization_type))
+ if(!["none","text","photo","text_photo"].includes(settings.customization_type)){
   throw new Error("Invalid customisation type.");
- if(settings.customization_photo_count<0)throw new Error("Photo count cannot be negative.");
- if(settings.customization_options.phone_enabled&&!settings.customization_options.phone_models.length)
+ }
+
+ if(settings.customization_photo_count<0){
+  throw new Error("Photo count cannot be negative.");
+ }
+
+ if(settings.customization_options.phone_enabled&&
+    !settings.customization_options.phone_models.length){
   throw new Error("Please add at least one phone model.");
+ }
 }
 
 /* PRODUCT MANAGEMENT */
 async function loadProducts(){
- const container=el("productsList");if(!container)return;
+ const container=el("productsList");
+ if(!container)return;
+
  container.innerHTML="Loading products…";
+
  try{
-  const {data,error}=await sb.from("store_products").select("*").order("created_at",{ascending:false});
+  const {data,error}=await sb.from("store_products")
+   .select("*")
+   .order("created_at",{ascending:false});
+
   if(error)throw error;
+
   productCache=data||[];
+
   container.innerHTML=productCache.map(p=>`
    <div class="item">
     <strong>${escapeHtml(p.name||"Unnamed product")}</strong>
@@ -708,12 +1037,20 @@ async function loadProducts(){
      <button onclick="editProduct('${p.id}')">Edit</button>
      <button class="danger" onclick="deleteProduct('${p.id}')">Delete</button>
     </div>
-   </div>`).join("")||"No products found.";
- }catch(error){container.textContent="Could not load products: "+error.message}
+   </div>
+  `).join("")||"No products found.";
+
+ }catch(error){
+  container.textContent="Could not load products: "+error.message;
+ }
 }
+
 function editProduct(id){
- const p=productCache.find(x=>String(x.id)===String(id));if(!p)return;
+ const p=productCache.find(x=>String(x.id)===String(id));
+ if(!p)return;
+
  const f=el("productForm");
+
  f.elements.id.value=p.id||"";
  f.elements.name.value=p.name||"";
  f.elements.category.value=p.category||"";
@@ -725,40 +1062,68 @@ function editProduct(id){
  f.elements.is_customisable.checked=!!p.is_customisable;
  f.elements.is_active.checked=p.is_active!==false;
  f.elements.image_file.value="";
+
  loadProductCustomization(p);
+
  el("productFormTitle").textContent="Edit Product";
+
  showMessage("productMessage","");
+
  window.scrollTo({top:0,behavior:"smooth"});
 }
+
 function resetProductForm(){
- const f=el("productForm");f.reset();
+ const f=el("productForm");
+
+ f.reset();
+
  f.elements.id.value="";
  f.elements.is_active.checked=true;
  f.elements.customization_type.value="none";
  f.elements.customization_photo_count.value=0;
+
  el("zyraPhoneEnabled").checked=false;
  el("zyraPhoneModelsInput").value="";
+
  el("productFormTitle").textContent="Add Product";
+
  updateZyraCustomizationVisibility();
 }
+
 async function deleteProduct(id){
  if(!confirm("Delete this product?"))return;
+
  try{
-  const {error}=await sb.from("store_products").delete().eq("id",id);
+  const {error}=await sb.from("store_products")
+   .delete()
+   .eq("id",id);
+
   if(error)throw error;
+
   showMessage("productMessage","Product deleted.");
+
   await loadProducts();
- }catch(error){alert("Could not delete product: "+error.message)}
+
+ }catch(error){
+  alert("Could not delete product: "+error.message);
+ }
 }
+
 el("productForm").addEventListener("submit",async event=>{
  event.preventDefault();
+
  const f=event.currentTarget;
  const button=f.querySelector('[type="submit"]');
+
  setButtonLoading(button,true);
+
  try{
   const id=f.elements.id.value;
+
   const customization=collectProductCustomization();
+
   validateProductCustomization(customization);
+
   const payload={
    name:f.elements.name.value.trim(),
    category:f.elements.category.value.trim()||null,
@@ -771,16 +1136,28 @@ el("productForm").addEventListener("submit",async event=>{
    is_active:f.elements.is_active.checked,
    ...customization
   };
+
   const result=id
    ?await sb.from("store_products").update(payload).eq("id",id)
    :await sb.from("store_products").insert(payload);
+
   if(result.error)throw result.error;
-  showMessage("productMessage",id?"Product updated successfully.":"Product added successfully.");
+
+  showMessage(
+   "productMessage",
+   id?"Product updated successfully.":"Product added successfully."
+  );
+
   resetProductForm();
+
   await loadProducts();
+
  }catch(error){
   showMessage("productMessage","Could not save product: "+error.message,true);
- }finally{setButtonLoading(button,false)}
+
+ }finally{
+  setButtonLoading(button,false);
+ }
 });
 
 /* =====================================================
@@ -790,48 +1167,82 @@ function resetManualItems(){
  zyraManualItems=[];
  renderManualItems();
 }
+
 function addManualItem(){
  const name=el("manualProductName").value.trim();
  const quantity=Number(el("manualQuantity").value||1);
  const price=Number(el("manualPrice").value||0);
- if(!name){alert("Enter a product name.");return}
- if(!Number.isInteger(quantity)||quantity<1){alert("Enter a valid quantity.");return}
- if(!Number.isFinite(price)||price<0){alert("Enter a valid unit price.");return}
 
- const product=productCache.find(p=>String(p.name||"").toLowerCase()===name.toLowerCase());
+ if(!name){
+  alert("Enter a product name.");
+  return;
+ }
+
+ if(!Number.isInteger(quantity)||quantity<1){
+  alert("Enter a valid quantity.");
+  return;
+ }
+
+ if(!Number.isFinite(price)||price<0){
+  alert("Enter a valid unit price.");
+  return;
+ }
+
+ const product=productCache.find(
+  p=>String(p.name||"").toLowerCase()===name.toLowerCase()
+ );
+
  zyraManualItems.push({
   product_id:product?.id||null,
   product_name:name,
   quantity,
   unit_price:price,
-  unit_cost_price:product?.cost_price!=null?Number(product.cost_price):null,
+  unit_cost_price:product?.cost_price!=null
+   ?Number(product.cost_price):null,
   is_customised:false,
   customisation_details:null
  });
+
  el("manualProductName").value="";
  el("manualQuantity").value=1;
  el("manualPrice").value="";
+
  renderManualItems();
 }
+
 function removeManualItem(index){
  zyraManualItems.splice(index,1);
  renderManualItems();
 }
+
 function renderManualItems(){
- const container=el("manualItems");if(!container)return;
+ const container=el("manualItems");
+ if(!container)return;
+
  container.innerHTML=zyraManualItems.map((item,index)=>`
   <div class="item">
    <strong>${escapeHtml(item.product_name)}</strong>
-   <p>${Number(item.quantity)} × ${money(item.unit_price)} = ${money(Number(item.quantity)*Number(item.unit_price))}</p>
+   <p>
+    ${Number(item.quantity)} × ${money(item.unit_price)}
+    = ${money(Number(item.quantity)*Number(item.unit_price))}
+   </p>
    <button type="button" class="danger" onclick="removeManualItem(${index})">Remove</button>
-  </div>`).join("")||"No products added yet.";
+  </div>
+ `).join("")||"No products added yet.";
+
  calculateManualTotal();
 }
+
 function calculateManualTotal(){
  const f=el("manualOrderForm");
- const subtotal=zyraManualItems.reduce((sum,item)=>sum+Number(item.quantity)*Number(item.unit_price),0);
+
+ const subtotal=zyraManualItems.reduce(
+  (sum,item)=>sum+Number(item.quantity)*Number(item.unit_price),0
+ );
+
  const discount=Math.max(0,Number(f.elements.discount_amount.value||0));
  const delivery=Math.max(0,Number(f.elements.delivery_fee.value||0));
+
  el("manualSubtotal").value=money(subtotal);
  el("manualTotal").value=money(Math.max(0,subtotal-discount+delivery));
 }
@@ -841,15 +1252,21 @@ function calculateManualTotal(){
 ===================================================== */
 function setManualFormDefaults(){
  const f=el("manualOrderForm");
+
  if(!f.elements.order_date.value){
   const now=new Date();
+
   now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+
   f.elements.order_date.value=now.toISOString().slice(0,16);
  }
 }
+
 function resetManualForm(){
  const f=el("manualOrderForm");
+
  f.reset();
+
  f.elements.editing_order_id.value="";
  f.elements.discount_amount.value=0;
  f.elements.delivery_fee.value=0;
@@ -859,19 +1276,24 @@ function resetManualForm(){
  f.elements.order_status.value="pending";
  f.elements.payment_status.value="pending";
  f.elements.preorder_status.value="pending";
+
  resetManualItems();
  setManualFormDefaults();
  calculateManualTotal();
+
  el("manualFormTitle").textContent="Create Manual Order";
  el("createManualOrderBtn").textContent="Create Manual Order";
  el("cancelManualEditBtn").style.display="none";
 }
+
 function cancelManualEdit(){
  resetManualForm();
  showMessage("manualMessage","Edit cancelled.");
 }
+
 function getManualOrderPayload(){
  const f=el("manualOrderForm");
+
  return{
   order_number:f.elements.order_number.value.trim(),
   customer_name:f.elements.customer_name.value.trim(),
@@ -893,6 +1315,7 @@ function getManualOrderPayload(){
    :new Date().toISOString()
  };
 }
+
 function getManualItemPayload(){
  return zyraManualItems.map(item=>({
   product_id:item.product_id||null,
@@ -901,11 +1324,14 @@ function getManualItemPayload(){
   unit_price:Number(item.unit_price),
   is_customised:!!item.is_customised,
   customisation_details:item.customisation_details||null,
-  unit_cost_price:item.unit_cost_price==null?null:Number(item.unit_cost_price)
+  unit_cost_price:item.unit_cost_price==null
+   ?null:Number(item.unit_cost_price)
  }));
 }
+
 function getManualCourierPayload(orderId){
  const f=el("manualOrderForm");
+
  return{
   store_order_id:orderId,
   courier:f.elements.courier.value.trim()||"Not assigned",
@@ -921,14 +1347,21 @@ function getManualCourierPayload(orderId){
   updated_at:new Date().toISOString()
  };
 }
+
 async function saveManualCourier(orderId){
  const payload=getManualCourierPayload(orderId);
+
  const {data:existing,error:findError}=await sb.from("zyra_orders")
-  .select("id").eq("store_order_id",orderId).maybeSingle();
+  .select("id")
+  .eq("store_order_id",orderId)
+  .maybeSingle();
+
  if(findError)throw findError;
+
  const result=existing
   ?await sb.from("zyra_orders").update(payload).eq("store_order_id",orderId)
   :await sb.from("zyra_orders").insert(payload);
+
  if(result.error)throw result.error;
 }
 
@@ -937,20 +1370,31 @@ async function saveManualCourier(orderId){
 ===================================================== */
 async function editManualOrder(id){
  const order=orderCache.find(item=>String(item.id)===String(id));
+
  if(!order)return;
+
  if(String(order.order_source||"").toLowerCase()!=="manual"){
-  alert("This is not a manual order.");return;
+  alert("This is not a manual order.");
+  return;
  }
+
  try{
   const {data:items,error}=await sb.from("store_order_items")
-   .select("*").eq("order_id",id);
+   .select("*")
+   .eq("order_id",id);
+
   if(error)throw error;
+
   const f=el("manualOrderForm");
   const track=trackingCache.get(id)||{};
+
   f.elements.editing_order_id.value=order.id;
   f.elements.order_number.value=order.order_number||"";
+
   const dateValue=order.created_at?new Date(order.created_at):new Date();
+
   dateValue.setMinutes(dateValue.getMinutes()-dateValue.getTimezoneOffset());
+
   f.elements.order_date.value=dateValue.toISOString().slice(0,16);
   f.elements.customer_name.value=order.customer_name||"";
   f.elements.phone.value=order.phone||"";
@@ -982,17 +1426,24 @@ async function editManualOrder(id){
    product_name:item.product_name||"",
    quantity:Number(item.quantity||1),
    unit_price:Number(item.unit_price||0),
-   unit_cost_price:item.unit_cost_price==null?null:Number(item.unit_cost_price),
+   unit_cost_price:item.unit_cost_price==null
+    ?null:Number(item.unit_cost_price),
    is_customised:!!item.is_customised,
    customisation_details:parseCustomisationDetails(item.customisation_details)
   }));
+
   renderManualItems();
+
   el("manualFormTitle").textContent="Edit Manual Order";
   el("createManualOrderBtn").textContent="Update Manual Order";
   el("cancelManualEditBtn").style.display="inline-block";
+
   showPage("manual",document.querySelector('nav button[onclick*="manual"]'));
+
   window.scrollTo({top:0,behavior:"smooth"});
+
   showMessage("manualMessage","Editing "+(order.order_number||order.id));
+
  }catch(error){
   alert("Could not load manual order: "+error.message);
  }
@@ -1002,8 +1453,13 @@ async function editManualOrder(id){
    MANUAL ORDER LIST
 ===================================================== */
 function renderManualOrders(){
- const target=el("manualOrdersList");if(!target)return;
- const list=orderCache.filter(order=>String(order.order_source||"").toLowerCase()==="manual");
+ const target=el("manualOrdersList");
+ if(!target)return;
+
+ const list=orderCache.filter(
+  order=>String(order.order_source||"").toLowerCase()==="manual"
+ );
+
  target.innerHTML=list.map(order=>`
   <div class="item">
    <strong>${escapeHtml(order.order_number||order.id)}</strong>
@@ -1015,7 +1471,8 @@ function renderManualOrders(){
     <button class="secondary" onclick="downloadInvoicePDF('${order.id}')">Download PDF</button>
     <button class="danger" onclick="deleteManualOrder('${order.id}')">Delete Order</button>
    </div>
-  </div>`).join("")||"No manual orders yet.";
+  </div>
+ `).join("")||"No manual orders yet.";
 }
 
 /* =====================================================
@@ -1023,47 +1480,81 @@ function renderManualOrders(){
 ===================================================== */
 async function deleteManualOrder(id){
  const order=orderCache.find(item=>String(item.id)===String(id));
- if(!order){alert("Manual order not found.");return}
- if(String(order.order_source||"").toLowerCase()!=="manual"){
-  alert("This is not a manual order.");return;
+
+ if(!order){
+  alert("Manual order not found.");
+  return;
  }
+
+ if(String(order.order_source||"").toLowerCase()!=="manual"){
+  alert("This is not a manual order.");
+  return;
+ }
+
  if(!confirm("Permanently delete manual order "+(order.order_number||id)+"?"))return;
+
  try{
-  const courier=await sb.from("zyra_orders").delete().eq("store_order_id",id);
+  const courier=await sb.from("zyra_orders")
+   .delete()
+   .eq("store_order_id",id);
+
   if(courier.error)throw courier.error;
-  const items=await sb.from("store_order_items").delete().eq("order_id",id);
+
+  const items=await sb.from("store_order_items")
+   .delete()
+   .eq("order_id",id);
+
   if(items.error)throw items.error;
-  const result=await sb.from("store_orders").delete().eq("id",id);
+
+  const result=await sb.from("store_orders")
+   .delete()
+   .eq("id",id);
+
   if(result.error)throw result.error;
+
   showMessage("manualMessage","Manual order deleted.");
+
   await loadOrders();
- }catch(error){alert("Could not delete manual order: "+error.message)}
+
+ }catch(error){
+  alert("Could not delete manual order: "+error.message);
+ }
 }
 
 /* =====================================================
    CREATE / UPDATE MANUAL ORDER
-   Uses the exact RPC arguments confirmed from your SQL:
+   Exact RPC arguments:
    CREATE: p_order, p_items
    UPDATE: p_order_id, p_order, p_items
 ===================================================== */
 el("manualOrderForm").addEventListener("submit",async event=>{
  event.preventDefault();
+
  const f=event.currentTarget;
  const button=el("createManualOrderBtn");
+
  setButtonLoading(button,true);
+
  try{
-  if(!zyraManualItems.length)throw new Error("Add at least one order item.");
+  if(!zyraManualItems.length){
+   throw new Error("Add at least one order item.");
+  }
+
   const id=f.elements.editing_order_id.value;
   const orderPayload=getManualOrderPayload();
   const itemPayload=getManualItemPayload();
 
-  if(!orderPayload.customer_name||!orderPayload.phone||
-     !orderPayload.delivery_address||!orderPayload.city||
+  if(!orderPayload.customer_name||
+     !orderPayload.phone||
+     !orderPayload.delivery_address||
+     !orderPayload.city||
      !orderPayload.payment_method){
    throw new Error("Customer name, phone, delivery address, city and payment method are required.");
   }
-  if(orderPayload.discount_amount<0||orderPayload.delivery_fee<0)
+
+  if(orderPayload.discount_amount<0||orderPayload.delivery_fee<0){
    throw new Error("Discount and delivery fee cannot be negative.");
+  }
 
   if(!id&&!orderPayload.order_number){
    throw new Error("Enter an order number before creating a manual order.");
@@ -1075,24 +1566,47 @@ el("manualOrderForm").addEventListener("submit",async event=>{
     p_order:orderPayload,
     p_items:itemPayload
    });
+
    if(error)throw error;
+
    await saveManualCourier(id);
+
    showMessage("manualMessage","Manual order updated successfully.");
+
   }else{
    const {data,error}=await sb.rpc("create_zyra_manual_order_with_number",{
     p_order:orderPayload,
     p_items:itemPayload
    });
+
    if(error)throw error;
+
    const createdId=data?.id||data?.[0]?.id;
-   if(!createdId)throw new Error("The order was submitted, but the RPC did not return an order ID. Refresh the order list before trying again.");
+
+   if(!createdId){
+    throw new Error("The order was submitted, but the RPC did not return an order ID. Refresh the order list before trying again.");
+   }
+
    await saveManualCourier(createdId);
-   showMessage("manualMessage","Manual order created successfully. Order number: "+(data.order_number||orderPayload.order_number));
+
+   showMessage(
+    "manualMessage",
+    "Manual order created successfully. Order number: "+
+    (data.order_number||orderPayload.order_number)
+   );
   }
+
   resetManualForm();
+
   await loadOrders();
+
  }catch(error){
-  showMessage("manualMessage","Could not save manual order: "+(error.message||String(error)),true);
+  showMessage(
+   "manualMessage",
+   "Could not save manual order: "+(error.message||String(error)),
+   true
+  );
+
  }finally{
   setButtonLoading(button,false);
  }
@@ -1104,50 +1618,100 @@ el("manualOrderForm").addEventListener("submit",async event=>{
 function getReportOrders(){
  const from=el("reportFrom")?.value;
  const to=el("reportTo")?.value;
+
  return orderCache.filter(order=>{
   const date=(order.created_at||"").slice(0,10);
+
   if(from&&date<from)return false;
   if(to&&date>to)return false;
+
   return true;
  });
 }
+
 function calculateZyraReport(){
  const orders=getReportOrders();
+
  const totalOrders=orders.length;
- const pendingOrders=orders.filter(o=>String(o.order_status||"").toLowerCase()==="pending").length;
- const totalSales=orders.reduce((sum,o)=>sum+Number(o.total_amount||0),0);
- const paidSales=orders.filter(o=>String(o.payment_status||"").toLowerCase()==="paid")
-  .reduce((sum,o)=>sum+Number(o.total_amount||0),0);
- const productCost=orders.reduce((sum,o)=>
-  sum+(o.store_order_items||[]).reduce((s,i)=>
-   s+Number(i.unit_cost_price||0)*Number(i.quantity||0),0),0);
- const expenses=expenseCache.reduce((sum,x)=>sum+Number(x.amount||0),0);
+
+ const pendingOrders=orders.filter(
+  o=>String(o.order_status||"").toLowerCase()==="pending"
+ ).length;
+
+ const totalSales=orders.reduce(
+  (sum,o)=>sum+Number(o.total_amount||0),0
+ );
+
+ const paidSales=orders.filter(
+  o=>String(o.payment_status||"").toLowerCase()==="paid"
+ ).reduce(
+  (sum,o)=>sum+Number(o.total_amount||0),0
+ );
+
+ const productCost=orders.reduce(
+  (sum,o)=>sum+(o.store_order_items||[]).reduce(
+   (s,i)=>s+Number(i.unit_cost_price||0)*Number(i.quantity||0),0
+  ),0
+ );
+
+ const expenses=expenseCache.reduce(
+  (sum,x)=>sum+Number(x.amount||0),0
+ );
+
  const estimatedProfit=paidSales-productCost-expenses;
- return{orders,totalOrders,pendingOrders,totalSales,paidSales,productCost,expenses,estimatedProfit};
+
+ return{
+  orders,
+  totalOrders,
+  pendingOrders,
+  totalSales,
+  paidSales,
+  productCost,
+  expenses,
+  estimatedProfit
+ };
 }
+
 function renderStatsAndReport(){
  const r=calculateZyraReport();
+
  if(el("overviewStats")){
   el("overviewStats").innerHTML=
    makeStat("Total Orders",r.totalOrders)+
    makeStat("Pending Orders",r.pendingOrders)+
    makeStat("Total Sales",money(r.totalSales))+
    makeStat("Paid Sales",money(r.paidSales))+
-   makeStat("Business Expenses",money(expenseCache.reduce((s,x)=>s+Number(x.amount||0),0)));
+   makeStat(
+    "Business Expenses",
+    money(expenseCache.reduce((s,x)=>s+Number(x.amount||0),0))
+   );
  }
+
  if(el("recentOrders")){
-  const recent=[...orderCache].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,8);
+  const recent=[...orderCache]
+   .sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))
+   .slice(0,8);
+
   el("recentOrders").innerHTML=recent.map(o=>`
-   <div class="item"><strong>${escapeHtml(o.order_number||o.id)}</strong>
-   <p>${escapeHtml(o.customer_name||"")} · ${money(o.total_amount)}</p>
-   <small>${escapeHtml(o.order_status||"pending")} · ${escapeHtml(o.payment_status||"pending")}</small></div>
+   <div class="item">
+    <strong>${escapeHtml(o.order_number||o.id)}</strong>
+    <p>${escapeHtml(o.customer_name||"")} · ${money(o.total_amount)}</p>
+    <small>
+     ${escapeHtml(o.order_status||"pending")} ·
+     ${escapeHtml(o.payment_status||"pending")}
+    </small>
+   </div>
   `).join("")||"No orders yet.";
  }
+
  renderZyraReport();
 }
+
 function renderZyraReport(){
  const r=calculateZyraReport();
+
  const stats=el("reportStats");
+
  if(stats){
   stats.innerHTML=
    makeStat("Orders",r.totalOrders)+
@@ -1158,20 +1722,37 @@ function renderZyraReport(){
    makeStat("Expenses",money(r.expenses))+
    makeStat("Estimated Profit",money(r.estimatedProfit));
  }
+
  const table=el("reportTable");
+
  if(table){
   table.innerHTML=`<table>
-   <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Status</th><th>Total</th></tr></thead>
-   <tbody>${r.orders.map(o=>`
-    <tr><td>${escapeHtml(o.order_number||o.id)}</td>
-    <td>${escapeHtml((o.created_at||"").slice(0,10))}</td>
-    <td>${escapeHtml(o.customer_name||"")}</td>
-    <td>${escapeHtml(o.payment_status||"")}</td>
-    <td>${escapeHtml(o.order_status||"")}</td>
-    <td>${money(o.total_amount)}</td></tr>`).join("")}</tbody>
+   <thead>
+    <tr>
+     <th>Order</th>
+     <th>Date</th>
+     <th>Customer</th>
+     <th>Payment</th>
+     <th>Status</th>
+     <th>Total</th>
+    </tr>
+   </thead>
+   <tbody>
+    ${r.orders.map(o=>`
+     <tr>
+      <td>${escapeHtml(o.order_number||o.id)}</td>
+      <td>${escapeHtml((o.created_at||"").slice(0,10))}</td>
+      <td>${escapeHtml(o.customer_name||"")}</td>
+      <td>${escapeHtml(o.payment_status||"")}</td>
+      <td>${escapeHtml(o.order_status||"")}</td>
+      <td>${money(o.total_amount)}</td>
+     </tr>
+    `).join("")}
+   </tbody>
   </table>`;
  }
 }
+
 function refreshReport(){
  renderZyraReport();
 }
@@ -1187,6 +1768,7 @@ document.addEventListener("DOMContentLoaded",()=>{
  renderManualItems();
  checkSession();
 });
+
 </script>
 </body>
 </html>
