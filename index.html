@@ -1087,11 +1087,14 @@ img{max-width:100%;display:block}
 
 /* PART 1 JAVASCRIPT CONFIGURATION AND SHARED HELPERS */
 
-const SUPABASE_URL =
-    "https://rouysaipjmzmvoegtign.supabase.co";
+const SUPABASE_URL = "https://rouysaipjmzmvoegtign.supabase.co";
 
-const SUPABASE_ANON_KEY =
-    "sb_publishable_XmZ0n4uAEtAhJcFgMg_CQ-HWv2D";
+const SUPABASE_ANON_KEY = "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
 const PRODUCT_TABLE = "store_products";
 const STORAGE_BUCKET = "Product -image";
@@ -1366,7 +1369,6 @@ function customField(item,key,label,placeholder,max=8,wide=false){
 
 $("currentYear").textContent = new Date().getFullYear();
 $("footerContact").textContent = SUPPORT_CONTACT;
-    
 
 // =====================================================
 // PART 2 — PRODUCTS, PRODUCT DISPLAY, CART & CUSTOMISATION
