@@ -13,6 +13,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:14px Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;background:var(--accent);color:white}
+button:disabled{opacity:.5;cursor:not-allowed}
 button.secondary{background:#e9e3dc;color:#39332d}
 button.danger{background:var(--danger)}
 input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:7px;background:white}
@@ -42,6 +43,9 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 .item{border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}
 .hidden{display:none!important}
 .notice{padding:10px;border-radius:7px;background:#f5eee8;margin:10px 0}
+.stat small{display:block}
+.check-label{display:flex;align-items:center;gap:8px}
+.check-label input{width:auto}
 @media(max-width:600px){main{padding:10px}header{padding:12px}nav{padding:8px}.panel{padding:12px}}
 </style>
 </head>
@@ -74,14 +78,17 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 
 <main>
 <section class="page active" id="page-overview">
-<div class="panel"><h2>Business Overview</h2>
+<div class="panel">
+<h2>Business Overview</h2>
 <div class="actions"><button onclick="refreshAll()">Refresh Dashboard</button></div>
-<div class="stats" id="overviewStats"></div></div>
+<div class="stats" id="overviewStats"></div>
+</div>
 <div class="panel"><h2>Recent Orders</h2><div id="recentOrders">Loading…</div></div>
 </section>
 
 <section class="page" id="page-reports">
-<div class="panel"><h2>Sales & Profit Report</h2>
+<div class="panel">
+<h2>Sales & Profit Report</h2>
 <div class="grid">
 <div><label>From</label><input type="date" id="reportFrom"></div>
 <div><label>To</label><input type="date" id="reportTo"></div>
@@ -89,7 +96,8 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <div class="actions"><button onclick="refreshReport()">Generate Report</button></div>
 <div id="reportStats" class="stats"></div>
 <div id="reportTable" class="table-wrap"></div>
-</div></section>
+</div>
+</section>
 
 <section class="page" id="page-banks">
 <div class="panel"><h2>Customer Bank Accounts</h2><div id="bankList"></div></div>
@@ -100,9 +108,11 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 </section>
 
 <section class="page" id="page-orders">
-<div class="panel"><h2>Orders & Courier Management</h2>
+<div class="panel">
+<h2>Orders & Courier Management</h2>
 <div class="actions"><button onclick="loadOrders()">Refresh Orders</button></div>
-<div id="ordersList">Loading…</div></div>
+<div id="ordersList">Loading…</div>
+</div>
 </section>
 
 <section class="page" id="page-manual">
@@ -111,27 +121,37 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <form id="manualOrderForm">
 <input type="hidden" name="editing_order_id">
 <div class="grid">
-<div><label>Order Number</label><input name="order_number" placeholder="Auto-generated if blank"></div>
+<div><label>Order Number (required for new orders)</label><input name="order_number" placeholder="Enter unique order number"></div>
 <div><label>Order Date</label><input name="order_date" type="datetime-local" required></div>
 <div><label>Customer Name</label><input name="customer_name" required></div>
 <div><label>Phone</label><input name="phone" required></div>
 <div><label>Email</label><input name="email" type="email"></div>
 <div><label>District</label><input name="district"></div>
-<div><label>City</label><input name="city"></div>
+<div><label>City</label><input name="city" required></div>
 <div><label>Postal Code</label><input name="postal_code"></div>
-<div><label>Payment Method</label><input name="payment_method"></div>
-<div><label>Payment Status</label><select name="payment_status"><option>pending</option><option>paid</option><option>rejected</option></select></div>
-<div><label>Order Status</label><select name="order_status"><option>pending</option><option>processing</option><option>completed</option><option>cancelled</option></select></div>
+<div><label>Payment Method</label><input name="payment_method" required placeholder="Bank transfer / COD"></div>
+<div><label>Payment Status</label><select name="payment_status"><option value="pending">Pending</option><option value="paid">Paid</option><option value="rejected">Rejected</option></select></div>
+<div><label>Order Status</label><select name="order_status"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
 </div>
-<label>Delivery Address</label><textarea name="delivery_address"></textarea>
+<label>Delivery Address</label><textarea name="delivery_address" required></textarea>
 <label>Customer Notes</label><textarea name="customer_notes"></textarea>
-<h3>Order Items</h3><div id="manualItems"></div>
-<div class="actions"><button type="button" class="secondary" onclick="addManualItem()">Add Item</button></div>
+
+<h3>Order Items</h3>
 <div class="grid">
-<div><label>Discount</label><input name="discount_amount" type="number" min="0" value="0" oninput="calculateManualTotal()"></div>
-<div><label>Delivery Fee</label><input name="delivery_fee" type="number" min="0" value="0" oninput="calculateManualTotal()"></div>
+<div><label>Product Name</label><input id="manualProductName" placeholder="Product name"></div>
+<div><label>Quantity</label><input id="manualQuantity" type="number" min="1" value="1"></div>
+<div><label>Unit Price (LKR)</label><input id="manualPrice" type="number" min="0" step=".01" placeholder="0.00"></div>
+</div>
+<div class="actions"><button type="button" onclick="addManualItem()">Add Item</button></div>
+<div id="manualItems"></div>
+
+<div class="grid">
+<div><label>Discount</label><input name="discount_amount" type="number" min="0" step=".01" value="0" oninput="calculateManualTotal()"></div>
+<div><label>Delivery Fee</label><input name="delivery_fee" type="number" min="0" step=".01" value="0" oninput="calculateManualTotal()"></div>
+<div><label>Subtotal</label><input id="manualSubtotal" readonly></div>
 <div><label>Total</label><input id="manualTotal" readonly></div>
 </div>
+
 <h3>Pre-order</h3>
 <div class="grid">
 <div><label>Status</label><select name="preorder_status"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="ready">Ready</option></select></div>
@@ -140,6 +160,7 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <div><label>Estimated Ready To</label><input name="preorder_estimated_ready_to" type="date"></div>
 <div><label>Actual Ready Date</label><input name="actual_ready_for_dispatch_date" type="date"></div>
 </div>
+
 <h3>Courier</h3>
 <div class="grid">
 <div><label>Courier</label><input name="courier" value="Not assigned"></div>
@@ -147,20 +168,26 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <div><label>Courier Reference</label><input name="courier_reference"></div>
 <div><label>Tracking ID</label><input name="tracking_id"></div>
 <div><label>Courier Status</label><input name="courier_status" value="Not dispatched"></div>
-<div><label>Courier Cost</label><input name="courier_cost" type="number" min="0" value="0"></div>
+<div><label>Courier Cost</label><input name="courier_cost" type="number" min="0" step=".01" value="0"></div>
 <div><label>Handover Date</label><input name="handover_date" type="date"></div>
 <div><label>Estimated Delivery Date</label><input name="courier_estimated_delivery_date" type="date"></div>
 </div>
 <label>Tracking Location</label><input name="tracking_location">
 <label>Courier Note</label><textarea name="courier_note"></textarea>
-<div class="actions"><button id="createManualOrderBtn" type="submit">Create Manual Order</button><button type="button" class="secondary" id="cancelManualEditBtn" onclick="cancelManualEdit()" style="display:none">Cancel Edit</button></div>
+
+<div class="actions">
+<button id="createManualOrderBtn" type="submit">Create Manual Order</button>
+<button type="button" class="secondary" id="cancelManualEditBtn" onclick="cancelManualEdit()" style="display:none">Cancel Edit</button>
+</div>
 <p id="manualMessage"></p>
-</form></div>
+</form>
+</div>
 <div class="panel"><h2>Manual Orders</h2><div id="manualOrdersList"></div></div>
 </section>
 
 <section class="page" id="page-expenses">
-<div class="panel"><h2>Business Expenses</h2>
+<div class="panel">
+<h2>Business Expenses</h2>
 <form id="expenseForm">
 <input type="hidden" name="id">
 <div class="grid">
@@ -171,12 +198,14 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 </div>
 <div class="actions"><button type="submit">Save Expense</button><button type="button" class="secondary" onclick="resetExpenseForm()">Reset</button></div>
 <p id="expenseMessage"></p>
-</form></div>
+</form>
+</div>
 <div class="panel"><h2>Expense Records</h2><div id="expensesList"></div></div>
 </section>
 
 <section class="page" id="page-products">
-<div class="panel"><h2 id="productFormTitle">Add Product</h2>
+<div class="panel">
+<h2 id="productFormTitle">Add Product</h2>
 <form id="productForm">
 <input type="hidden" name="id">
 <div class="grid">
@@ -190,9 +219,10 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <label>Image URL</label><input name="image_url">
 <label>Description</label><textarea name="description"></textarea>
 <div class="grid">
-<label><input name="is_customisable" type="checkbox" style="width:auto"> Customisable (legacy)</label>
-<label><input name="is_active" type="checkbox" checked style="width:auto"> Active Product</label>
+<label class="check-label"><input name="is_customisable" type="checkbox"> Customisable (legacy)</label>
+<label class="check-label"><input name="is_active" type="checkbox" checked> Active Product</label>
 </div>
+
 <div class="panel" style="margin-top:15px">
 <h3>Product Customisation Settings</h3>
 <label>Customisation Type</label>
@@ -203,24 +233,34 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <option value="text_photo">Text + Photo</option>
 </select>
 <div id="zyraTextSettings">
-<label>Text Required?</label><select name="customization_required"><option value="false">Optional</option><option value="true">Required</option></select>
+<label>Text Required?</label>
+<select name="customization_required"><option value="false">Optional</option><option value="true">Required</option></select>
 <label>Text Field Labels (one per line)</label>
 <textarea name="customization_fields" placeholder="Name&#10;Special Date&#10;Engraving"></textarea>
 </div>
 <div id="zyraPhotoSettings">
 <label>Photos per individual product unit</label>
 <input name="customization_photo_count" type="number" min="0" value="0">
-<label>Photo Required?</label><select name="customization_photo_required"><option value="false">Optional</option><option value="true">Required</option></select>
+<label>Photo Required?</label>
+<select name="customization_photo_required"><option value="false">Optional</option><option value="true">Required</option></select>
 </div>
 <div id="zyraPhoneSettings">
+<label>Enable Phone Model Selection</label>
+<label class="check-label"><input type="checkbox" id="zyraPhoneEnabled"> Enable phone models for this product</label>
 <label>Phone Case Models (one per line)</label>
-<textarea name="customization_options" placeholder="iPhone 15&#10;iPhone 15 Pro&#10;Samsung models"></textarea>
+<textarea id="zyraPhoneModelsInput" placeholder="iPhone 15&#10;iPhone 15 Pro&#10;iPhone 15 Pro Max&#10;Samsung models"></textarea>
+<p class="muted">Enter one model per line. These are saved in customization_options JSON.</p>
 </div>
 <p class="muted">Photo count is applied separately to each quantity unit.</p>
 </div>
-<div class="actions"><button type="submit">Save Product</button><button type="button" class="secondary" onclick="resetProductForm()">Reset</button></div>
+
+<div class="actions">
+<button type="submit">Save Product</button>
+<button type="button" class="secondary" onclick="resetProductForm()">Reset</button>
+</div>
 <p id="productMessage"></p>
-</form></div>
+</form>
+</div>
 <div class="panel"><h2>Product List</h2><div id="productsList"></div></div>
 </section>
 </main>
@@ -237,7 +277,7 @@ let orderCache=[];
 let productCache=[];
 let expenseCache=[];
 let trackingCache=new Map();
-let manualItemCount=0;
+let zyraManualItems=[];
 
 const el=id=>document.getElementById(id);
 const money=value=>"LKR "+Number(value||0).toLocaleString("en-LK",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -251,6 +291,11 @@ function showMessage(id,message,isError=false){
  node.textContent=message;
  node.style.color=isError?"#b83c3c":"#397b55";
 }
+function setButtonLoading(button,loading,label){
+ if(!button)return;
+ if(loading){button.dataset.originalText=button.textContent;button.disabled=true;button.textContent="Please wait…"}
+ else{button.disabled=false;button.textContent=button.dataset.originalText||label||"Save"}
+}
 function showPage(page,button){
  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
@@ -262,6 +307,7 @@ function showPage(page,button){
  if(page==="expenses")loadExpenses();
  if(page==="manual")renderManualOrders();
  if(page==="banks")renderAdminBankAccounts();
+ if(page==="reports")refreshReport();
 }
 async function login(){
  const email=el("loginEmail").value.trim();
@@ -290,33 +336,16 @@ sb.auth.onAuthStateChange((_event,session)=>{
  if(!session)showDashboard(false);
 });
 async function refreshAll(){
- await Promise.allSettled([
-  loadOrders(),loadProducts(),loadExpenses(),loadPayments()
- ]);
+ await Promise.allSettled([loadOrders(),loadProducts(),loadExpenses(),loadPayments()]);
  renderStatsAndReport();
  renderManualOrders();
 }
-function makeInput(label,value="",type="text"){
- const wrap=document.createElement("div");
- const l=document.createElement("label");l.textContent=label;
- const input=document.createElement("input");input.type=type;input.value=value??"";
- wrap.append(l,input);
- return{wrap,input};
-}
-function makeSelect(label,value,options){
- const wrap=document.createElement("div");
- const l=document.createElement("label");l.textContent=label;
- const input=document.createElement("select");
- options.forEach(option=>{
-  const o=document.createElement("option");
-  o.value=option;o.textContent=option;input.append(o);
- });
- input.value=value||options[0];
- wrap.append(l,input);
- return{wrap,input};
+function makeStat(label,value){
+ return `<div class="stat"><small>${escapeHtml(label)}</small><strong>${value}</strong></div>`;
 }
 
-/* BANK ACCOUNTS */
+/* BANK ACCOUNTS
+   Add your real account details here. No account numbers are invented. */
 const ZYRA_BANKS=[
  {bank:"Commercial Bank",name:"Zyra.lk",branch:""},
  {bank:"Bank of Ceylon",name:"Zyra.lk",branch:""}
@@ -333,13 +362,16 @@ async function loadOrders(){
  const target=el("ordersList");
  if(target)target.textContent="Loading orders…";
  try{
-  const {data:orders,error}=await sb.from("store_orders").select("*,store_order_items(*)").order("created_at",{ascending:false}).limit(300);
+  const {data:orders,error}=await sb.from("store_orders")
+   .select("*,store_order_items(*)")
+   .order("created_at",{ascending:false}).limit(300);
   if(error)throw error;
   orderCache=orders||[];
   trackingCache.clear();
   const ids=orderCache.map(o=>o.id).filter(Boolean);
   if(ids.length){
-   const {data:tracks,error:trackError}=await sb.from("zyra_orders").select("*").in("store_order_id",ids);
+   const {data:tracks,error:trackError}=await sb.from("zyra_orders")
+    .select("*").in("store_order_id",ids);
    if(!trackError)(tracks||[]).forEach(t=>trackingCache.set(t.store_order_id,t));
   }
   renderOrders(orderCache);
@@ -355,8 +387,7 @@ function renderOrders(orders){
  target.innerHTML=orders.map(o=>{
   const track=trackingCache.get(o.id)||{};
   const items=(o.store_order_items||[]).map(i=>`
-   <div class="item">
-   <strong>${escapeHtml(i.product_name||"Product")}</strong>
+   <div class="item"><strong>${escapeHtml(i.product_name||"Product")}</strong>
    × ${Number(i.quantity||1)} — ${money(i.unit_price)}
    ${i.customisation_details?`<p>${escapeHtml(JSON.stringify(parseCustomisationDetails(i.customisation_details)))}</p>`:""}
    </div>`).join("");
@@ -373,7 +404,7 @@ function renderOrders(orders){
     <div><label>Courier Reference</label><input id="reference-${o.id}" value="${escapeHtml(track.courier_reference||"")}"></div>
     <div><label>Tracking ID</label><input id="tracking-${o.id}" value="${escapeHtml(track.tracking_id||"")}"></div>
     <div><label>Courier Status</label><input id="courierstatus-${o.id}" value="${escapeHtml(track.status||"Not dispatched")}"></div>
-    <div><label>Courier Cost</label><input id="cost-${o.id}" type="number" value="${Number(track.courier_cost||0)}"></div>
+    <div><label>Courier Cost</label><input id="cost-${o.id}" type="number" min="0" step=".01" value="${Number(track.courier_cost||0)}"></div>
     <div><label>Handover Date</label><input id="handover-${o.id}" type="date" value="${escapeHtml(track.handover_date||"")}"></div>
     <div><label>Estimated Delivery</label><input id="estimate-${o.id}" type="date" value="${escapeHtml(track.courier_estimated_delivery_date||"")}"></div>
    </div>
@@ -405,7 +436,9 @@ async function saveCourierDetails(id){
   updated_at:new Date().toISOString()
  };
  try{
-  const {data:existing}=await sb.from("zyra_orders").select("id").eq("store_order_id",id).maybeSingle();
+  const {data:existing,error:findError}=await sb.from("zyra_orders")
+   .select("id").eq("store_order_id",id).maybeSingle();
+  if(findError)throw findError;
   const result=existing
    ?await sb.from("zyra_orders").update(payload).eq("store_order_id",id)
    :await sb.from("zyra_orders").insert(payload);
@@ -421,7 +454,8 @@ async function updateOrderStatus(id,status){
 async function deleteOrder(id){
  if(!confirm("Delete this order? This action cannot be undone."))return;
  try{
-  await sb.from("zyra_orders").delete().eq("store_order_id",id);
+  const courier=await sb.from("zyra_orders").delete().eq("store_order_id",id);
+  if(courier.error)throw courier.error;
   const items=await sb.from("store_order_items").delete().eq("order_id",id);
   if(items.error)throw items.error;
   const result=await sb.from("store_orders").delete().eq("id",id);
@@ -435,7 +469,8 @@ async function loadPayments(){
  const target=el("paymentList");if(!target)return;
  target.textContent="Loading payment slips…";
  try{
-  const {data,error}=await sb.from("store_orders").select("*").not("payment_slip","is",null).order("created_at",{ascending:false}).limit(200);
+  const {data,error}=await sb.from("store_orders").select("*")
+   .not("payment_slip","is",null).order("created_at",{ascending:false}).limit(200);
   if(error)throw error;
   target.innerHTML=(data||[]).map(o=>`
    <div class="item">
@@ -451,10 +486,14 @@ async function loadPayments(){
  }catch(error){target.textContent="Could not load payment slips: "+error.message}
 }
 async function viewPaymentSlip(id){
- const order=orderCache.find(o=>o.id===id);
- if(!order||!order.payment_slip){alert("Payment slip not found.");return}
- const path=order.payment_slip;
- const {data,error}=await sb.storage.from("payment-slips").createSignedUrl(path,300);
+ let order=orderCache.find(o=>o.id===id);
+ if(!order){
+  const {data,error}=await sb.from("store_orders").select("*").eq("id",id).maybeSingle();
+  if(error||!data){alert("Order not found.");return}
+  order=data;
+ }
+ if(!order.payment_slip){alert("Payment slip not found.");return}
+ const {data,error}=await sb.storage.from("payment-slips").createSignedUrl(order.payment_slip,300);
  if(error){alert(error.message);return}
  window.open(data.signedUrl,"_blank","noopener");
 }
@@ -487,7 +526,11 @@ function invoiceMarkup(o){
  <p>Address: ${escapeHtml(o.delivery_address||"")}</p>
  <table><thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
  <tbody>${rows}</tbody></table>
- <h3>Grand Total: ${money(o.total_amount)}</h3><p>Thank you for shopping with Zyra.lk</p></body></html>`;
+ <p>Subtotal: ${money(o.subtotal_amount)}</p>
+ <p>Discount: ${money(o.discount_amount)}</p>
+ <p>Delivery: ${money(o.delivery_fee)}</p>
+ <h3>Grand Total: ${money(o.total_amount)}</h3>
+ <p>Thank you for shopping with Zyra.lk</p></body></html>`;
 }
 function printInvoice(id){
  const o=orderCache.find(x=>x.id===id);if(!o)return alert("Order not found.");
@@ -500,16 +543,27 @@ function downloadInvoicePDF(id){
  const doc=new window.jspdf.jsPDF();
  doc.setFontSize(20);doc.text("ZYRA.LK - INVOICE",15,20);
  doc.setFontSize(11);
- doc.text("Order: "+(o.order_number||o.id),15,32);
- doc.text("Customer: "+(o.customer_name||""),15,40);
- doc.text("Phone: "+(o.phone||""),15,48);
- let y=62;
+ let y=32;
+ const lines=[
+  "Order: "+(o.order_number||o.id),
+  "Date: "+new Date(o.created_at||Date.now()).toLocaleDateString(),
+  "Customer: "+(o.customer_name||""),
+  "Phone: "+(o.phone||""),
+  "Address: "+(o.delivery_address||"")
+ ];
+ lines.forEach(line=>{doc.text(line.substring(0,95),15,y);y+=8});
+ y+=5;
  (o.store_order_items||[]).forEach(i=>{
   const line=(i.product_name||"Product")+" x "+i.quantity+" - "+money(i.unit_price);
-  doc.text(line.substring(0,90),15,y);y+=8;
-  if(y>270){doc.addPage();y=20}
+  if(y>275){doc.addPage();y=20}
+  doc.text(line.substring(0,95),15,y);y+=8;
  });
- doc.text("Total: "+money(o.total_amount),15,y+8);
+ y+=5;
+ if(y>275){doc.addPage();y=20}
+ doc.text("Subtotal: "+money(o.subtotal_amount),15,y);y+=8;
+ doc.text("Discount: "+money(o.discount_amount),15,y);y+=8;
+ doc.text("Delivery: "+money(o.delivery_fee),15,y);y+=8;
+ doc.text("Total: "+money(o.total_amount),15,y);
  doc.save("Zyra-Invoice-"+(o.order_number||id)+".pdf");
 }
 
@@ -521,10 +575,11 @@ function resetExpenseForm(){
 }
 async function loadExpenses(){
  try{
-  const {data,error}=await sb.from("zyra_business_expenses").select("*").order("expense_date",{ascending:false});
+  const {data,error}=await sb.from("zyra_business_expenses")
+   .select("*").order("expense_date",{ascending:false});
   if(error)throw error;
   expenseCache=data||[];
-  const target=el("expensesList");
+  const target=el("expensesList");if(!target)return;
   target.innerHTML=expenseCache.map(x=>`
    <div class="item"><strong>${escapeHtml(x.category)}</strong>
    <p>${escapeHtml(x.description||"")} · ${money(x.amount)}</p>
@@ -563,149 +618,103 @@ async function deleteExpense(id){
  if(error)alert(error.message);else await loadExpenses();
 }
 
-/* =====================================================
-   PRODUCT CUSTOMISATION
-===================================================== */
-
+/* PRODUCT CUSTOMISATION HELPERS */
+function getCustomizationOptions(product){
+ try{
+  return typeof product.customization_options==="string"
+   ?JSON.parse(product.customization_options||"{}")
+   :(product.customization_options||{});
+ }catch(_){return{}}
+}
+function getCustomizationFields(product){
+ try{
+  return typeof product.customization_fields==="string"
+   ?JSON.parse(product.customization_fields||"{}")
+   :(product.customization_fields||{});
+ }catch(_){return{}}
+}
+function getCustomizationType(product){
+ if(product.customization_type)return product.customization_type;
+ return product.is_customisable?"text":"none";
+}
+function getPhoneModelsFromProduct(product){
+ const options=getCustomizationOptions(product);
+ return Array.isArray(options.phone_models)?options.phone_models:[];
+}
 function updateZyraCustomizationVisibility(){
- const type=el("productForm").elements.customization_type.value;
-
- el("zyraTextSettings").style.display=
-  ["text","text_photo"].includes(type)?"block":"none";
-
- el("zyraPhotoSettings").style.display=
-  ["photo","text_photo"].includes(type)?"block":"none";
-
- el("zyraPhoneSettings").style.display="block";
+ const type=el("zyraCustomizationType")?.value||"none";
+ el("zyraTextSettings")?.classList.toggle("hidden",!["text","text_photo"].includes(type));
+ el("zyraPhotoSettings")?.classList.toggle("hidden",!["photo","text_photo"].includes(type));
 }
-
-function parseLines(value){
- return String(value||"")
-  .split("\n")
-  .map(x=>x.trim())
-  .filter(Boolean);
+function loadProductCustomization(product){
+ const f=el("productForm");
+ if(!product)return;
+ f.elements.customization_type.value=getCustomizationType(product);
+ f.elements.customization_required.value=String(!!product.customization_required);
+ f.elements.customization_photo_count.value=Number(product.customization_photo_count||0);
+ f.elements.customization_photo_required.value=String(!!product.customization_photo_required);
+ const fields=getCustomizationFields(product);
+ f.elements.customization_fields.value=Array.isArray(fields.text_fields)
+  ?fields.text_fields.join("\n")
+  :typeof fields==="string"?fields:"";
+ const options=getCustomizationOptions(product);
+ el("zyraPhoneEnabled").checked=!!options.phone_enabled;
+ el("zyraPhoneModelsInput").value=getPhoneModelsFromProduct(product).join("\n");
+ updateZyraCustomizationVisibility();
 }
-
-function getZyraCustomizationSettings(form){
- const type=form.elements.customization_type.value;
-
+function collectProductCustomization(){
+ const f=el("productForm");
+ const type=f.elements.customization_type.value||"none";
+ const models=el("zyraPhoneModelsInput").value.split("\n").map(x=>x.trim()).filter(Boolean);
+ const uniqueModels=[...new Map(models.map(x=>[x.toLowerCase(),x])).values()];
  return{
   customization_type:type,
-
-  customization_photo_count:
-   ["photo","text_photo"].includes(type)
-    ?Number(form.elements.customization_photo_count.value||0)
-    :0,
-
-  customization_required:
-   ["text","text_photo"].includes(type)&&
-   form.elements.customization_required.value==="true",
-
-  customization_photo_required:
-   ["photo","text_photo"].includes(type)&&
-   form.elements.customization_photo_required.value==="true",
-
+  customization_required:f.elements.customization_required.value==="true",
+  customization_photo_count:Math.max(0,Number(f.elements.customization_photo_count.value||0)),
+  customization_photo_required:f.elements.customization_photo_required.value==="true",
   customization_fields:{
-   text_fields:parseLines(form.elements.customization_fields.value)
+   text_fields:f.elements.customization_fields.value.split("\n").map(x=>x.trim()).filter(Boolean)
   },
-
   customization_options:{
-   phone_models:parseLines(form.elements.customization_options.value)
+   phone_enabled:el("zyraPhoneEnabled").checked,
+   phone_models:el("zyraPhoneEnabled").checked?uniqueModels:[]
   }
  };
 }
-
-function setZyraCustomizationSettings(form,p){
- const type=p.customization_type||
-  (p.is_customisable?"text":"none");
-
- form.elements.customization_type.value=type;
-
- form.elements.customization_photo_count.value=
-  p.customization_photo_count??0;
-
- form.elements.customization_required.value=
-  String(!!p.customization_required);
-
- form.elements.customization_photo_required.value=
-  String(!!p.customization_photo_required);
-
- const fields=typeof p.customization_fields==="string"
-  ?JSON.parse(p.customization_fields||"{}")
-  :(p.customization_fields||{});
-
- const options=typeof p.customization_options==="string"
-  ?JSON.parse(p.customization_options||"{}")
-  :(p.customization_options||{});
-
- form.elements.customization_fields.value=
-  Array.isArray(fields.text_fields)
-   ?fields.text_fields.join("\n")
-   :"";
-
- form.elements.customization_options.value=
-  Array.isArray(options.phone_models)
-   ?options.phone_models.join("\n")
-   :"";
-
- updateZyraCustomizationVisibility();
+function validateProductCustomization(settings){
+ if(!["none","text","photo","text_photo"].includes(settings.customization_type))
+  throw new Error("Invalid customisation type.");
+ if(settings.customization_photo_count<0)throw new Error("Photo count cannot be negative.");
+ if(settings.customization_options.phone_enabled&&!settings.customization_options.phone_models.length)
+  throw new Error("Please add at least one phone model.");
 }
 
-
-/* =====================================================
-   PRODUCT MANAGEMENT
-===================================================== */
-
+/* PRODUCT MANAGEMENT */
 async function loadProducts(){
- const target=el("productsList");
-
- if(target)target.textContent="Loading products…";
-
+ const container=el("productsList");if(!container)return;
+ container.innerHTML="Loading products…";
  try{
-
-  const {data,error}=await sb
-   .from("store_products")
-   .select("*")
-   .order("created_at",{ascending:false});
-
+  const {data,error}=await sb.from("store_products").select("*").order("created_at",{ascending:false});
   if(error)throw error;
-
   productCache=data||[];
-
-  target.innerHTML=productCache.map(p=>`
+  container.innerHTML=productCache.map(p=>`
    <div class="item">
-    <strong>${escapeHtml(p.name)}</strong>
-
-    <p>${money(p.price)} · Stock: ${Number(p.stock_quantity||0)}</p>
-
-    <small>
-     ${p.is_active?"Active":"Inactive"}
-     · ${escapeHtml(p.category||"")}
-    </small>
-
+    <strong>${escapeHtml(p.name||"Unnamed product")}</strong>
+    <p>Category: ${escapeHtml(p.category||"—")}</p>
+    <p>Price: ${money(p.price)} · Stock: ${Number(p.stock_quantity||0)}</p>
+    <p>Customisation: ${escapeHtml(getCustomizationType(p))}</p>
+    <p>Phone models: ${getPhoneModelsFromProduct(p).map(escapeHtml).join(", ")||"None"}</p>
     <div class="actions">
-     <button class="secondary"
-      onclick="editProduct('${p.id}')">Edit</button>
+     <button onclick="editProduct('${p.id}')">Edit</button>
+     <button class="danger" onclick="deleteProduct('${p.id}')">Delete</button>
     </div>
-   </div>
-  `).join("")||"No products found.";
-
- }catch(error){
-
-  target.textContent="Could not load products: "+error.message;
-
- }
+   </div>`).join("")||"No products found.";
+ }catch(error){container.textContent="Could not load products: "+error.message}
 }
-
-
 function editProduct(id){
- const p=productCache.find(x=>String(x.id)===String(id));
-
- if(!p)return;
-
+ const p=productCache.find(x=>String(x.id)===String(id));if(!p)return;
  const f=el("productForm");
-
- f.elements.id.value=p.id;
+ f.elements.id.value=p.id||"";
  f.elements.name.value=p.name||"";
  f.elements.category.value=p.category||"";
  f.elements.cost_price.value=p.cost_price??"";
@@ -713,1013 +722,471 @@ function editProduct(id){
  f.elements.stock_quantity.value=p.stock_quantity??0;
  f.elements.image_url.value=p.image_url||"";
  f.elements.description.value=p.description||"";
-
  f.elements.is_customisable.checked=!!p.is_customisable;
- f.elements.is_active.checked=!!p.is_active;
-
- setZyraCustomizationSettings(f,p);
-
+ f.elements.is_active.checked=p.is_active!==false;
+ f.elements.image_file.value="";
+ loadProductCustomization(p);
  el("productFormTitle").textContent="Edit Product";
-
- showPage(
-  "products",
-  document.querySelector('nav button:last-child')
- );
-
+ showMessage("productMessage","");
  window.scrollTo({top:0,behavior:"smooth"});
 }
-
-
 function resetProductForm(){
- const f=el("productForm");
-
- f.reset();
-
+ const f=el("productForm");f.reset();
  f.elements.id.value="";
  f.elements.is_active.checked=true;
- f.elements.stock_quantity.value=0;
  f.elements.customization_type.value="none";
  f.elements.customization_photo_count.value=0;
- f.elements.customization_required.value="false";
- f.elements.customization_photo_required.value="false";
-
+ el("zyraPhoneEnabled").checked=false;
+ el("zyraPhoneModelsInput").value="";
  el("productFormTitle").textContent="Add Product";
-
  updateZyraCustomizationVisibility();
 }
-
-
+async function deleteProduct(id){
+ if(!confirm("Delete this product?"))return;
+ try{
+  const {error}=await sb.from("store_products").delete().eq("id",id);
+  if(error)throw error;
+  showMessage("productMessage","Product deleted.");
+  await loadProducts();
+ }catch(error){alert("Could not delete product: "+error.message)}
+}
 el("productForm").addEventListener("submit",async event=>{
  event.preventDefault();
-
  const f=event.currentTarget;
- const button=f.querySelector('button[type="submit"]');
-
- button.disabled=true;
-
+ const button=f.querySelector('[type="submit"]');
+ setButtonLoading(button,true);
  try{
-
   const id=f.elements.id.value;
-  const name=f.elements.name.value.trim();
-
-  let imageUrl=f.elements.image_url.value.trim();
-
-  const file=f.elements.image_file.files[0];
-
-  if(file){
-
-   const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-   const path=Date.now()+"_"+safeName;
-
-   const upload=await sb.storage
-    .from("Product -image")
-    .upload(path,file,{upsert:true});
-
-   if(upload.error)throw upload.error;
-
-   const publicResult=sb.storage
-    .from("Product -image")
-    .getPublicUrl(path);
-
-   imageUrl=publicResult.data.publicUrl;
-  }
-
-  const settings=getZyraCustomizationSettings(f);
-
+  const customization=collectProductCustomization();
+  validateProductCustomization(customization);
   const payload={
-   name,
-   category:f.elements.category.value.trim(),
-   cost_price:Number(f.elements.cost_price.value||0),
+   name:f.elements.name.value.trim(),
+   category:f.elements.category.value.trim()||null,
+   cost_price:f.elements.cost_price.value===""?null:Number(f.elements.cost_price.value),
    price:Number(f.elements.price.value),
    stock_quantity:Number(f.elements.stock_quantity.value||0),
-   image_url:imageUrl,
-   description:f.elements.description.value.trim(),
-   is_customisable:settings.customization_type!=="none",
+   image_url:f.elements.image_url.value.trim()||null,
+   description:f.elements.description.value.trim()||null,
+   is_customisable:f.elements.is_customisable.checked,
    is_active:f.elements.is_active.checked,
-   ...settings
+   ...customization
   };
-
   const result=id
    ?await sb.from("store_products").update(payload).eq("id",id)
    :await sb.from("store_products").insert(payload);
-
   if(result.error)throw result.error;
-
-  showMessage("productMessage","Product saved successfully.");
-
+  showMessage("productMessage",id?"Product updated successfully.":"Product added successfully.");
   resetProductForm();
-
   await loadProducts();
-
  }catch(error){
-
-  showMessage(
-   "productMessage",
-   "Could not save product: "+error.message,
-   true
-  );
-
- }finally{
-
-  button.disabled=false;
-
- }
+  showMessage("productMessage","Could not save product: "+error.message,true);
+ }finally{setButtonLoading(button,false)}
 });
-
-updateZyraCustomizationVisibility();
-
 
 /* =====================================================
    MANUAL ORDER ITEMS
 ===================================================== */
-
-function setManualOrderDate(){
- const input=el("manualOrderForm").elements.order_date;
-
- if(input&&!input.value){
-
-  const d=new Date();
-
-  d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
-
-  input.value=d.toISOString().slice(0,16);
- }
+function resetManualItems(){
+ zyraManualItems=[];
+ renderManualItems();
 }
-
-
-async function refreshManualProductOptions(){
- if(!productCache.length)await loadProducts();
-}
-
-
 function addManualItem(){
- manualItemCount++;
+ const name=el("manualProductName").value.trim();
+ const quantity=Number(el("manualQuantity").value||1);
+ const price=Number(el("manualPrice").value||0);
+ if(!name){alert("Enter a product name.");return}
+ if(!Number.isInteger(quantity)||quantity<1){alert("Enter a valid quantity.");return}
+ if(!Number.isFinite(price)||price<0){alert("Enter a valid unit price.");return}
 
- const wrap=document.createElement("div");
-
- wrap.className="item";
-
- wrap.innerHTML=`
-  <div class="grid">
-
-   <div>
-    <label>Item Type</label>
-    <select class="mi-type">
-     <option value="existing">Existing Product</option>
-     <option value="custom">Custom Item</option>
-    </select>
-   </div>
-
-   <div class="mi-product-wrap">
-    <label>Product</label>
-    <select class="mi-product"></select>
-   </div>
-
-   <div class="mi-custom-wrap hidden">
-    <label>Custom Product Name</label>
-    <input class="mi-name">
-   </div>
-
-   <div>
-    <label>Unit Price</label>
-    <input class="mi-price" type="number" min="0" step=".01">
-   </div>
-
-   <div>
-    <label>Unit Cost</label>
-    <input class="mi-cost" type="number" min="0" step=".01">
-   </div>
-
-   <div>
-    <label>Quantity</label>
-    <input class="mi-quantity" type="number" min="1" value="1">
-   </div>
-
-  </div>
-
-  <label>Customisation / Instructions</label>
-
-  <textarea class="mi-details"
-   placeholder="Customer customisation details"></textarea>
-
-  <div class="actions">
-   <button type="button" class="danger mi-remove">
-    Remove Item
-   </button>
-  </div>
- `;
-
- const d={
-  type:wrap.querySelector(".mi-type"),
-  product:wrap.querySelector(".mi-product"),
-  customName:wrap.querySelector(".mi-name"),
-  price:wrap.querySelector(".mi-price"),
-  cost:wrap.querySelector(".mi-cost"),
-  quantity:wrap.querySelector(".mi-quantity"),
-  customDetails:wrap.querySelector(".mi-details")
- };
-
- wrap._manual=d;
-
- const updateType=()=>{
-
-  const custom=d.type.value==="custom";
-
-  wrap.querySelector(".mi-product-wrap")
-   .classList.toggle("hidden",custom);
-
-  wrap.querySelector(".mi-custom-wrap")
-   .classList.toggle("hidden",!custom);
-
-  calculateManualTotal();
- };
-
- d.type.addEventListener("change",updateType);
-
- d.product.addEventListener("change",()=>{
-
-  const p=productCache.find(
-   x=>String(x.id)===d.product.value
-  );
-
-  if(p){
-   d.price.value=p.price||0;
-   d.cost.value=p.cost_price||0;
-  }
-
-  calculateManualTotal();
+ const product=productCache.find(p=>String(p.name||"").toLowerCase()===name.toLowerCase());
+ zyraManualItems.push({
+  product_id:product?.id||null,
+  product_name:name,
+  quantity,
+  unit_price:price,
+  unit_cost_price:product?.cost_price!=null?Number(product.cost_price):null,
+  is_customised:false,
+  customisation_details:null
  });
-
- [d.price,d.cost,d.quantity,d.customDetails].forEach(x=>
-  x.addEventListener("input",calculateManualTotal)
- );
-
- wrap.querySelector(".mi-remove").addEventListener("click",()=>{
-  wrap.remove();
-  calculateManualTotal();
- });
-
- el("manualItems").append(wrap);
-
- refreshManualProductOptions().then(()=>{
-
-  d.product.innerHTML=
-   '<option value="">Select product</option>'+
-   productCache.map(p=>`
-    <option value="${escapeHtml(p.id)}">
-     ${escapeHtml(p.name)}
-    </option>
-   `).join("");
-
- });
-
- updateType();
+ el("manualProductName").value="";
+ el("manualQuantity").value=1;
+ el("manualPrice").value="";
+ renderManualItems();
 }
-
-
+function removeManualItem(index){
+ zyraManualItems.splice(index,1);
+ renderManualItems();
+}
+function renderManualItems(){
+ const container=el("manualItems");if(!container)return;
+ container.innerHTML=zyraManualItems.map((item,index)=>`
+  <div class="item">
+   <strong>${escapeHtml(item.product_name)}</strong>
+   <p>${Number(item.quantity)} × ${money(item.unit_price)} = ${money(Number(item.quantity)*Number(item.unit_price))}</p>
+   <button type="button" class="danger" onclick="removeManualItem(${index})">Remove</button>
+  </div>`).join("")||"No products added yet.";
+ calculateManualTotal();
+}
 function calculateManualTotal(){
  const f=el("manualOrderForm");
-
- let total=0;
-
- document.querySelectorAll("#manualItems .item").forEach(box=>{
-
-  const d=box._manual;
-
-  if(d){
-   total+=Number(d.price.value||0)*
-    Number(d.quantity.value||0);
-  }
-
- });
-
- total-=Number(f.elements.discount_amount.value||0);
- total+=Number(f.elements.delivery_fee.value||0);
-
- el("manualTotal").value=money(Math.max(0,total));
+ const subtotal=zyraManualItems.reduce((sum,item)=>sum+Number(item.quantity)*Number(item.unit_price),0);
+ const discount=Math.max(0,Number(f.elements.discount_amount.value||0));
+ const delivery=Math.max(0,Number(f.elements.delivery_fee.value||0));
+ el("manualSubtotal").value=money(subtotal);
+ el("manualTotal").value=money(Math.max(0,subtotal-discount+delivery));
 }
-
-
-function getManualItems(){
- return [...document.querySelectorAll("#manualItems .item")]
-  .map(box=>{
-
-   const d=box._manual;
-
-   const custom=d.type.value==="custom";
-
-   const product=productCache.find(
-    p=>String(p.id)===d.product.value
-   );
-
-   return{
-    product_id:custom?null:(d.product.value||null),
-
-    product_name:custom
-     ?d.customName.value.trim()
-     :(product?.name||d.product.selectedOptions[0]?.text||"Product"),
-
-    quantity:Number(d.quantity.value||1),
-
-    unit_price:Number(d.price.value||0),
-
-    unit_cost_price:Number(d.cost.value||0),
-
-    customisation_details:
-     d.customDetails.value.trim()
-      ?{instructions:d.customDetails.value.trim()}
-      :null
-   };
-
-  })
-  .filter(x=>x.product_name&&x.quantity>0);
-}
-
 
 /* =====================================================
-   CANCEL MANUAL EDIT
+   MANUAL ORDER FORM HELPERS
 ===================================================== */
-
-function cancelManualEdit(){
-
+function setManualFormDefaults(){
  const f=el("manualOrderForm");
-
- f.reset();
-
- f.elements.editing_order_id.value="";
-
- el("manualItems").replaceChildren();
-
- manualItemCount=0;
-
- addManualItem();
-
- setManualOrderDate();
-
- calculateManualTotal();
-
- el("createManualOrderBtn").textContent="Create Manual Order";
-
- el("manualFormTitle").textContent="Create Manual Order";
-
- el("cancelManualEditBtn").style.display="none";
-
- showMessage("manualMessage","");
+ if(!f.elements.order_date.value){
+  const now=new Date();
+  now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  f.elements.order_date.value=now.toISOString().slice(0,16);
+ }
 }
-
+function resetManualForm(){
+ const f=el("manualOrderForm");
+ f.reset();
+ f.elements.editing_order_id.value="";
+ f.elements.discount_amount.value=0;
+ f.elements.delivery_fee.value=0;
+ f.elements.courier.value="Not assigned";
+ f.elements.courier_status.value="Not dispatched";
+ f.elements.courier_cost.value=0;
+ f.elements.order_status.value="pending";
+ f.elements.payment_status.value="pending";
+ f.elements.preorder_status.value="pending";
+ resetManualItems();
+ setManualFormDefaults();
+ calculateManualTotal();
+ el("manualFormTitle").textContent="Create Manual Order";
+ el("createManualOrderBtn").textContent="Create Manual Order";
+ el("cancelManualEditBtn").style.display="none";
+}
+function cancelManualEdit(){
+ resetManualForm();
+ showMessage("manualMessage","Edit cancelled.");
+}
+function getManualOrderPayload(){
+ const f=el("manualOrderForm");
+ return{
+  order_number:f.elements.order_number.value.trim(),
+  customer_name:f.elements.customer_name.value.trim(),
+  phone:f.elements.phone.value.trim(),
+  email:f.elements.email.value.trim()||null,
+  district:f.elements.district.value.trim()||null,
+  city:f.elements.city.value.trim(),
+  postal_code:f.elements.postal_code.value.trim()||null,
+  delivery_address:f.elements.delivery_address.value.trim(),
+  payment_method:f.elements.payment_method.value.trim(),
+  payment_status:f.elements.payment_status.value,
+  order_status:f.elements.order_status.value,
+  customer_notes:f.elements.customer_notes.value.trim()||null,
+  discount_amount:Number(f.elements.discount_amount.value||0),
+  delivery_fee:Number(f.elements.delivery_fee.value||0),
+  has_customised_items:zyraManualItems.some(item=>item.is_customised),
+  created_at:f.elements.order_date.value
+   ?new Date(f.elements.order_date.value).toISOString()
+   :new Date().toISOString()
+ };
+}
+function getManualItemPayload(){
+ return zyraManualItems.map(item=>({
+  product_id:item.product_id||null,
+  product_name:item.product_name,
+  quantity:Number(item.quantity),
+  unit_price:Number(item.unit_price),
+  is_customised:!!item.is_customised,
+  customisation_details:item.customisation_details||null,
+  unit_cost_price:item.unit_cost_price==null?null:Number(item.unit_cost_price)
+ }));
+}
+function getManualCourierPayload(orderId){
+ const f=el("manualOrderForm");
+ return{
+  store_order_id:orderId,
+  courier:f.elements.courier.value.trim()||"Not assigned",
+  delivery_area:f.elements.delivery_area.value.trim()||null,
+  courier_reference:f.elements.courier_reference.value.trim()||null,
+  tracking_id:f.elements.tracking_id.value.trim()||null,
+  status:f.elements.courier_status.value.trim()||"Not dispatched",
+  courier_cost:Number(f.elements.courier_cost.value||0),
+  handover_date:f.elements.handover_date.value||null,
+  courier_estimated_delivery_date:f.elements.courier_estimated_delivery_date.value||null,
+  location:f.elements.tracking_location.value.trim()||null,
+  note:f.elements.courier_note.value.trim()||null,
+  updated_at:new Date().toISOString()
+ };
+}
+async function saveManualCourier(orderId){
+ const payload=getManualCourierPayload(orderId);
+ const {data:existing,error:findError}=await sb.from("zyra_orders")
+  .select("id").eq("store_order_id",orderId).maybeSingle();
+ if(findError)throw findError;
+ const result=existing
+  ?await sb.from("zyra_orders").update(payload).eq("store_order_id",orderId)
+  :await sb.from("zyra_orders").insert(payload);
+ if(result.error)throw result.error;
+}
 
 /* =====================================================
    EDIT MANUAL ORDER
 ===================================================== */
-
-function editManualOrder(id){
-
- const o=orderCache.find(x=>String(x.id)===String(id));
-
- if(!o||String(o.order_source||"").toLowerCase()!=="manual"){
-  alert("Manual order not found.");
-  return;
+async function editManualOrder(id){
+ const order=orderCache.find(item=>String(item.id)===String(id));
+ if(!order)return;
+ if(String(order.order_source||"").toLowerCase()!=="manual"){
+  alert("This is not a manual order.");return;
  }
+ try{
+  const {data:items,error}=await sb.from("store_order_items")
+   .select("*").eq("order_id",id);
+  if(error)throw error;
+  const f=el("manualOrderForm");
+  const track=trackingCache.get(id)||{};
+  f.elements.editing_order_id.value=order.id;
+  f.elements.order_number.value=order.order_number||"";
+  const dateValue=order.created_at?new Date(order.created_at):new Date();
+  dateValue.setMinutes(dateValue.getMinutes()-dateValue.getTimezoneOffset());
+  f.elements.order_date.value=dateValue.toISOString().slice(0,16);
+  f.elements.customer_name.value=order.customer_name||"";
+  f.elements.phone.value=order.phone||"";
+  f.elements.email.value=order.email||"";
+  f.elements.district.value=order.district||"";
+  f.elements.city.value=order.city||"";
+  f.elements.postal_code.value=order.postal_code||"";
+  f.elements.payment_method.value=order.payment_method||"";
+  f.elements.payment_status.value=order.payment_status||"pending";
+  f.elements.order_status.value=order.order_status||"pending";
+  f.elements.delivery_address.value=order.delivery_address||"";
+  f.elements.customer_notes.value=order.customer_notes||"";
+  f.elements.discount_amount.value=Number(order.discount_amount||0);
+  f.elements.delivery_fee.value=Number(order.delivery_fee||0);
 
- const f=el("manualOrderForm");
- const track=trackingCache.get(id)||{};
+  f.elements.courier.value=track.courier||"Not assigned";
+  f.elements.delivery_area.value=track.delivery_area||"";
+  f.elements.courier_reference.value=track.courier_reference||"";
+  f.elements.tracking_id.value=track.tracking_id||"";
+  f.elements.courier_status.value=track.status||"Not dispatched";
+  f.elements.courier_cost.value=Number(track.courier_cost||0);
+  f.elements.handover_date.value=track.handover_date||"";
+  f.elements.courier_estimated_delivery_date.value=track.courier_estimated_delivery_date||"";
+  f.elements.tracking_location.value=track.location||"";
+  f.elements.courier_note.value=track.note||"";
 
- f.reset();
-
- f.elements.editing_order_id.value=o.id;
- f.elements.order_number.value=o.order_number||"";
-
- [
-  "customer_name",
-  "phone",
-  "email",
-  "delivery_address",
-  "district",
-  "city",
-  "postal_code",
-  "payment_method",
-  "payment_status",
-  "order_status",
-  "customer_notes"
- ].forEach(k=>{
-
-  if(f.elements[k]){
-   f.elements[k].value=o[k]||"";
-  }
-
- });
-
- const dt=new Date(o.created_at||Date.now());
-
- const local=new Date(
-  dt.getTime()-dt.getTimezoneOffset()*60000
- );
-
- f.elements.order_date.value=local.toISOString().slice(0,16);
-
- f.elements.discount_amount.value=Number(o.discount_amount||0);
- f.elements.delivery_fee.value=Number(o.delivery_fee||0);
-
- f.elements.preorder_status.value=o.preorder_status||"pending";
-
- f.elements.preorder_confirmed_at.value=
-  o.preorder_confirmed_at
-   ?String(o.preorder_confirmed_at).slice(0,10)
-   :"";
-
- f.elements.preorder_estimated_ready_from.value=
-  o.preorder_estimated_ready_from||"";
-
- f.elements.preorder_estimated_ready_to.value=
-  o.preorder_estimated_ready_to||"";
-
- f.elements.actual_ready_for_dispatch_date.value=
-  o.actual_ready_for_dispatch_date||"";
-
- f.elements.courier.value=track.courier||"Not assigned";
- f.elements.delivery_area.value=track.delivery_area||"";
- f.elements.courier_reference.value=track.courier_reference||"";
- f.elements.tracking_id.value=track.tracking_id||"";
- f.elements.courier_status.value=track.status||"Not dispatched";
- f.elements.courier_cost.value=Number(track.courier_cost||0);
- f.elements.handover_date.value=track.handover_date||"";
-
- f.elements.courier_estimated_delivery_date.value=
-  track.courier_estimated_delivery_date||"";
-
- f.elements.tracking_location.value=track.location||"";
- f.elements.courier_note.value=track.note||"";
-
- el("manualItems").replaceChildren();
-
- (o.store_order_items||[]).forEach(item=>{
-
-  addManualItem();
-
-  const box=el("manualItems").lastElementChild;
-  const d=box._manual;
-
-  if(item.product_id){
-
-   d.type.value="existing";
-
-   d.type.dispatchEvent(new Event("change"));
-
-   if(![...d.product.options].some(
-    x=>x.value===String(item.product_id)
-   )){
-
-    d.product.add(new Option(
-     (item.product_name||"Historical item")+" (historical)",
-     item.product_id
-    ));
-
-   }
-
-   d.product.value=item.product_id;
-
-  }else{
-
-   d.type.value="custom";
-
-   d.type.dispatchEvent(new Event("change"));
-
-   d.customName.value=item.product_name||"";
-
-  }
-
-  d.price.value=item.unit_price||0;
-  d.cost.value=item.unit_cost_price??"";
-  d.quantity.value=item.quantity||1;
-
-  d.customDetails.value=
-   parseCustomisationDetails(item.customisation_details).instructions||"";
-
- });
-
- calculateManualTotal();
-
- el("createManualOrderBtn").textContent="Save Manual Order Changes";
-
- el("manualFormTitle").textContent="Edit Manual Order";
-
- el("cancelManualEditBtn").style.display="inline-block";
-
- showPage("manual",document.querySelectorAll("nav button")[5]);
+  zyraManualItems=(items||[]).map(item=>({
+   product_id:item.product_id||null,
+   product_name:item.product_name||"",
+   quantity:Number(item.quantity||1),
+   unit_price:Number(item.unit_price||0),
+   unit_cost_price:item.unit_cost_price==null?null:Number(item.unit_cost_price),
+   is_customised:!!item.is_customised,
+   customisation_details:parseCustomisationDetails(item.customisation_details)
+  }));
+  renderManualItems();
+  el("manualFormTitle").textContent="Edit Manual Order";
+  el("createManualOrderBtn").textContent="Update Manual Order";
+  el("cancelManualEditBtn").style.display="inline-block";
+  showPage("manual",document.querySelector('nav button[onclick*="manual"]'));
+  window.scrollTo({top:0,behavior:"smooth"});
+  showMessage("manualMessage","Editing "+(order.order_number||order.id));
+ }catch(error){
+  alert("Could not load manual order: "+error.message);
+ }
 }
-
 
 /* =====================================================
    MANUAL ORDER LIST
-   EDIT / PRINT / PDF / DELETE
 ===================================================== */
-
 function renderManualOrders(){
-
- const target=el("manualOrdersList");
-
- if(!target)return;
-
- const list=orderCache.filter(o=>
-  String(o.order_source||"").toLowerCase()==="manual"
- );
-
- target.innerHTML=list.map(o=>`
-
+ const target=el("manualOrdersList");if(!target)return;
+ const list=orderCache.filter(order=>String(order.order_source||"").toLowerCase()==="manual");
+ target.innerHTML=list.map(order=>`
   <div class="item">
-
-   <strong>${escapeHtml(o.order_number||o.id)}</strong>
-
-   <p>
-    ${escapeHtml(o.customer_name||"")}
-    · ${money(o.total_amount)}
-   </p>
-
-   <p>${escapeHtml(o.order_status||"pending")}</p>
-
+   <strong>${escapeHtml(order.order_number||order.id)}</strong>
+   <p>${escapeHtml(order.customer_name||"")} · ${escapeHtml(order.phone||"")}</p>
+   <p>${money(order.total_amount)} · ${escapeHtml(order.order_status||"pending")}</p>
    <div class="actions">
-
-    <button onclick="editManualOrder('${o.id}')">
-     Edit
-    </button>
-
-    <button class="secondary"
-     onclick="printInvoice('${o.id}')">
-     Print Invoice
-    </button>
-
-    <button class="secondary"
-     onclick="downloadInvoicePDF('${o.id}')">
-     Download PDF
-    </button>
-
-    <button class="danger"
-     onclick="deleteManualOrder('${o.id}')">
-     Delete Order
-    </button>
-
+    <button onclick="editManualOrder('${order.id}')">Edit</button>
+    <button class="secondary" onclick="printInvoice('${order.id}')">Print Invoice</button>
+    <button class="secondary" onclick="downloadInvoicePDF('${order.id}')">Download PDF</button>
+    <button class="danger" onclick="deleteManualOrder('${order.id}')">Delete Order</button>
    </div>
-
-  </div>
-
- `).join("")||"No manual orders yet.";
+  </div>`).join("")||"No manual orders yet.";
 }
-
 
 /* =====================================================
    DELETE MANUAL ORDER
 ===================================================== */
-
 async function deleteManualOrder(id){
-
- const order=orderCache.find(
-  o=>String(o.id)===String(id)
- );
-
- if(!order){
-  alert("Manual order not found.");
-  return;
- }
-
+ const order=orderCache.find(item=>String(item.id)===String(id));
+ if(!order){alert("Manual order not found.");return}
  if(String(order.order_source||"").toLowerCase()!=="manual"){
-  alert("This is not a manual order.");
-  return;
+  alert("This is not a manual order.");return;
  }
-
- if(!confirm(
-  "Permanently delete manual order "+
-  (order.order_number||id)+
-  "? This action cannot be undone."
- ))return;
-
+ if(!confirm("Permanently delete manual order "+(order.order_number||id)+"?"))return;
  try{
-
-  const courier=await sb
-   .from("zyra_orders")
-   .delete()
-   .eq("store_order_id",id);
-
+  const courier=await sb.from("zyra_orders").delete().eq("store_order_id",id);
   if(courier.error)throw courier.error;
-
-  const items=await sb
-   .from("store_order_items")
-   .delete()
-   .eq("order_id",id);
-
+  const items=await sb.from("store_order_items").delete().eq("order_id",id);
   if(items.error)throw items.error;
-
-  const result=await sb
-   .from("store_orders")
-   .delete()
-   .eq("id",id);
-
+  const result=await sb.from("store_orders").delete().eq("id",id);
   if(result.error)throw result.error;
-
-  alert("Manual order deleted successfully.");
-
+  showMessage("manualMessage","Manual order deleted.");
   await loadOrders();
-
- }catch(error){
-
-  alert(
-   "Could not delete manual order: "+
-   (error.message||String(error))
-  );
-
- }
+ }catch(error){alert("Could not delete manual order: "+error.message)}
 }
-
-
-/* =====================================================
-   SAVE COURIER DETAILS
-===================================================== */
-
-async function saveZyraOrderDetails(id,form){
-
- const f=form.elements;
-
- const payload={
-
-  store_order_id:id,
-
-  courier:f.courier.value||"Not assigned",
-
-  delivery_area:f.delivery_area.value||"",
-
-  courier_reference:f.courier_reference.value||"",
-
-  tracking_id:f.tracking_id.value||"",
-
-  status:f.courier_status.value||"Not dispatched",
-
-  courier_cost:Number(f.courier_cost.value||0),
-
-  handover_date:f.handover_date.value||null,
-
-  courier_estimated_delivery_date:
-   f.courier_estimated_delivery_date.value||null,
-
-  location:f.tracking_location.value||"",
-
-  note:f.courier_note.value||""
-
- };
-
- const {data:existing}=await sb
-  .from("zyra_orders")
-  .select("id")
-  .eq("store_order_id",id)
-  .maybeSingle();
-
- const result=existing
-  ?await sb.from("zyra_orders")
-    .update(payload)
-    .eq("store_order_id",id)
-  :await sb.from("zyra_orders").insert(payload);
-
- if(result.error)throw result.error;
-}
-
 
 /* =====================================================
    CREATE / UPDATE MANUAL ORDER
+   Uses the exact RPC arguments confirmed from your SQL:
+   CREATE: p_order, p_items
+   UPDATE: p_order_id, p_order, p_items
 ===================================================== */
-
 el("manualOrderForm").addEventListener("submit",async event=>{
-
  event.preventDefault();
-
  const f=event.currentTarget;
-
  const button=el("createManualOrderBtn");
-
- button.disabled=true;
-
+ setButtonLoading(button,true);
  try{
+  if(!zyraManualItems.length)throw new Error("Add at least one order item.");
+  const id=f.elements.editing_order_id.value;
+  const orderPayload=getManualOrderPayload();
+  const itemPayload=getManualItemPayload();
 
-  const items=getManualItems();
+  if(!orderPayload.customer_name||!orderPayload.phone||
+     !orderPayload.delivery_address||!orderPayload.city||
+     !orderPayload.payment_method){
+   throw new Error("Customer name, phone, delivery address, city and payment method are required.");
+  }
+  if(orderPayload.discount_amount<0||orderPayload.delivery_fee<0)
+   throw new Error("Discount and delivery fee cannot be negative.");
 
-  if(!items.length){
-   throw new Error("Add at least one order item.");
+  if(!id&&!orderPayload.order_number){
+   throw new Error("Enter an order number before creating a manual order.");
   }
 
-  const total=items.reduce(
-   (sum,x)=>sum+x.unit_price*x.quantity,
-   0
-  )
-  -Number(f.elements.discount_amount.value||0)
-  +Number(f.elements.delivery_fee.value||0);
-
-  if(total<0){
-   throw new Error("Discount cannot make the order total negative.");
-  }
-
-  const payload={
-
-   order_number:f.elements.order_number.value.trim()||null,
-
-   customer_name:f.elements.customer_name.value.trim(),
-
-   phone:f.elements.phone.value.trim(),
-
-   email:f.elements.email.value.trim(),
-
-   delivery_address:f.elements.delivery_address.value.trim(),
-
-   district:f.elements.district.value.trim(),
-
-   city:f.elements.city.value.trim(),
-
-   postal_code:f.elements.postal_code.value.trim(),
-
-   payment_method:f.elements.payment_method.value,
-
-   payment_status:f.elements.payment_status.value,
-
-   order_status:f.elements.order_status.value,
-
-   customer_notes:f.elements.customer_notes.value,
-
-   discount_amount:Number(f.elements.discount_amount.value||0),
-
-   delivery_fee:Number(f.elements.delivery_fee.value||0),
-
-   total_amount:total,
-
-   preorder_status:f.elements.preorder_status.value,
-
-   preorder_confirmed_at:
-    f.elements.preorder_confirmed_at.value||null,
-
-   preorder_estimated_ready_from:
-    f.elements.preorder_estimated_ready_from.value||null,
-
-   preorder_estimated_ready_to:
-    f.elements.preorder_estimated_ready_to.value||null,
-
-   actual_ready_for_dispatch_date:
-    f.elements.actual_ready_for_dispatch_date.value||null,
-
-   items
-
-  };
-
-  const editingId=f.elements.editing_order_id.value;
-
-  let orderId=editingId;
-
-  if(editingId){
-
-   const {error}=await sb.rpc(
-    "update_zyra_manual_order",
-    {
-     p_order_id:editingId,
-     p_order_data:payload
-    }
-   );
-
+  if(id){
+   const {error}=await sb.rpc("update_zyra_manual_order",{
+    p_order_id:id,
+    p_order:orderPayload,
+    p_items:itemPayload
+   });
    if(error)throw error;
-
+   await saveManualCourier(id);
+   showMessage("manualMessage","Manual order updated successfully.");
   }else{
-
-   const {data,error}=await sb.rpc(
-    "create_zyra_manual_order_with_number",
-    {
-     p_order_data:payload
-    }
-   );
-
+   const {data,error}=await sb.rpc("create_zyra_manual_order_with_number",{
+    p_order:orderPayload,
+    p_items:itemPayload
+   });
    if(error)throw error;
-
-   orderId=data?.id||data?.order_id||data;
-
+   const createdId=data?.id||data?.[0]?.id;
+   if(!createdId)throw new Error("The order was submitted, but the RPC did not return an order ID. Refresh the order list before trying again.");
+   await saveManualCourier(createdId);
+   showMessage("manualMessage","Manual order created successfully. Order number: "+(data.order_number||orderPayload.order_number));
   }
-
-  if(orderId){
-   await saveZyraOrderDetails(orderId,f);
-  }
-
-  showMessage(
-   "manualMessage",
-   editingId
-    ?"Manual order updated."
-    :"Manual order created."
-  );
-
-  cancelManualEdit();
-
+  resetManualForm();
   await loadOrders();
-
  }catch(error){
-
-  showMessage(
-   "manualMessage",
-   "Could not save manual order: "+error.message,
-   true
-  );
-
+  showMessage("manualMessage","Could not save manual order: "+(error.message||String(error)),true);
  }finally{
-
-  button.disabled=false;
-
+  setButtonLoading(button,false);
  }
-
 });
-
 
 /* =====================================================
    REPORTS AND DASHBOARD
 ===================================================== */
-
-function renderStatsAndReport(){
-
- const orders=orderCache;
-
- const sales=orders.reduce(
-  (s,o)=>s+Number(o.total_amount||0),
-  0
- );
-
- const count=orders.length;
-
- const pending=orders.filter(
-  o=>String(o.order_status).toLowerCase()==="pending"
- ).length;
-
- const cost=orders.reduce(
-  (s,o)=>
-   s+(o.store_order_items||[]).reduce(
-    (a,i)=>
-     a+Number(i.unit_cost_price||0)*Number(i.quantity||0),
-    0
-   ),
-  0
- );
-
- const gross=sales-cost;
-
- const expenses=expenseCache.reduce(
-  (s,e)=>s+Number(e.amount||0),
-  0
- );
-
- const stats=[
-
-  ["Orders",count],
-
-  ["Pending Orders",pending],
-
-  ["Sales",money(sales)],
-
-  ["Product Cost",money(cost)],
-
-  ["Gross Profit",money(gross)],
-
-  ["Other Expenses",money(expenses)],
-
-  ["Net Profit",money(gross-expenses)]
-
- ];
-
- el("overviewStats").innerHTML=stats.map(x=>`
-
-  <div class="stat">
-
-   <span>${escapeHtml(x[0])}</span>
-
-   <strong>${escapeHtml(x[1])}</strong>
-
-  </div>
-
- `).join("");
-
- el("recentOrders").innerHTML=orders.slice(0,8).map(o=>`
-
-  <div class="item">
-
-   <strong>${escapeHtml(o.order_number||o.id)}</strong>
-
-   <p>
-    ${escapeHtml(o.customer_name||"")}
-    · ${money(o.total_amount)}
-   </p>
-
-  </div>
-
- `).join("")||"No orders.";
-
-}
-
-
-async function refreshReport(){
-
- const from=el("reportFrom").value;
-
- const to=el("reportTo").value;
-
- const filtered=orderCache.filter(o=>{
-
-  const date=String(o.created_at||"").slice(0,10);
-
-  return(!from||date>=from)&&(!to||date<=to);
-
+function getReportOrders(){
+ const from=el("reportFrom")?.value;
+ const to=el("reportTo")?.value;
+ return orderCache.filter(order=>{
+  const date=(order.created_at||"").slice(0,10);
+  if(from&&date<from)return false;
+  if(to&&date>to)return false;
+  return true;
  });
-
- const sales=filtered.reduce(
-  (s,o)=>s+Number(o.total_amount||0),
-  0
- );
-
- const cost=filtered.reduce(
-  (s,o)=>
-   s+(o.store_order_items||[]).reduce(
-    (a,i)=>
-     a+Number(i.unit_cost_price||0)*Number(i.quantity||0),
-    0
-   ),
-  0
- );
-
- const profit=sales-cost;
-
- el("reportStats").innerHTML=[
-
-  ["Orders",filtered.length],
-
-  ["Sales",money(sales)],
-
-  ["Product Cost",money(cost)],
-
-  ["Gross Profit",money(profit)]
-
- ].map(x=>`
-
-  <div class="stat">
-
-   ${escapeHtml(x[0])}
-
-   <strong>${escapeHtml(x[1])}</strong>
-
-  </div>
-
- `).join("");
-
- el("reportTable").innerHTML=`
-
-  <table>
-
-   <thead>
-
-    <tr>
-     <th>Order</th>
-     <th>Date</th>
-     <th>Customer</th>
-     <th>Total</th>
-    </tr>
-
-   </thead>
-
-   <tbody>
-
-    ${filtered.map(o=>`
-
-     <tr>
-
-      <td>${escapeHtml(o.order_number||o.id)}</td>
-
-      <td>${escapeHtml(String(o.created_at||"").slice(0,10))}</td>
-
-      <td>${escapeHtml(o.customer_name||"")}</td>
-
-      <td>${money(o.total_amount)}</td>
-
-     </tr>
-
-    `).join("")}
-
-   </tbody>
-
-  </table>
-
- `;
-
 }
-
+function calculateZyraReport(){
+ const orders=getReportOrders();
+ const totalOrders=orders.length;
+ const pendingOrders=orders.filter(o=>String(o.order_status||"").toLowerCase()==="pending").length;
+ const totalSales=orders.reduce((sum,o)=>sum+Number(o.total_amount||0),0);
+ const paidSales=orders.filter(o=>String(o.payment_status||"").toLowerCase()==="paid")
+  .reduce((sum,o)=>sum+Number(o.total_amount||0),0);
+ const productCost=orders.reduce((sum,o)=>
+  sum+(o.store_order_items||[]).reduce((s,i)=>
+   s+Number(i.unit_cost_price||0)*Number(i.quantity||0),0),0);
+ const expenses=expenseCache.reduce((sum,x)=>sum+Number(x.amount||0),0);
+ const estimatedProfit=paidSales-productCost-expenses;
+ return{orders,totalOrders,pendingOrders,totalSales,paidSales,productCost,expenses,estimatedProfit};
+}
+function renderStatsAndReport(){
+ const r=calculateZyraReport();
+ if(el("overviewStats")){
+  el("overviewStats").innerHTML=
+   makeStat("Total Orders",r.totalOrders)+
+   makeStat("Pending Orders",r.pendingOrders)+
+   makeStat("Total Sales",money(r.totalSales))+
+   makeStat("Paid Sales",money(r.paidSales))+
+   makeStat("Business Expenses",money(expenseCache.reduce((s,x)=>s+Number(x.amount||0),0)));
+ }
+ if(el("recentOrders")){
+  const recent=[...orderCache].sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0)).slice(0,8);
+  el("recentOrders").innerHTML=recent.map(o=>`
+   <div class="item"><strong>${escapeHtml(o.order_number||o.id)}</strong>
+   <p>${escapeHtml(o.customer_name||"")} · ${money(o.total_amount)}</p>
+   <small>${escapeHtml(o.order_status||"pending")} · ${escapeHtml(o.payment_status||"pending")}</small></div>
+  `).join("")||"No orders yet.";
+ }
+ renderZyraReport();
+}
+function renderZyraReport(){
+ const r=calculateZyraReport();
+ const stats=el("reportStats");
+ if(stats){
+  stats.innerHTML=
+   makeStat("Orders",r.totalOrders)+
+   makeStat("Pending",r.pendingOrders)+
+   makeStat("Total Sales",money(r.totalSales))+
+   makeStat("Paid Sales",money(r.paidSales))+
+   makeStat("Product Costs",money(r.productCost))+
+   makeStat("Expenses",money(r.expenses))+
+   makeStat("Estimated Profit",money(r.estimatedProfit));
+ }
+ const table=el("reportTable");
+ if(table){
+  table.innerHTML=`<table>
+   <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Payment</th><th>Status</th><th>Total</th></tr></thead>
+   <tbody>${r.orders.map(o=>`
+    <tr><td>${escapeHtml(o.order_number||o.id)}</td>
+    <td>${escapeHtml((o.created_at||"").slice(0,10))}</td>
+    <td>${escapeHtml(o.customer_name||"")}</td>
+    <td>${escapeHtml(o.payment_status||"")}</td>
+    <td>${escapeHtml(o.order_status||"")}</td>
+    <td>${money(o.total_amount)}</td></tr>`).join("")}</tbody>
+  </table>`;
+ }
+}
+function refreshReport(){
+ renderZyraReport();
+}
 
 /* =====================================================
    STARTUP
 ===================================================== */
-
-setManualOrderDate();
-
-addManualItem();
-
-resetExpenseForm();
-
-updateZyraCustomizationVisibility();
-
-checkSession();
-
+document.addEventListener("DOMContentLoaded",()=>{
+ setManualFormDefaults();
+ resetExpenseForm();
+ updateZyraCustomizationVisibility();
+ renderAdminBankAccounts();
+ renderManualItems();
+ checkSession();
+});
 </script>
 </body>
 </html>
