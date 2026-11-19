@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -806,12 +805,11 @@ a { color: inherit; text-decoration: none; }
 <!-- SUPABASE CONFIGURATION -->
 
 <script>
-
 const SUPABASE_URL =
     "https://rouysaipjmzmvoegtign.supabase.co";
 
 const SUPABASE_ANON_KEY =
-    "sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
+    "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
@@ -1268,9 +1266,10 @@ let selectedCategory = "All";
 
 </footer>
 
+<!-- PART 2 AND PART 3 JAVASCRIPT GO BELOW THIS LINE -->
 
 /* =========================================================
-   ZYRA.LK CUSTOMER WEBSITE — PART 2
+   ZYRA.LK CUSTOMER WEBSITE — UPDATED PART 2
    PRODUCTS • CUSTOMISATION • PHOTO UPLOADS • CART
    ========================================================= */
 
@@ -1280,9 +1279,11 @@ const PRODUCT_TABLE = "store_products";
 const CUSTOMER_PHOTO_BUCKET = "customer-photos";
 const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
 
-let products = [];
-let cart = [];
-let selectedCategory = "All";
+/*
+IMPORTANT:
+products, cart and selectedCategory are declared
+in Part 1. Do not declare them again here.
+*/
 
 /* ---------- SAFE HELPERS ---------- */
 
@@ -1327,14 +1328,10 @@ function zyraNormalise(value) {
 }
 
 function zyraProductImage(product) {
-    const image = product.image_url ||
+    return product.image_url ||
         product.image ||
         product.photo_url ||
         "";
-
-    if (image) return image;
-
-    return "";
 }
 
 function zyraProductFields(product) {
@@ -1364,7 +1361,7 @@ function zyraIsCustomisable(product) {
 /* ---------- CATEGORY FILTERS ---------- */
 
 function getProductCategories() {
-    const categories = [
+    return [
         "All",
         ...new Set(
             products
@@ -1372,8 +1369,6 @@ function getProductCategories() {
                 .filter(Boolean)
         )
     ];
-
-    return categories;
 }
 
 function renderCategoryFilters() {
@@ -1397,7 +1392,6 @@ function renderCategoryFilters() {
 
 function filterProducts(category) {
     selectedCategory = category;
-
     renderCategoryFilters();
     renderProducts();
 }
@@ -1426,7 +1420,9 @@ function renderProducts() {
 
     grid.innerHTML = filtered.map(product => {
         const image = zyraProductImage(product);
-        const available = product.is_active !== false &&
+
+        const available =
+            product.is_active !== false &&
             product.active !== false;
 
         return `
@@ -1554,6 +1550,7 @@ function renderCustomisationFields(product, unitIndex) {
         const type = zyraFieldType(field);
         const required = zyraFieldRequired(field);
         const maxLength = zyraFieldMaxLength(field);
+
         const inputId =
             `custom_${product.id}_${unitIndex}_${index}`;
 
@@ -1562,6 +1559,7 @@ function renderCustomisationFields(product, unitIndex) {
 
             return `
                 <div class="custom-field">
+
                     <label for="${inputId}">
                         ${zyraEscape(label)}
                         ${required ? "*" : ""}
@@ -1574,7 +1572,9 @@ function renderCustomisationFields(product, unitIndex) {
                         data-required="${required}"
                         class="unit-custom-field">
 
-                        <option value="">Select ${zyraEscape(label)}</option>
+                        <option value="">
+                            Select ${zyraEscape(label)}
+                        </option>
 
                         ${options.map(option => `
                             <option value="${zyraEscape(option)}">
@@ -1586,8 +1586,6 @@ function renderCustomisationFields(product, unitIndex) {
                 </div>
             `;
         }
-
-        const inputType = type === "date" ? "text" : "text";
 
         const isSpecialDate =
             zyraNormalise(key).includes("date") ||
@@ -1603,7 +1601,7 @@ function renderCustomisationFields(product, unitIndex) {
 
                 <input
                     id="${inputId}"
-                    type="${inputType}"
+                    type="text"
                     class="unit-custom-field"
                     data-custom-key="${zyraEscape(key)}"
                     data-custom-label="${zyraEscape(label)}"
@@ -1658,6 +1656,7 @@ function renderLegacyCustomisation(product, unitIndex) {
             html += `
                 <div class="custom-field">
                     <label>Phone Model</label>
+
                     <select
                         class="unit-custom-field"
                         data-custom-key="phone_model"
@@ -1708,7 +1707,10 @@ function renderUnitPhotoFields(product, unitIndex) {
         return "";
     }
 
-    const total = Math.max(count, productRequiresPhoto(product) ? 1 : 0);
+    const total = Math.max(
+        count,
+        productRequiresPhoto(product) ? 1 : 0
+    );
 
     return Array.from({ length: total }, (_, index) => `
         <div class="custom-field">
@@ -1819,7 +1821,8 @@ function changeQty(productId, change) {
 
     if (!item) return;
 
-    const nextQuantity = item.quantity + Number(change);
+    const nextQuantity =
+        item.quantity + Number(change);
 
     if (nextQuantity <= 0) {
         removeCartItem(productId);
@@ -1973,26 +1976,22 @@ function renderCart() {
         .querySelectorAll(".cart-unit")
         .forEach(unitElement => {
             const productId = unitElement.dataset.productId;
-            const unitIndex = Number(unitElement.dataset.unitIndex);
+            const unitIndex =
+                Number(unitElement.dataset.unitIndex);
 
             unitElement
                 .querySelectorAll(".unit-custom-field")
                 .forEach(input => {
-                    input.addEventListener("input", () => {
+                    const save = () => {
                         saveCartCustomisation(
                             productId,
                             unitIndex,
                             unitElement
                         );
-                    });
+                    };
 
-                    input.addEventListener("change", () => {
-                        saveCartCustomisation(
-                            productId,
-                            unitIndex,
-                            unitElement
-                        );
-                    });
+                    input.addEventListener("input", save);
+                    input.addEventListener("change", save);
                 });
         });
 
@@ -2064,8 +2063,11 @@ function validateCustomisation(product, unitElement) {
     for (let index = 0; index < fields.length; index++) {
         const field = fields[index];
         const key = zyraFieldKey(field, index);
-        const input = unitElement.querySelector(
-            `[data-custom-key="${CSS.escape(key)}"]`
+
+        const input = [
+            ...unitElement.querySelectorAll(".unit-custom-field")
+        ].find(element =>
+            element.dataset.customKey === key
         );
 
         if (!input) continue;
@@ -2082,7 +2084,9 @@ function validateCustomisation(product, unitElement) {
 
         const isDate =
             zyraNormalise(key).includes("date") ||
-            zyraNormalise(zyraFieldLabel(field, index)).includes("date");
+            zyraNormalise(
+                zyraFieldLabel(field, index)
+            ).includes("date");
 
         if (isDate && input.value.trim()) {
             if (!/^\d{6}$/.test(input.value.trim())) {
@@ -2120,10 +2124,11 @@ function validateCartCustomisations() {
         if (!product) continue;
 
         const unitElements = [
-            ...document.querySelectorAll(
-                `.cart-unit[data-product-id="${CSS.escape(String(item.product_id))}"]`
-            )
-        ];
+            ...document.querySelectorAll(".cart-unit")
+        ].filter(element =>
+            element.dataset.productId ===
+            String(item.product_id)
+        );
 
         for (const unitElement of unitElements) {
             if (!validateCustomisation(product, unitElement)) {
@@ -2144,13 +2149,15 @@ function validateCartCustomisations() {
 function saveUnitPhotoFiles() {
     for (const item of cart) {
         const unitElements = [
-            ...document.querySelectorAll(
-                `.cart-unit[data-product-id="${CSS.escape(String(item.product_id))}"]`
-            )
-        ];
+            ...document.querySelectorAll(".cart-unit")
+        ].filter(element =>
+            element.dataset.productId ===
+            String(item.product_id)
+        );
 
         unitElements.forEach(unitElement => {
-            const index = Number(unitElement.dataset.unitIndex);
+            const index =
+                Number(unitElement.dataset.unitIndex);
 
             if (!item.units[index]) return;
 
@@ -2163,7 +2170,12 @@ function saveUnitPhotoFiles() {
 
 /* ---------- SUPABASE CUSTOMER PHOTO UPLOAD ---------- */
 
-async function uploadCustomerPhoto(file, productId, unitIndex, photoIndex) {
+async function uploadCustomerPhoto(
+    file,
+    productId,
+    unitIndex,
+    photoIndex
+) {
     if (!file) return null;
 
     if (file.size > PHOTO_MAX_BYTES) {
@@ -2204,16 +2216,25 @@ async function uploadCustomerPhoto(file, productId, unitIndex, photoIndex) {
 
 async function loadProducts() {
     const grid = document.getElementById("productGrid");
+    const message = document.getElementById("productMessage");
 
     if (grid) {
         grid.innerHTML = `
             <div class="loading-products">
-                Loading our collection...
+                Connecting to Zyra collection...
             </div>
         `;
     }
 
     try {
+        console.log("Zyra: Starting product request...");
+
+        if (typeof db === "undefined" || !db) {
+            throw new Error(
+                "Supabase database client is not initialised."
+            );
+        }
+
         const { data, error } = await db
             .from(PRODUCT_TABLE)
             .select("*")
@@ -2223,31 +2244,46 @@ async function loadProducts() {
 
         if (error) throw error;
 
+        console.log(
+            "Zyra: Products received:",
+            data?.length
+        );
+
         products = (data || []).filter(product =>
-            product.is_active !== false &&
-            product.active !== false
+            product.is_active === true
         );
 
         renderCategoryFilters();
         renderProducts();
 
+        if (message) {
+            message.textContent = products.length
+                ? ""
+                : "No active products available.";
+        }
+
+        console.log(
+            "Zyra: Product loading completed."
+        );
+
     } catch (error) {
-        console.error("Zyra product loading error:", error);
+        console.error(
+            "Zyra product loading error:",
+            error
+        );
 
         if (grid) {
             grid.innerHTML = `
                 <div class="product-error">
-                    We couldn't load the collection.
+                    Could not load our collection.
                     Please refresh and try again.
                 </div>
             `;
         }
 
-        const message = document.getElementById("productMessage");
-
         if (message) {
             message.textContent =
-                "Could not load products: " +
+                "Product loading error: " +
                 (error.message || String(error));
         }
     }
@@ -2262,8 +2298,8 @@ function initialiseZyraProductsAndCart() {
 }
 
 /* =========================================================
-   END OF PART 2
-   PART 3: CHECKOUT • ORDER SUBMISSION • INVOICE • TRACKING
+   END OF UPDATED PART 2
+   PART 3 MUST FOLLOW
    ========================================================= */
 
 /* =========================================================
@@ -2942,10 +2978,10 @@ function initialiseZyraPartThree() {
     initialiseZyraCheckout();
 }
 
-/* 
-</script>
-
+/* =========================================================
+   END OF PART 3
+   ========================================================= */
+ </script>
 </body>
+</html>
 
-</html
-  
