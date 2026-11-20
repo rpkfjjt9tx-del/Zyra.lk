@@ -595,10 +595,14 @@ async function loadPayments(){
     ${o.bank_transaction_reference
      ?`<p>Transaction reference: ${escapeHtml(o.bank_transaction_reference)}</p>`
      :""}
-    <div class="actions">
-     <button onclick="verifyPayment('${o.id}','ACCEPT')">Accept</button>
-<button class="danger" onclick="verifyPayment('${o.id}','REJECT')">Reject</button>
-   </div>
+    <<div class="actions">
+  <button class="secondary" onclick="viewPaymentSlip('${o.id}')">
+    View Payment Slip
+  </button>
+  <button onclick="verifyPayment('${o.id}','ACCEPT')">Accept</button>
+  <button class="danger" onclick="verifyPayment('${o.id}','REJECT')">Reject</button>
+</div>
+  </div>
   `).join("")||"No payment slips found.";
 
  }catch(error){
