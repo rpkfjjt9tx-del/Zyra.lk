@@ -422,38 +422,195 @@ async function loadOrders(){
    }
   }
 
-  renderOrders(orderCache);
-  renderStatsAndReport();
+await renderOrders(orderCache);  renderStatsAndReport();
   renderManualOrders();
 
  }catch(error){
   if(target)target.textContent="Could not load orders: "+error.message;
  }
 }
+function getCustomerPhotoPaths(details) {
+  if (typeof details === "string") {
+    try {
+      details = JSON.parse(details);
+    } catch {
+      return [];
+    }
+  }
 
-function renderOrders(orders){
- const target=el("ordersList");
- if(!target)return;
+  if (!details || typeof details !== "object") return [];
 
- if(!orders.length){
-  target.textContent="No orders found.";
-  return;
- }
+  const paths = [];
 
- target.innerHTML=orders.map(o=>{
-  const track=trackingCache.get(o.id)||{};
+  if (Array.isArray(details.photo_paths)) {
+    paths.push(...details.photo_paths);
+  }
 
-  const items=(o.store_order_items||[]).map(i=>`
-   <div class="item">
-    <strong>${escapeHtml(i.product_name||"Product")}</strong>
-    × ${Number(i.quantity||1)} — ${money(i.unit_price)}
-    ${i.customisation_details
-     ?`<p>${escapeHtml(JSON.stringify(parseCustomisationDetails(i.customisation_details)))}</p>`
-     :""}
-   </div>
-  `).join("");
+  if (details.photo_path) {
+    paths.push(details.photo_path);
+  }
 
-  return `<div class="panel">
+  if (Array.isArray(details.units)) {
+    details.units.forEach(unit => {
+      if (unit.photo_path) paths.push(unit.photo_path);
+
+      if (Array.isArray(unit.photo_paths)) {
+        paths.push(...unit.photo_paths);
+      }
+    });
+  }
+
+  return [...new Set(paths.filter(path =>
+    typeof path === "string" &&
+    path.startsWith("customer-orders/")
+  ))];
+}
+
+async function renderOrders(orders) {
+  const target = el("ordersList");
+  if (!target) return;
+
+  if (!orders.length) {
+    target.textContent = "No orders found.";
+    return;
+  }
+
+  target.textContent = "Loading customer photos…";
+
+  try {
+    const orderCards = await Promise.all(orders.map(async o => {
+      const track = trackingCache.get(o.id) || {};
+
+      const items = await Promise.all(
+        (o.store_order_items || []).map(async i => {
+          const paths = getCustomerPhotoPaths(i.customisation_details);
+
+          const photoHtml = await Promise.all(paths.map(async path => {
+            const { data, error } = await sb.storage
+              .from("customer-photos")
+              .createSignedUrl(path, 3600);
+
+            if (error || !data?.signedUrl) {
+              return `<p>Customer photo unavailable: ${escapeHtml(path)}</p>`;
+            }
+
+            return `
+              <div style="margin:12px 0">
+                <img
+                  src="${escapeHtml(data.signedUrl)}"
+                  alt="Customer customised product photo"
+                  loading="lazy"
+                  style="width:100%;max-width:240px;height:auto;object-fit:contain;border-radius:10px;border:1px solid #ddd"
+                >
+                <p>${escapeHtml(path.split("/").pop())}</p>
+              </div>
+            `;
+          }));
+
+          return `
+            <div class="item">
+              <strong>${escapeHtml(i.product_name || "Product")}</strong>
+              × ${Number(i.quantity || 1)} — ${money(i.unit_price)}
+
+              ${i.customisation_details
+                ? `<p>${escapeHtml(JSON.stringify(parseCustomisationDetails(i.customisation_details)))}</p>`
+                : ""}
+
+              ${photoHtml.join("")}
+            </div>
+          `;
+        })
+      );
+
+      return `
+        <div class="panel">
+          <h3>Order ${escapeHtml(o.order_number || o.id)}</h3>
+
+          <p>
+            <strong>${escapeHtml(o.customer_name || "")}</strong>
+            · ${escapeHtml(o.phone || "")}
+          </p>
+
+          <p>
+            ${escapeHtml(o.delivery_address || "")}
+            ${escapeHtml(o.city || "")}
+            ${escapeHtml(o.district || "")}
+          </p>
+
+          <p>
+            Payment: ${escapeHtml(o.payment_status || "pending")}
+            · Status: ${escapeHtml(o.order_status || "pending")}
+          </p>
+
+          <p>Total: <strong>${money(o.total_amount)}</strong></p>
+
+          ${items.join("")}
+
+          <div class="grid">
+            <div>
+              <label>Courier</label>
+              <input id="courier-${o.id}" value="${escapeHtml(track.courier || "Not assigned")}">
+            </div>
+
+            <div>
+              <label>Delivery Area</label>
+              <input id="area-${o.id}" value="${escapeHtml(track.delivery_area || "")}">
+            </div>
+
+            <div>
+              <label>Courier Reference</label>
+              <input id="reference-${o.id}" value="${escapeHtml(track.courier_reference || "")}">
+            </div>
+
+            <div>
+              <label>Tracking ID</label>
+              <input id="tracking-${o.id}" value="${escapeHtml(track.tracking_id || "")}">
+            </div>
+
+            <div>
+              <label>Courier Status</label>
+              <input id="courierstatus-${o.id}" value="${escapeHtml(track.status || "Not dispatched")}">
+            </div>
+
+            <div>
+              <label>Courier Cost</label>
+              <input id="cost-${o.id}" type="number" min="0" step=".01" value="${Number(track.courier_cost || 0)}">
+            </div>
+
+            <div>
+              <label>Handover Date</label>
+              <input id="handover-${o.id}" type="date" value="${escapeHtml(track.handover_date || "")}">
+            </div>
+
+            <div>
+              <label>Estimated Delivery</label>
+              <input id="estimate-${o.id}" type="date" value="${escapeHtml(track.courier_estimated_delivery_date || "")}">
+            </div>
+          </div>
+
+          <label>Tracking Location</label>
+          <input id="location-${o.id}" value="${escapeHtml(track.location || "")}">
+
+          <label>Courier Note</label>
+          <textarea id="note-${o.id}">${escapeHtml(track.note || "")}</textarea>
+
+          <div class="actions">
+            <button onclick="saveCourierDetails('${o.id}')">Save Courier Details</button>
+            <button class="secondary" onclick="printInvoice('${o.id}')">Print Invoice</button>
+            <button class="secondary" onclick="downloadInvoicePDF('${o.id}')">Download PDF</button>
+            <button class="danger" onclick="deleteOrder('${o.id}')">Delete Order</button>
+          </div>
+        </div>
+      `;
+    }));
+
+    target.innerHTML = orderCards.join("");
+
+  } catch (error) {
+    console.error("Customer photo display error:", error);
+    target.textContent = "Could not display orders: " + error.message;
+  }
+}  return `<div class="panel">
    <h3>Order ${escapeHtml(o.order_number||o.id)}</h3>
    <p><strong>${escapeHtml(o.customer_name||"")}</strong> · ${escapeHtml(o.phone||"")}</p>
    <p>${escapeHtml(o.delivery_address||"")} ${escapeHtml(o.city||"")} ${escapeHtml(o.district||"")}</p>
