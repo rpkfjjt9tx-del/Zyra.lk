@@ -319,22 +319,39 @@ function showPage(page,button){
  if(page==="reports")refreshReport();
 }
 
-async function login(){
- const email=el("loginEmail").value.trim();
- const password=el("loginPassword").value;
- if(!email||!password){
-  showMessage("loginMessage","Enter your email and password.",true);
-  return;
- }
- const {error}=await sb.auth.signInWithPassword({email,password});
- if(error){
-  showMessage("loginMessage",error.message,true);
-  return;
- }
- await checkSession();
-}
+window.login = async function login() {
+  const email = el("loginEmail").value.trim();
+  const password = el("loginPassword").value;
 
-async function logout(){
+  if (!email || !password) {
+    showMessage("loginMessage", "Enter your email and password.", true);
+    return;
+  }
+
+  const button = document.querySelector('#loginPanel button');
+
+  try {
+    if (button) button.disabled = true;
+
+    showMessage("loginMessage", "Signing in…");
+
+    const { error } = await sb.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    await checkSession();
+
+  } catch (error) {
+    console.error("Admin login error:", error);
+    showMessage("loginMessage", error.message || "Login failed.", true);
+
+  } finally {
+    if (button) button.disabled = false;
+  }
+};async function logout(){
  await sb.auth.signOut();
  showDashboard(false);
 }
