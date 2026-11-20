@@ -21,10 +21,12 @@ header{padding:15px 6%;box-shadow:0 4px 18px #2a171008}
 .hero h1{font:clamp(42px,6vw,76px)/1.04 Georgia,serif;letter-spacing:-1.5px;margin:0 0 20px;color:#302622}
 .hero p{font-size:14px;line-height:1.9;color:#74675f;max-width:460px;margin:0 0 28px}
 .hero .btn{display:inline-block;text-decoration:none;padding:14px 24px;letter-spacing:1.2px;font-size:11px}
-.hero-art{min-height:360px;position:relative;border:1px solid #ffffffb8;background:radial-gradient(circle at 55% 38%,#fff9 0 12%,transparent 12.5%),radial-gradient(circle at 54% 45%,#d7b7a9 0 24%,transparent 24.5%),radial-gradient(circle at 54% 45%,#f8eee6 0 40%,transparent 40.5%),linear-gradient(145deg,#e6d3c7,#f8f1eb 55%,#d9c1b6);box-shadow:0 25px 65px #55382b18;display:grid;place-items:center;overflow:hidden}
-.hero-art:before,.hero-art:after{content:"";position:absolute;border:1px solid #fff9;border-radius:50%;width:70%;aspect-ratio:1;transform:rotate(-25deg)}
-.hero-art:after{width:52%;transform:rotate(28deg);border-color:#842d4050}
-.hero-art span{font:italic 30px Georgia,serif;color:#842d40;position:relative;z-index:1;letter-spacing:2px}
+.hero-art{min-height:360px;position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:transparent;border:0;box-shadow:none;padding:0 12px}
+.hero-oval{width:min(100%,390px);height:350px;border-radius:50% 50% 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;position:relative;overflow:hidden;border:1px solid #fff;background:radial-gradient(circle at 50% 25%,#fff9 0 10%,transparent 10.5%),linear-gradient(155deg,#ead8ce 0%,#f8eee7 48%,#d8b9ad 100%);box-shadow:0 24px 55px #55382b18,inset 0 0 0 10px #ffffff30}
+.hero-oval:before,.hero-oval:after{content:"";position:absolute;border:1px solid #fff9;border-radius:50%;width:78%;height:72%;top:13%;left:11%;pointer-events:none}
+.hero-oval:after{width:62%;height:58%;top:20%;left:19%;border-color:#842d4038}
+.hero-quote{position:relative;z-index:1;text-align:center;font:italic clamp(21px,2.7vw,29px)/1.35 Georgia,serif;color:#5b3a38;letter-spacing:.1px;padding:0 16px}
+.hero-brand{position:relative;z-index:1;font:bold 13px Arial,sans-serif;letter-spacing:4px;color:#842d40;border-top:1px solid #842d4060;padding-top:13px}
 .section{padding:75px 7%}
 .section-title{font:38px Georgia,serif;letter-spacing:-.6px;color:#302622}
 .section-subtitle{font-size:13px;line-height:1.8}
@@ -72,26 +74,10 @@ button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-acco
 .care-tip span{font-size:13px;color:var(--muted);line-height:1.7}
 .payment-note{background:#f8f1ec;border:1px solid #eadbd2;border-radius:14px;padding:12px;margin:10px 0;font-size:12px;line-height:1.6}
 @media(max-width:650px){.delivery-grid,.care-grid{grid-template-columns:1fr}.modal-content{padding:18px}.benefits{margin:0 3% 22px}}
-</style>
-</head>
+</style></head>
 <body>
-
 <div class="announcement">A LITTLE DETAIL. A PERSONAL STORY. &nbsp;·&nbsp; ISLANDWIDE DELIVERY</div>
-
-<header>
-<a class="brand" href="#home" style="text-decoration:none">
-<img src="ZYRA-LOGO.PNG" alt="Zyra.lk" onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<span class=\"brand-fallback\">ZYRA.LK</span>')">
-</a>
-<nav class="nav">
-<a href="#home">HOME</a>
-<a href="#products">SHOP</a>
-<a href="#custom">CUSTOMISE</a>
-<a href="#jewellery-care">CARE GUIDE</a>
-<a href="#delivery">DELIVERY</a>
-<a href="#tracking">TRACK ORDER</a>
-<button class="cart-button" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button>
-</nav>
-</header>
+<header><a class="brand" href="#home" style="text-decoration:none"><img src="ZYRA-LOGO.PNG" alt="Zyra.lk" onerror="this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<span class=\"brand-fallback\">ZYRA.LK</span>')"></a><nav class="nav"><a href="#home">HOME</a><a href="#products">SHOP</a><a href="#custom">CUSTOMISE</a><a href="#jewellery-care">CARE GUIDE</a><a href="#delivery">DELIVERY</a><a href="#tracking">TRACK ORDER</a><button class="cart-button" onclick="openCart()">BAG (<span id="cartCount">0</span>)</button></nav></header>
 
 <section class="hero" id="home">
 <div class="hero-copy">
@@ -100,7 +86,12 @@ button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-acco
 <p>Discover thoughtful details, personalised pieces and limited-edition designs created to make everyday moments special.</p>
 <a class="btn" href="#products" style="text-decoration:none">EXPLORE COLLECTION</a>
 </div>
-<div class="hero-art" aria-label="Zyra jewellery collection artwork"><span>ZYRA.LK</span></div>
+<div class="hero-art" aria-label="Zyra boutique half-oval design">
+<div class="hero-oval">
+<div class="hero-quote">“A little detail,<br>a story that’s yours.”</div>
+<div class="hero-brand">ZYRA.LK</div>
+</div>
+</div>
 </section>
 
 <section class="section" id="products">
@@ -108,13 +99,9 @@ button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-acco
 <p class="section-subtitle">Thoughtfully selected pieces, exclusively for you.</p>
 <div class="toolbar">
 <input type="search" id="searchInput" placeholder="Search products..." oninput="filterProducts()">
-<select id="categoryFilter" onchange="filterProducts()">
-<option value="">All Collections</option>
-</select>
+<select id="categoryFilter" onchange="filterProducts()"><option value="">All Collections</option></select>
 </div>
-<div class="products" id="productList">
-<div class="empty">Loading collection...</div>
-</div>
+<div class="products" id="productList"><div class="empty">Loading collection...</div></div>
 </section>
 
 <section class="custom-intro" id="custom">
@@ -125,7 +112,7 @@ button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-acco
 </div>
 <div class="custom-note">
 <strong>How personalisation works</strong><br>
-1. Select a customisable product.<br>
+1. Select a product marked as customisable.<br>
 2. Add it to your bag and complete the details for every piece.<br>
 3. Upload a photo when the product requires one.<br>
 4. Review your details before placing your order.
@@ -179,20 +166,15 @@ button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-acco
 <footer>
 <div class="brand" style="color:#fff">ZYRA.LK</div>
 <p>Exclusive Collection · Islandwide Delivery</p>
-<p>© 2026 Zyra.lk. All rights reserved.</p>
+<p>©️ 2026 Zyra.lk. All rights reserved.</p>
 </footer>
 
 <!-- SHOPPING BAG -->
 <div class="modal" id="cartModal">
 <div class="modal-content">
-<div class="modal-header">
-<h2>Your Shopping Bag</h2>
-<button class="close" onclick="closeModal('cartModal')">×</button>
-</div>
+<div class="modal-header"><h2>Your Shopping Bag</h2><button class="close" onclick="closeModal('cartModal')">×</button></div>
 <div id="cartItems"></div>
-<div class="delivery-summary" id="cartDeliverySummary">
-<div class="delivery-line"><span>Delivery fee</span><strong>Calculated at checkout</strong></div>
-</div>
+<div class="delivery-summary" id="cartDeliverySummary"><div class="delivery-line"><span>Delivery fee</span><strong>Calculated at checkout</strong></div></div>
 <div class="cart-total" id="cartTotal">Subtotal: LKR 0</div>
 <button class="checkout-button" onclick="showCheckout()">PROCEED TO CHECKOUT</button>
 </div>
@@ -201,103 +183,33 @@ button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-acco
 <!-- CHECKOUT -->
 <div class="modal" id="checkoutModal">
 <div class="modal-content">
-<div class="modal-header">
-<h2>Checkout</h2>
-<button class="close" onclick="closeModal('checkoutModal')">×</button>
-</div>
-
+<div class="modal-header"><h2>Checkout</h2><button class="close" onclick="closeModal('checkoutModal')">×</button></div>
 <form id="checkoutForm">
 <div class="form-grid">
-
-<div class="form-group">
-<label>Full Name *</label>
-<input name="customer_name" required maxlength="150" autocomplete="name">
-</div>
-
-<div class="form-group">
-<label>Email Address</label>
-<input name="email" type="email" maxlength="254" autocomplete="email">
-</div>
-
-<div class="form-group full">
-<label>Mobile Number *</label>
-<input name="phone" type="tel" required maxlength="10" minlength="10" pattern="07[0-9]{8}" inputmode="numeric" autocomplete="tel-national" placeholder="0771234567">
-<small class="fine">Enter exactly 10 digits, including the first 0. Example: 0771234567</small>
-</div>
-
-<div class="form-group full">
-<label>Delivery Address *</label>
-<textarea name="delivery_address" required maxlength="1000" autocomplete="street-address"></textarea>
-</div>
-
-<div class="form-group">
-<label>District *</label>
-<select name="district" id="districtInput" required>
+<div class="form-group"><label>Full Name *</label><input name="customer_name" required maxlength="150" autocomplete="name"></div>
+<div class="form-group"><label>Email Address</label><input name="email" type="email" maxlength="254" autocomplete="email"></div>
+<div class="form-group full"><label>Mobile Number *</label><input name="phone" type="tel" required maxlength="10" minlength="10" pattern="07[0-9]{8}" inputmode="numeric" autocomplete="tel-national" placeholder="0771234567"><small class="fine">Enter exactly 10 digits, including the first 0. Example: 0771234567</small></div>
+<div class="form-group full"><label>Delivery Address *</label><textarea name="delivery_address" required maxlength="1000" autocomplete="street-address"></textarea></div>
+<div class="form-group"><label>District *</label><select name="district" id="districtInput" required>
 <option value="">Select district</option>
 <option>Ampara</option><option>Anuradhapura</option><option>Badulla</option><option>Batticaloa</option><option>Colombo</option><option>Galle</option><option>Gampaha</option><option>Hambantota</option><option>Jaffna</option><option>Kalutara</option><option>Kandy</option><option>Kegalle</option><option>Kilinochchi</option><option>Kurunegala</option><option>Mannar</option><option>Matale</option><option>Matara</option><option>Monaragala</option><option>Mullaitivu</option><option>Nuwara Eliya</option><option>Polonnaruwa</option><option>Puttalam</option><option>Ratnapura</option><option>Trincomalee</option><option>Vavuniya</option>
-</select>
-</div>
-
-<div class="form-group">
-<label>City / Town *</label>
-<input name="city" id="cityInput" list="sriLankaTownOptions" required maxlength="120" autocomplete="address-level2" placeholder="Type or select your town">
+</select></div>
+<div class="form-group"><label>City / Town *</label><input name="city" id="cityInput" list="sriLankaTownOptions" required maxlength="120" autocomplete="address-level2" placeholder="Type or select your town">
 <datalist id="sriLankaTownOptions">
 <option value="Colombo 1–15"></option><option value="Dehiwala"></option><option value="Mount Lavinia"></option><option value="Moratuwa"></option><option value="Nugegoda"></option><option value="Maharagama"></option><option value="Kottawa"></option><option value="Pannipitiya"></option><option value="Homagama"></option><option value="Battaramulla"></option><option value="Malabe"></option><option value="Kaduwela"></option><option value="Wattala"></option><option value="Negombo"></option><option value="Ja-Ela"></option><option value="Gampaha"></option><option value="Kadawatha"></option><option value="Kelaniya"></option><option value="Kiribathgoda"></option><option value="Ragama"></option><option value="Minuwangoda"></option><option value="Katunayake"></option><option value="Kalutara"></option><option value="Panadura"></option><option value="Horana"></option><option value="Beruwala"></option><option value="Galle"></option><option value="Hikkaduwa"></option><option value="Ambalangoda"></option><option value="Matara"></option><option value="Weligama"></option><option value="Hambantota"></option><option value="Kandy"></option><option value="Peradeniya"></option><option value="Matale"></option><option value="Nuwara Eliya"></option><option value="Hatton"></option><option value="Kurunegala"></option><option value="Kuliyapitiya"></option><option value="Puttalam"></option><option value="Chilaw"></option><option value="Anuradhapura"></option><option value="Polonnaruwa"></option><option value="Jaffna"></option><option value="Kilinochchi"></option><option value="Vavuniya"></option><option value="Mannar"></option><option value="Mullaitivu"></option><option value="Trincomalee"></option><option value="Batticaloa"></option><option value="Ampara"></option><option value="Ratnapura"></option><option value="Embilipitiya"></option><option value="Kegalle"></option><option value="Badulla"></option><option value="Bandarawela"></option><option value="Monaragala"></option>
 </datalist>
 <small class="fine">Start typing to see common towns. You can also enter another town manually.</small>
 </div>
-
-<div class="form-group">
-<label>Postal Code *</label>
-<input name="postal_code" id="postalCodeInput" required maxlength="5" minlength="5" pattern="[0-9]{5}" inputmode="numeric" placeholder="5-digit postal code">
-<small class="fine" id="postalHint">Known town codes may fill automatically. Please verify before submitting.</small>
+<div class="form-group"><label>Postal Code *</label><input name="postal_code" id="postalCodeInput" required maxlength="5" minlength="5" pattern="[0-9]{5}" inputmode="numeric" placeholder="5-digit postal code"><small class="fine" id="postalHint">Known town codes may fill automatically. Please verify before submitting.</small></div>
+<div class="form-group"><label>Payment Method *</label><select name="payment_method" id="paymentMethod" required><option value="">Select payment method</option><option value="Cash on Delivery">Cash on Delivery</option><option value="Bank Transfer">Bank Transfer</option></select><small class="payment-note" id="paymentRestrictionNote">Payment methods shown depend on the products in your bag.</small></div>
+<div class="form-group full" id="bankGroup" style="display:none"><label>Select Bank *</label><select name="selected_bank" id="selectedBank"><option value="">Select bank</option><option>Commercial Bank</option><option>Nations Trust Bank</option><option>Amana Bank PLC</option><option>HNB</option></select><div class="bank-box" id="bankDetails"></div>
+<div class="form-group full" id="slipGroup" style="display:none;margin-top:12px"><label>Upload Payment Slip *</label><input type="file" id="paymentSlip" accept="image/jpeg,image/png,image/webp,application/pdf"><small class="fine">Accepted: JPG, PNG, WEBP or PDF. Maximum 5MB.</small></div>
 </div>
-
-<div class="form-group">
-<label>Payment Method *</label>
-<select name="payment_method" id="paymentMethod" required>
-<option value="">Select payment method</option>
-<option value="Cash on Delivery">Cash on Delivery</option>
-<option value="Bank Transfer">Bank Transfer</option>
-</select>
-<small class="payment-note" id="paymentRestrictionNote">Payment methods shown depend on the products in your bag.</small>
+<div class="form-group full" id="referenceGroup" style="display:none"><label>Bank Transaction Reference (if already paid)</label><input name="bank_transaction_reference" maxlength="120" placeholder="Enter transaction reference"></div>
+<div class="form-group full"><label>Order Notes (optional)</label><textarea name="customer_notes" maxlength="1500" placeholder="Any delivery or order instructions..."></textarea></div>
 </div>
-
-<div class="form-group full" id="bankGroup" style="display:none">
-<label>Select Bank *</label>
-<select name="selected_bank" id="selectedBank">
-<option value="">Select bank</option>
-<option>Commercial Bank</option>
-<option>Nations Trust Bank</option>
-<option>Amana Bank PLC</option>
-<option>HNB</option>
-</select>
-<div class="bank-box" id="bankDetails"></div>
-<div class="form-group full" id="slipGroup" style="display:none;margin-top:12px">
-<label>Upload Payment Slip *</label>
-<input type="file" id="paymentSlip" accept="image/jpeg,image/png,image/webp,application/pdf">
-<small class="fine">Accepted: JPG, PNG, WEBP or PDF. Maximum 5MB.</small>
-</div>
-</div>
-
-<div class="form-group full" id="referenceGroup" style="display:none">
-<label>Bank Transaction Reference (if already paid)</label>
-<input name="bank_transaction_reference" maxlength="120" placeholder="Enter transaction reference">
-</div>
-
-<div class="form-group full">
-<label>Order Notes (optional)</label>
-<textarea name="customer_notes" maxlength="1500" placeholder="Any delivery or order instructions..."></textarea>
-</div>
-
-</div>
-
 <p class="fine">For bank transfers, upload your payment slip. Payment remains pending until Zyra verifies the transfer.</p>
-
-<div class="delivery-summary" id="checkoutDeliverySummary">
-<div class="delivery-line"><span>Delivery fee</span><strong>Enter your district and postal code</strong></div>
-</div>
-
+<div class="delivery-summary" id="checkoutDeliverySummary"><div class="delivery-line"><span>Delivery fee</span><strong>Enter your district and postal code</strong></div></div>
 <div class="cart-total" id="checkoutTotal"></div>
 <button class="checkout-button" type="submit" id="placeOrderButton">PLACE ORDER</button>
 <p class="message" id="checkoutMessage" role="status"></p>
@@ -326,1246 +238,515 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const BANK_INFO={"Commercial Bank":"Account Name: Hamrah<br>Account Number: 8031077367<br>Branch: Mutwal","Nations Trust Bank":"Account Name: MF Hamrah<br>Account Number: 200190100485<br>Branch: Union Place","Amana Bank PLC":"Account Name: MOHAMMED ILMY FATHIMA HAMRAH<br>Account Number: 0290244734002<br>Branch: Kollupitiya","HNB":"Account Name: Miss Hilmey F H M<br>Account Number: 096020094073<br>Branch: Kotahena"};
 let products=[],cart=[],lastInvoice=null;
 const DELIVERY_FEES={colombo_city:350,colombo_suburbs:400,outside_colombo:450};
-
 function deliveryInfo(district,city){
-const d=String(district||"").trim().toLowerCase();
-const c=String(city||"").trim().toLowerCase();
+const d=String(district||"").trim().toLowerCase(),c=String(city||"").trim().toLowerCase();
 if(d==="colombo"&&(c==="colombo 1–15"||c==="colombo 1-15"))return {area:"Colombo 1–15",fee:DELIVERY_FEES.colombo_city};
 if(d==="colombo")return {area:"Colombo suburbs",fee:DELIVERY_FEES.colombo_suburbs};
 return {area:"Outside Colombo",fee:DELIVERY_FEES.outside_colombo};
 }
-
 function deliveryForForm(form){
-  const district = typeof form.get === "function"
-    ? form.get("district")
-    : form.elements.district?.value;
-
-  const city = typeof form.get === "function"
-    ? form.get("city")
-    : form.elements.city?.value;
-
-  return deliveryInfo(district, city);
+const district=typeof form.get==="function"?form.get("district"):form.elements.district?.value;
+const city=typeof form.get==="function"?form.get("city"):form.elements.city?.value;
+return deliveryInfo(district,city);
 }
-
 function updateDeliveryDisplay(){
-const form=$("checkoutForm");
-if(!form)return;
+const form=$("checkoutForm");if(!form)return;
 const district=form.elements.district.value,city=form.elements.city.value;
-const has=district&&city.trim();
-const info=has?deliveryInfo(district,city):null;
-const fee=info?info.fee:0;
+const has=district&&city.trim(),info=has?deliveryInfo(district,city):null,fee=info?info.fee:0;
 const area=info?info.area:"Enter your district and city / town";
 const summary=`<div class="delivery-line"><span>Delivery area</span><strong>${area}</strong></div><div class="delivery-line"><span>Delivery fee</span><strong>${info?"LKR "+money(fee):"To be calculated"}</strong></div>`;
-["cartDeliverySummary","checkoutDeliverySummary"].forEach(id=>{
-const el=$(id);
-if(el)el.innerHTML=summary;
-});
-const totalEl=$("checkoutTotal");
-if(totalEl)totalEl.textContent="Subtotal: LKR "+money(total())+" | Total payable: LKR "+money(total()+fee);
+["cartDeliverySummary","checkoutDeliverySummary"].forEach(id=>{const el=$(id);if(el)el.innerHTML=summary;});
+const totalEl=$("checkoutTotal");if(totalEl)totalEl.textContent="Subtotal: LKR "+money(total())+" | Total payable: LKR "+money(total()+fee);
 }
-
 const $=id=>document.getElementById(id);
 const money=n=>Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
 const CUSTOMER_PHOTO_BUCKET="customer-photos";
 const PAYMENT_SLIP_BUCKET="payment-slips";
 const PHOTO_MAX_BYTES=5*1024*1024;
-
-function normaliseCustomType(p){
-const t=String(p?.customization_type||"").toLowerCase().trim();
-if(["text","photo","text_photo"].includes(t))return t;
-if(p?.is_customisable===true)return "text";
-return "none";
-}
-
-function productPhotoCount(p){
-const raw=Number(p?.customization_photo_count||0);
-if(raw>0)return Math.min(20,Math.floor(raw));
-const n=String(p?.name||"").toLowerCase();
-if(n.includes("photo roll"))return 10;
-return legacyPhotoProduct(n)?1:0;
-}
-
-function legacyPhotoProduct(name){
-const n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
-return n.includes("photo roll")||n.includes("photo projection")||n.includes("engraved eye")||n.includes("eye engraved")||n.includes("i engraved")||n.includes("iron grade");
-}
-
-function isPhotoProduct(product){
-const p=typeof product==="object"?product:products.find(x=>String(x.name||"")===String(product||""));
-return p?productPhotoCount(p)>0:legacyPhotoProduct(product);
-}
-
-function photoCountFor(product){
-const p=typeof product==="object"?product:products.find(x=>String(x.name||"")===String(product||""));
-if(p)return productPhotoCount(p);
-const n=String(product||"").toLowerCase();
-return n.includes("photo roll")?10:(legacyPhotoProduct(n)?1:0);
-}
-
+function normaliseCustomType(p){const t=String(p?.customization_type||"").toLowerCase().trim();if(["text","photo","text_photo"].includes(t))return t;if(p?.is_customisable===true)return "text";return "none";}
+function productPhotoCount(p){const raw=Number(p?.customization_photo_count||0);if(raw>0)return Math.min(20,Math.floor(raw));const n=String(p?.name||"").toLowerCase();if(n.includes("photo roll"))return 10;return legacyPhotoProduct(n)?1:0;}
+function legacyPhotoProduct(name){const n=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();return n.includes("photo roll")||n.includes("photo projection")||n.includes("engraved eye")||n.includes("eye engraved")||n.includes("i engraved")||n.includes("iron grade");}
+function isPhotoProduct(product){const p=typeof product==="object"?product:products.find(x=>String(x.name||"")===String(product||""));return p?productPhotoCount(p)>0:legacyPhotoProduct(product);}
+function photoCountFor(product){const p=typeof product==="object"?product:products.find(x=>String(x.name||"")===String(product||""));if(p)return productPhotoCount(p);const n=String(product||"").toLowerCase();return n.includes("photo roll")?10:(legacyPhotoProduct(n)?1:0);}
 function productTextFields(p){
-const raw=p?.customization_fields;
-let fields=[];
-if(Array.isArray(raw))fields=raw;
-else if(raw&&Array.isArray(raw.text_fields))fields=raw.text_fields;
-else if(raw&&Array.isArray(raw.fields))fields=raw.fields;
-return fields.map((f,i)=>typeof f==="string"?{
-key:"custom_field_"+(i+1),
-label:f,
-type:"text",
-required:true,
-max_length:120
-}:({
-...f,
-key:f.key||("custom_field_"+(i+1)),
-label:f.label||f.name||("Custom detail "+(i+1)),
-type:f.type||"text",
-required:f.required!==false,
-max_length:Number(f.max_length||120)
-}));
+const raw=p?.customization_fields;let fields=[];
+if(Array.isArray(raw))fields=raw;else if(raw&&Array.isArray(raw.text_fields))fields=raw.text_fields;else if(raw&&Array.isArray(raw.fields))fields=raw.fields;
+return fields.map((f,i)=>typeof f==="string"?{key:"custom_field_"+(i+1),label:f,type:"text",required:true,max_length:120}:{...f,key:f.key||("custom_field_"+(i+1)),label:f.label||f.name||("Custom detail "+(i+1)),type:f.type||"text",required:f.required!==false,max_length:Number(f.max_length||120)});
 }
-
-function productHasCustomisation(p){
-if(!p)return false;
-return normaliseCustomType(p)!=="none"||
-p.customization_required===true||
-productPhotoCount(p)>0||
-productTextFields(p).length>0||
-legacyPhotoProduct(p.name)||
-isLegacyNameCustomisable(p.name);
-}
-
-function isLegacyNameCustomisable(name){
-const n=String(name||"").toLowerCase();
-return /name necklace|name bracelet|couple name|infinity|customised ring|initial couple ring|engraved bracelet|engraving bracelet|engraved bangle/.test(n);
-}
-
-function isCustomisableProduct(product,flag=false){
-const p=typeof product==="object"?product:products.find(x=>String(x.name||"")===String(product||""));
-return p?productHasCustomisation(p):!!flag||legacyPhotoProduct(product)||isLegacyNameCustomisable(product);
-}
-
-function productAllowsCOD(p){
-const setting=String(p?.payment_option||"").toLowerCase().replace(/[_-]+/g," ").trim();
-if(!setting)return true;
-if(setting.includes("bank")&&!setting.includes("cash")&&!setting.includes("cod"))return false;
-if(setting.includes("cash")||setting.includes("cod")||setting.includes("both")||setting.includes("all"))return true;
-return true;
-}
-
-function cartHasCustomisedItems(){
-return cart.some(item=>isCustomisableProduct(item.product||item,item.is_customisable));
-}
-
-function codAllowedForCart(){
-return cart.length>0&&!cartHasCustomisedItems()&&cart.every(item=>productAllowsCOD(item.product||item));
-}
-
+function productHasCustomisation(p){if(!p)return false;return normaliseCustomType(p)!=="none"||p.customization_required===true||productPhotoCount(p)>0||productTextFields(p).length>0||legacyPhotoProduct(p.name)||isLegacyNameCustomisable(p.name);}
+function isLegacyNameCustomisable(name){const n=String(name||"").toLowerCase();return /name necklace|name bracelet|couple name|infinity|customised ring|initial couple ring|engraved bracelet|engraving bracelet|engraved bangle/.test(n);}
+function isCustomisableProduct(product,flag=false){const p=typeof product==="object"?product:products.find(x=>String(x.name||"")===String(product||""));return p?productHasCustomisation(p):!!flag||legacyPhotoProduct(product)||isLegacyNameCustomisable(product);}
+function productAllowsCOD(p){const setting=String(p?.payment_option||"").toLowerCase().replace(/[_-]+/g," ").trim();if(!setting)return true;if(setting.includes("bank")&&!setting.includes("cash")&&!setting.includes("cod"))return false;if(setting.includes("cash")||setting.includes("cod")||setting.includes("both")||setting.includes("all"))return true;return true;}
+function cartHasCustomisedItems(){return cart.some(item=>isCustomisableProduct(item.product||item,item.is_customisable));}
+function codAllowedForCart(){return cart.length>0&&!cartHasCustomisedItems()&&cart.every(item=>productAllowsCOD(item.product||item));}
 function updatePaymentOptions(){
-const select=$("paymentMethod");
-if(!select)return;
-const forceBank=cartHasCustomisedItems();
-const allowCOD=codAllowedForCart();
-const old=select.value;
+const select=$("paymentMethod");if(!select)return;
+const forceBank=cartHasCustomisedItems(),allowCOD=codAllowedForCart(),old=select.value;
 select.innerHTML='<option value="">Select payment method</option>'+(allowCOD?'<option value="Cash on Delivery">Cash on Delivery</option>':'')+'<option value="Bank Transfer">Bank Transfer</option>';
-if(forceBank){
-select.value="Bank Transfer";
-select.disabled=false;
-const note=$("paymentRestrictionNote");
-if(note)note.textContent="Customised orders are payable by bank transfer only. This applies to the entire bag.";
-}else{
-select.disabled=false;
-if(old&&Array.from(select.options).some(o=>o.value===old))select.value=old;
-else select.value=allowCOD?"Cash on Delivery":"Bank Transfer";
-const note=$("paymentRestrictionNote");
-if(note)note.textContent="Payment methods shown depend on the products in your bag.";
-}
+if(forceBank){select.value="Bank Transfer";select.disabled=false;const note=$("paymentRestrictionNote");if(note)note.textContent="Customised orders are payable by bank transfer only. This applies to the entire bag.";}
+else{select.disabled=false;if(old&&Array.from(select.options).some(o=>o.value===old))select.value=old;else select.value=allowCOD?"Cash on Delivery":"Bank Transfer";const note=$("paymentRestrictionNote");if(note)note.textContent="Payment methods shown depend on the products in your bag.";}
 syncPaymentFields();
 }
-
 function syncPaymentFields(){
 const bank=$("paymentMethod")?.value==="Bank Transfer";
-$("bankGroup").style.display=bank?"block":"none";
-$("referenceGroup").style.display=bank?"block":"none";
-$("selectedBank").required=bank;
-$("slipGroup").style.display=bank?"block":"none";
-$("paymentSlip").required=bank;
+$("bankGroup").style.display=bank?"block":"none";$("referenceGroup").style.display=bank?"block":"none";
+$("selectedBank").required=bank;$("slipGroup").style.display=bank?"block":"none";$("paymentSlip").required=bank;
 }
-
 const TOWN_DATA={
-"colombo 1–15":["Colombo","00100"],
-"colombo 1-15":["Colombo","00100"],
-"colombo":["Colombo","00100"],
-"negombo":["Gampaha","11500"],
-"wattala":["Gampaha","11300"],
-"ja-ela":["Gampaha","11350"],
-"ja ela":["Gampaha","11350"],
-"gampaha":["Gampaha","11000"],
-"kadawatha":["Gampaha","11850"],
-"kelaniya":["Gampaha","11600"],
-"kiribathgoda":["Gampaha","11600"],
-"ragama":["Gampaha","11010"],
-"minuwangoda":["Gampaha","11550"],
-"katunayake":["Gampaha","11450"],
-"dehiwala":["Colombo","10350"],
-"mount lavinia":["Colombo","10370"],
-"moratuwa":["Colombo","10400"],
-"nugegoda":["Colombo","10250"],
-"maharagama":["Colombo","10280"],
-"kottawa":["Colombo","10230"],
-"pannipitiya":["Colombo","10230"],
-"homagama":["Colombo","10200"],
-"battaramulla":["Colombo","10120"],
-"malabe":["Colombo","10115"],
-"kaduwela":["Colombo","10640"],
-"kalutara":["Kalutara","12000"],
-"panadura":["Kalutara","12500"],
-"horana":["Kalutara","12400"],
-"beruwala":["Kalutara","12070"],
-"galle":["Galle","80000"],
-"hikkaduwa":["Galle","80240"],
-"ambalangoda":["Galle","80300"],
-"matara":["Matara","81000"],
-"weligama":["Matara","81700"],
-"hambantota":["Hambantota","82000"],
-"kandy":["Kandy","20000"],
-"peradeniya":["Kandy","20400"],
-"matale":["Matale","21000"],
-"nuwara eliya":["Nuwara Eliya","22200"],
-"hatton":["Nuwara Eliya","22000"],
-"kurunegala":["Kurunegala","60000"],
-"kuliyapitiya":["Kurunegala","60200"],
-"puttalam":["Puttalam","61300"],
-"chilaw":["Puttalam","61000"],
-"anuradhapura":["Anuradhapura","50000"],
-"polonnaruwa":["Polonnaruwa","51000"],
-"jaffna":["Jaffna","40000"],
-"kilinochchi":["Kilinochchi","44000"],
-"vavuniya":["Vavuniya","43000"],
-"mannar":["Mannar","41000"],
-"mullaitivu":["Mullaitivu","42000"],
-"trincomalee":["Trincomalee","31000"],
-"batticaloa":["Batticaloa","30000"],
-"ampara":["Ampara","32000"],
-"ratnapura":["Ratnapura","70000"],
-"embilipitiya":["Ratnapura","70200"],
-"kegalle":["Kegalle","71000"],
-"badulla":["Badulla","90000"],
-"bandarawela":["Badulla","90100"],
-"monaragala":["Monaragala","91000"]
+"colombo 1–15":["Colombo","00100"],"colombo 1-15":["Colombo","00100"],"colombo":["Colombo","00100"],
+"negombo":["Gampaha","11500"],"wattala":["Gampaha","11300"],"ja-ela":["Gampaha","11350"],"ja ela":["Gampaha","11350"],"gampaha":["Gampaha","11000"],"kadawatha":["Gampaha","11850"],"kelaniya":["Gampaha","11600"],"kiribathgoda":["Gampaha","11600"],"ragama":["Gampaha","11010"],"minuwangoda":["Gampaha","11550"],"katunayake":["Gampaha","11450"],
+"dehiwala":["Colombo","10350"],"mount lavinia":["Colombo","10370"],"moratuwa":["Colombo","10400"],"nugegoda":["Colombo","10250"],"maharagama":["Colombo","10280"],"kottawa":["Colombo","10230"],"pannipitiya":["Colombo","10230"],"homagama":["Colombo","10200"],"battaramulla":["Colombo","10120"],"malabe":["Colombo","10115"],"kaduwela":["Colombo","10640"],
+"kalutara":["Kalutara","12000"],"panadura":["Kalutara","12500"],"horana":["Kalutara","12400"],"beruwala":["Kalutara","12070"],"galle":["Galle","80000"],"hikkaduwa":["Galle","80240"],"ambalangoda":["Galle","80300"],"matara":["Matara","81000"],"weligama":["Matara","81700"],"hambantota":["Hambantota","82000"],
+"kandy":["Kandy","20000"],"peradeniya":["Kandy","20400"],"matale":["Matale","21000"],"nuwara eliya":["Nuwara Eliya","22200"],"hatton":["Nuwara Eliya","22000"],"kurunegala":["Kurunegala","60000"],"kuliyapitiya":["Kurunegala","60200"],"puttalam":["Puttalam","61300"],"chilaw":["Puttalam","61000"],
+"anuradhapura":["Anuradhapura","50000"],"polonnaruwa":["Polonnaruwa","51000"],"jaffna":["Jaffna","40000"],"kilinochchi":["Kilinochchi","44000"],"vavuniya":["Vavuniya","43000"],"mannar":["Mannar","41000"],"mullaitivu":["Mullaitivu","42000"],"trincomalee":["Trincomalee","31000"],"batticaloa":["Batticaloa","30000"],"ampara":["Ampara","32000"],"ratnapura":["Ratnapura","70000"],"embilipitiya":["Ratnapura","70200"],"kegalle":["Kegalle","71000"],"badulla":["Badulla","90000"],"bandarawela":["Badulla","90100"],"monaragala":["Monaragala","91000"]
 };
-
 function applyTownAutofill(){
-const city=$("cityInput"),district=$("districtInput"),postal=$("postalCodeInput");
-if(!city||!district||!postal)return;
-const key=city.value.trim().toLowerCase();
-const match=TOWN_DATA[key];
-if(match){
-district.value=match[0];
-postal.value=match[1];
-$("postalHint").textContent="Suggested postal code for this town. Please verify it is correct for your exact address.";
-}else{
-$("postalHint").textContent="Town not in the quick-fill list. Please enter and verify your district and postal code.";
-}
+const city=$("cityInput"),district=$("districtInput"),postal=$("postalCodeInput");if(!city||!district||!postal)return;
+const match=TOWN_DATA[city.value.trim().toLowerCase()];
+if(match){district.value=match[0];postal.value=match[1];$("postalHint").textContent="Suggested postal code for this town. Please verify it is correct for your exact address.";}
+else{$("postalHint").textContent="Town not in the quick-fill list. Please enter and verify your district and postal code.";}
 updateDeliveryDisplay();
 }
-
-function imageUrlForProduct(p){
-const raw=p.image_url||p.image_path||p.image||"";
-if(!raw)return "";
-if(/^https?:\/\//i.test(raw))return raw;
-return db.storage.from(STORAGE_BUCKET).getPublicUrl(raw).data.publicUrl;
-}
-
-function safeFileExt(file){
-const ext=(file.name.split(".").pop()||"").toLowerCase();
-return ["jpg","jpeg","png","webp"].includes(ext)?ext:"jpg";
-}
-
-function imageUrl(v){
-if(!v)return "";
-if(/^https?:\/\//i.test(v))return v;
-return db.storage.from(STORAGE_BUCKET).getPublicUrl(v).data.publicUrl;
-}
-
+function imageUrlForProduct(p){const raw=p.image_url||p.image_path||p.image||"";if(!raw)return "";if(/^https?:\/\//i.test(raw))return raw;return db.storage.from(STORAGE_BUCKET).getPublicUrl(raw).data.publicUrl;}
+function safeFileExt(file){const ext=(file.name.split(".").pop()||"").toLowerCase();return ["jpg","jpeg","png","webp"].includes(ext)?ext:"jpg";}
+function imageUrl(v){if(!v)return "";if(/^https?:\/\//i.test(v))return v;return db.storage.from(STORAGE_BUCKET).getPublicUrl(v).data.publicUrl;}
 async function loadProducts(){
-const root=$("productList");
-root.textContent="Loading collection...";
+const root=$("productList");root.textContent="Loading collection...";
 let result=await db.from(PRODUCT_TABLE).select("*").eq("is_active",true).order("created_at",{ascending:false});
-if(result.error){
-console.error("Product query with sorting failed:",result.error);
-result=await db.from(PRODUCT_TABLE).select("*").eq("is_active",true);
-}
-if(result.error){
-console.error("Product loading failed:",result.error);
-root.textContent="Unable to load products: "+result.error.message+" ("+(result.error.code||"no code")+"). Check the store_products SELECT permission and column/table names.";
-return;
-}
+if(result.error){console.error("Product query with sorting failed:",result.error);result=await db.from(PRODUCT_TABLE).select("*").eq("is_active",true);}
+if(result.error){console.error("Product loading failed:",result.error);root.textContent="Unable to load products: "+result.error.message+" ("+(result.error.code||"no code")+"). Check the store_products SELECT permission and column/table names.";return;}
 products=result.data||[];
-const cat=$("categoryFilter"),old=cat.value;
-cat.innerHTML='<option value="">All Collections</option>';
-[...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{
-const o=document.createElement("option");
-o.value=c;
-o.textContent=c;
-cat.append(o);
-});
-cat.value=old;
-renderProducts(products);
+const cat=$("categoryFilter"),old=cat.value;cat.innerHTML='<option value="">All Collections</option>';
+[...new Set(products.map(p=>p.category).filter(Boolean))].sort().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;cat.append(o);});
+cat.value=old;renderProducts(products);
 }
-
 function renderProducts(items){
-const root=$("productList");
-root.replaceChildren();
-if(!items.length){
-root.innerHTML='<div class="empty">No products found.</div>';
-return;
-}
+const root=$("productList");root.replaceChildren();
+if(!items.length){root.innerHTML='<div class="empty">No products found.</div>';return;}
 items.forEach(p=>{
-const card=document.createElement("article");
-card.className="product-card";
-const src=imageUrlForProduct(p);
-if(src){
-const img=document.createElement("img");
-img.className="product-image";
-img.alt=p.name||"Zyra product";
-img.loading="lazy";
-img.src=src;
-img.onerror=()=>{
-const ph=document.createElement("div");
-ph.className="image-placeholder";
-ph.textContent="IMAGE UNAVAILABLE";
-img.replaceWith(ph);
-};
-card.append(img);
-}else{
-const ph=document.createElement("div");
-ph.className="image-placeholder";
-ph.textContent="IMAGE COMING SOON";
-card.append(ph);
-}
-const info=document.createElement("div");
-info.className="product-info";
-const h=document.createElement("h3");
-h.textContent=p.name||"Product";
-const d=document.createElement("p");
-d.textContent=p.description||"";
-const price=document.createElement("div");
-price.className="price";
-price.textContent="LKR "+money(p.price);
-const b=document.createElement("button");
-b.className="add-button";
-b.textContent="ADD TO BAG";
-b.onclick=()=>addToCart(p.id);
+const card=document.createElement("article");card.className="product-card";const src=imageUrlForProduct(p);
+if(src){const img=document.createElement("img");img.className="product-image";img.alt=p.name||"Zyra product";img.loading="lazy";img.src=src;img.onerror=()=>{const ph=document.createElement("div");ph.className="image-placeholder";ph.textContent="IMAGE UNAVAILABLE";img.replaceWith(ph);};card.append(img);}
+else{const ph=document.createElement("div");ph.className="image-placeholder";ph.textContent="IMAGE COMING SOON";card.append(ph);}
+const info=document.createElement("div");info.className="product-info";
+const h=document.createElement("h3");h.textContent=p.name||"Product";
+const d=document.createElement("p");d.textContent=p.description||"";
+const price=document.createElement("div");price.className="price";price.textContent="LKR "+money(p.price);
+const b=document.createElement("button");b.className="add-button";b.textContent="ADD TO BAG";b.onclick=()=>addToCart(p.id);
 info.append(h,d,price);
-if(isCustomisableProduct(p)){
-const c=document.createElement("p");
-c.textContent=productPhotoCount(p)>0?(p.customization_photo_required===false?"Photo upload optional":"Photo upload required"):"Customisable";
-c.style.color="var(--wine)";
-info.append(c);
-}
-info.append(b);
-card.append(info);
-root.append(card);
+if(isCustomisableProduct(p)){const c=document.createElement("p");c.textContent=productPhotoCount(p)>0?(p.customization_photo_required===false?"Photo upload optional":"Photo upload required"):"Customisable";c.style.color="var(--wine)";info.append(c);}
+info.append(b);card.append(info);root.append(card);
 });
 }
-
-function filterProducts(){
-const q=$("searchInput").value.toLowerCase(),c=$("categoryFilter").value;
-renderProducts(products.filter(p=>(p.name||"").toLowerCase().includes(q)&&(!c||p.category===c)));
-}
-
-function createCustomisationUnit(){
-return {details:{},photoFiles:[]};
-}
-
+function filterProducts(){const q=$("searchInput").value.toLowerCase(),c=$("categoryFilter").value;renderProducts(products.filter(p=>(p.name||"").toLowerCase().includes(q)&&(!c||p.category===c)));}
+function createCustomisationUnit(){return {details:{},photoFiles:[]};}
 function ensureCustomisationUnits(item){
-if(!Array.isArray(item.units)){
-const first=createCustomisationUnit();
-first.details={...(item.details||{})};
-first.photoFiles=Array.isArray(item.photoFiles)?item.photoFiles:[];
-item.units=Array.from({length:Math.max(1,Number(item.quantity)||1)},(_,i)=>i===0?first:createCustomisationUnit());
-}
+if(!Array.isArray(item.units)){const first=createCustomisationUnit();first.details={...(item.details||{})};first.photoFiles=Array.isArray(item.photoFiles)?item.photoFiles:[];item.units=Array.from({length:Math.max(1,Number(item.quantity)||1)},(_,i)=>i===0?first:createCustomisationUnit());}
 while(item.units.length<item.quantity)item.units.push(createCustomisationUnit());
 if(item.units.length>item.quantity)item.units.length=item.quantity;
 return item.units;
 }
-
 function addToCart(id){
-const p=products.find(x=>x.id===id);
-if(!p)return;
+const p=products.find(x=>x.id===id);if(!p)return;
 const found=cart.find(x=>x.id===id);
-if(found){
-ensureCustomisationUnits(found);
-found.quantity++;
-found.units.push(createCustomisationUnit());
-}else{
-cart.push({
-id:p.id,
-name:p.name,
-price:Number(p.price),
-quantity:1,
-product:p,
-is_customisable:isCustomisableProduct(p),
-units:[createCustomisationUnit()]
-});
+if(found){ensureCustomisationUnits(found);found.quantity++;found.units.push(createCustomisationUnit());}
+else{cart.push({id:p.id,name:p.name,price:Number(p.price),quantity:1,product:p,is_customisable:isCustomisableProduct(p),units:[createCustomisationUnit()]});}
+renderCart();openCart();
 }
-renderCart();
-openCart();
-}
-
-function removeItem(id){
-cart=cart.filter(x=>x.id!==id);
-renderCart();
-}
-
+function removeItem(id){cart=cart.filter(x=>x.id!==id);renderCart();}
 function changeQty(id,delta){
-const x=cart.find(i=>i.id===id);
-if(!x)return;
-ensureCustomisationUnits(x);
-if(delta>0){
-x.quantity++;
-x.units.push(createCustomisationUnit());
+const x=cart.find(i=>i.id===id);if(!x)return;ensureCustomisationUnits(x);
+if(delta>0){x.quantity++;x.units.push(createCustomisationUnit());}
+else if(delta<0){x.quantity--;x.units.pop();}
+if(x.quantity<1)removeItem(id);else renderCart();
 }
-
-else if(delta<0){
-  x.quantity--;
-  x.units.pop();
-}
-if(x.quantity<1)removeItem(id);
-else renderCart();
-}
-
-function total(){
-  return cart.reduce((s,x)=>s+x.price*x.quantity,0);
-}
-
+function total(){return cart.reduce((s,x)=>s+x.price*x.quantity,0);}
 function customField(unit,key,label,placeholder,max=120,wide=false){
-  const wrap=document.createElement("div");
-  if(wide)wrap.className="wide";
-  const input=document.createElement("input");
-  input.placeholder=placeholder||label;
-  input.maxLength=max;
-  input.value=unit.details[key]||"";
-  input.setAttribute("aria-label",label);
-  input.oninput=()=>unit.details[key]=input.value;
-  wrap.append(input);
-  return wrap;
+const wrap=document.createElement("div");if(wide)wrap.className="wide";
+const input=document.createElement("input");input.placeholder=placeholder||label;input.maxLength=max;input.value=unit.details[key]||"";input.setAttribute("aria-label",label);input.oninput=()=>unit.details[key]=input.value;wrap.append(input);return wrap;
 }
-
 function photoUploadControl(unit,product,unitNumber){
-  const count=photoCountFor(product);
-  if(!count)return null;
-  const required=product.customization_photo_required!==false;
-  const wrap=document.createElement("div");
-  wrap.className="photo-upload";
-  const label=document.createElement("label");
-  label.textContent=(required?"Upload":"Optional upload of")+" "+count+" photo"+(count===1?"":"s")+" for Piece "+unitNumber+(required?" *":"");
-  const input=document.createElement("input");
-  input.type="file";
-  input.accept="image/jpeg,image/png,image/webp";
-  input.multiple=count>1;
-  input.required=required;
-  input.onchange=()=>{
-    const files=Array.from(input.files||[]);
-    if(files.length&&files.length!==count){
-      alert("Please select exactly "+count+" photo(s) for piece "+unitNumber+".");
-      input.value="";
-      unit.photoFiles=[];
-      return;
-    }
-    unit.photoFiles=files;
-  };
-  const help=document.createElement("div");
-  help.className="photo-help";
-  help.textContent="JPG, PNG or WEBP. Maximum 5MB per photo.";
-  wrap.append(label,input,help);
-  if(String(product.name||"").toLowerCase().includes("photo roll")){
-    const msg=document.createElement("input");
-    msg.type="text";
-    msg.maxLength=200;
-    msg.placeholder="Birthday message (optional)";
-    msg.value=unit.details.birthday_message||"";
-    msg.style.cssText="width:100%;margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:12px";
-    msg.oninput=()=>unit.details.birthday_message=msg.value;
-    wrap.append(msg);
-  }
-  return wrap;
+const count=photoCountFor(product);if(!count)return null;
+const required=product.customization_photo_required!==false;
+const wrap=document.createElement("div");wrap.className="photo-upload";
+const label=document.createElement("label");label.textContent=(required?"Upload":"Optional upload of")+" "+count+" photo"+(count===1?"":"s")+" for Piece "+unitNumber+(required?" *":"");
+const input=document.createElement("input");input.type="file";input.accept="image/jpeg,image/png,image/webp";input.multiple=count>1;input.required=required;
+input.onchange=()=>{const files=Array.from(input.files||[]);if(files.length&&files.length!==count){alert("Please select exactly "+count+" photo(s) for piece "+unitNumber+".");input.value="";unit.photoFiles=[];return;}unit.photoFiles=files;};
+const help=document.createElement("div");help.className="photo-help";help.textContent="JPG, PNG or WEBP. Maximum 5MB per photo.";wrap.append(label,input,help);
+if(String(product.name||"").toLowerCase().includes("photo roll")){const msg=document.createElement("input");msg.type="text";msg.maxLength=200;msg.placeholder="Birthday message (optional)";msg.value=unit.details.birthday_message||"";msg.style.cssText="width:100%;margin-top:10px;padding:10px;border:1px solid #ddd;border-radius:12px";msg.oninput=()=>unit.details.birthday_message=msg.value;wrap.append(msg);}
+return wrap;
 }
-
 function appendGenericProductFields(fields,item,unit){
-  const p=item.product||{},customFields=productTextFields(p),opts=p.customization_options||{};
-  customFields.forEach((field,index)=>{
-    const wrap=document.createElement("div");
-    if(field.wide||field.type==="textarea")wrap.className="wide";
-    const label=document.createElement("label");
-    label.textContent=field.label+(field.required?" *":"");
-    label.style.cssText="display:block;font-size:12px;margin-bottom:5px;color:#6f5d55";
-    let input;
-    if(field.type==="select"||Array.isArray(field.options)){
-      input=document.createElement("select");
-      input.innerHTML='<option value="">Select '+escapeHtml(field.label)+'</option>'+(field.options||[]).map(o=>{
-        const value=typeof o==="object"?o.value:o;
-        const text=typeof o==="object"?(o.label||o.value):o;
-        return '<option value="'+escapeHtml(value)+'">'+escapeHtml(text)+'</option>';
-      }).join("");
-    }else if(field.type==="textarea"){
-      input=document.createElement("textarea");
-      input.rows=2;
-    }else{
-      input=document.createElement("input");
-      input.type=field.type==="number"?"text":"text";
-      input.maxLength=Math.min(1000,Number(field.max_length||120));
-    }
-    input.placeholder=field.placeholder||field.label;
-    input.value=unit.details[field.key]||"";
-    input.required=field.required!==false;
-    input.oninput=input.onchange=()=>unit.details[field.key]=input.value;
-    wrap.append(label,input);
-    fields.append(wrap);
-  });
-  if(opts.phone_enabled===true&&Array.isArray(opts.phone_models)&&opts.phone_models.length){
-    const wrap=document.createElement("div");
-    wrap.className="wide";
-    const label=document.createElement("label");
-    label.textContent="Phone model *";
-    label.style.cssText="display:block;font-size:12px;margin-bottom:5px;color:#6f5d55";
-    const select=document.createElement("select");
-    select.innerHTML='<option value="">Select phone model</option>'+opts.phone_models.map(m=>'<option value="'+escapeHtml(m)+'">'+escapeHtml(m)+'</option>').join("");
-    select.value=unit.details.phone_model||"";
-    select.required=true;
-    select.onchange=()=>unit.details.phone_model=select.value;
-    wrap.append(label,select);
-    fields.append(wrap);
-  }
+const p=item.product||{},customFields=productTextFields(p),opts=p.customization_options||{};
+customFields.forEach((field,index)=>{
+const wrap=document.createElement("div");if(field.wide||field.type==="textarea")wrap.className="wide";
+const label=document.createElement("label");label.textContent=field.label+(field.required?" *":"");label.style.cssText="display:block;font-size:12px;margin-bottom:5px;color:#6f5d55";
+let input;
+if(field.type==="select"||Array.isArray(field.options)){input=document.createElement("select");input.innerHTML='<option value="">Select '+escapeHtml(field.label)+'</option>'+(field.options||[]).map(o=>{const value=typeof o==="object"?o.value:o;const text=typeof o==="object"?(o.label||o.value):o;return '<option value="'+escapeHtml(value)+'">'+escapeHtml(text)+'</option>';}).join("");}
+else if(field.type==="textarea"){input=document.createElement("textarea");input.rows=2;}
+else{input=document.createElement("input");input.type=field.type==="number"?"text":"text";input.maxLength=Math.min(1000,Number(field.max_length||120));}
+input.placeholder=field.placeholder||field.label;input.value=unit.details[field.key]||"";input.required=field.required!==false;input.oninput=input.onchange=()=>unit.details[field.key]=input.value;wrap.append(label,input);fields.append(wrap);
+});
+if(opts.phone_enabled===true&&Array.isArray(opts.phone_models)&&opts.phone_models.length){const wrap=document.createElement("div");wrap.className="wide";const label=document.createElement("label");label.textContent="Phone model *";label.style.cssText="display:block;font-size:12px;margin-bottom:5px;color:#6f5d55";const select=document.createElement("select");select.innerHTML='<option value="">Select phone model</option>'+opts.phone_models.map(m=>'<option value="'+escapeHtml(m)+'">'+escapeHtml(m)+'</option>').join("");select.value=unit.details.phone_model||"";select.required=true;select.onchange=()=>unit.details.phone_model=select.value;wrap.append(label,select);fields.append(wrap);}
 }
-
-function escapeHtml(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function appendUnitCustomisationFields(fields,item,unit,unitNumber){
-  const p=item.product||{},n=item.name.toLowerCase(),metadataFields=productTextFields(p),hasMetadata=metadataFields.length>0;
-  if(hasMetadata||p.customization_options?.phone_enabled){
-    appendGenericProductFields(fields,item,unit);
-  }else if(n.includes("initial couple ring")){
-    fields.append(
-      customField(unit,"first_box_initial","First box initial","First box — 1 character",1),
-      customField(unit,"second_box_initial","Second box initial","Second box — 1 character",1)
-    );
-  }else if(n.includes("customised ring")){
-    fields.append(customField(unit,"name","Ring name","Enter name — max 6 characters",6,true));
-  }else if(n.includes("double layered name necklace")){
-    fields.append(
-      customField(unit,"first_layer_name","First layer name","First layer — max 8 characters",8),
-      customField(unit,"second_layer_name","Second layer name","Second layer — max 8 characters",8)
-    );
-  }else if(n.includes("name necklace with bst")){
-    fields.append(customField(unit,"name","Name","Name — max 12 characters",12,true));
-    const wrap=document.createElement("div");
-    wrap.className="wide";
-    const sel=document.createElement("select");
-    sel.setAttribute("aria-label","Birthstone month");
-    sel.innerHTML='<option value="">Select birthstone month</option>'+["January","February","March","April","May","June","July","August","September","October","November","December"].map(m=>`<option value="${m}">${m}</option>`).join("");
-    sel.value=unit.details.birthstone_month||"";
-    sel.onchange=()=>unit.details.birthstone_month=sel.value;
-    wrap.append(sel);
-    fields.append(wrap);
-  }else if(n.includes("name necklace with design")||n.includes("infinity")){
-    fields.append(
-      customField(unit,"name_one","First name","First name — max 6 characters",6),
-      customField(unit,"name_two","Second name","Second name — max 6 characters",6),
-      customField(unit,"special_date","Special date","DDMMYY — 6 digits",6,true)
-    );
-  }else if(n.includes("couple name necklace")){
-    fields.append(
-      customField(unit,"first_name","First name","First name — max 6 characters",6),
-      customField(unit,"second_name","Second name","Second name — max 6 characters",6)
-    );
-  }else if(n.includes("name bracelet & necklace combo")||n.includes("name bracelet and necklace combo")){
-    fields.append(
-      customField(unit,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),
-      customField(unit,"necklace_name","Necklace name","Necklace name — max 8 characters",8)
-    );
-  }else if(n.includes("engraved bracelet")||n.includes("engraving bracelet")||n.includes("engraved bangle")){
-    fields.append(customField(unit,"engraving_text","Engraving text","Enter the exact text to engrave",100,true));
-  }else if(n.includes("name necklace")||n.includes("name bracelet")){
-    fields.append(customField(unit,"name","Name to customise","Enter name — max 8 characters",8,true));
-  }else if(!productTextFields(p).length&&normaliseCustomType(p)!=="photo"){
-    const text=document.createElement("textarea");
-    text.className="wide";
-    text.placeholder="Enter customisation details";
-    text.value=unit.details.instructions||"";
-    text.maxLength=1000;
-    text.oninput=()=>unit.details.instructions=text.value;
-    fields.append(text);
-  }
-  const photoControl=photoUploadControl(unit,p.name?p:{...p,name:item.name},unitNumber);
-  if(photoControl)fields.append(photoControl);
+const p=item.product||{},n=item.name.toLowerCase(),metadataFields=productTextFields(p),hasMetadata=metadataFields.length>0;
+if(hasMetadata||p.customization_options?.phone_enabled){appendGenericProductFields(fields,item,unit);}
+else if(n.includes("initial couple ring")){fields.append(customField(unit,"first_box_initial","First box initial","First box — 1 character",1),customField(unit,"second_box_initial","Second box initial","Second box — 1 character",1));}
+else if(n.includes("customised ring")){fields.append(customField(unit,"name","Ring name","Enter name — max 6 characters",6,true));}
+else if(n.includes("double layered name necklace")){fields.append(customField(unit,"first_layer_name","First layer name","First layer — max 8 characters",8),customField(unit,"second_layer_name","Second layer name","Second layer — max 8 characters",8));}
+else if(n.includes("name necklace with bst")){fields.append(customField(unit,"name","Name","Name — max 12 characters",12,true));const wrap=document.createElement("div");wrap.className="wide";const sel=document.createElement("select");sel.setAttribute("aria-label","Birthstone month");sel.innerHTML='<option value="">Select birthstone month</option>'+["January","February","March","April","May","June","July","August","September","October","November","December"].map(m=>`<option value="${m}">${m}</option>`).join("");sel.value=unit.details.birthstone_month||"";sel.onchange=()=>unit.details.birthstone_month=sel.value;wrap.append(sel);fields.append(wrap);}
+else if(n.includes("name necklace with design")||n.includes("infinity")){fields.append(customField(unit,"name_one","First name","First name — max 6 characters",6),customField(unit,"name_two","Second name","Second name — max 6 characters",6),customField(unit,"special_date","Special date","DDMMYY — 6 digits",6,true));}
+else if(n.includes("couple name necklace")){fields.append(customField(unit,"first_name","First name","First name — max 6 characters",6),customField(unit,"second_name","Second name","Second name — max 6 characters",6));}
+else if(n.includes("name bracelet & necklace combo")||n.includes("name bracelet and necklace combo")){fields.append(customField(unit,"bracelet_name","Bracelet name","Bracelet name — max 8 characters",8),customField(unit,"necklace_name","Necklace name","Necklace name — max 8 characters",8));}
+else if(n.includes("engraved bracelet")||n.includes("engraving bracelet")||n.includes("engraved bangle")){fields.append(customField(unit,"engraving_text","Engraving text","Enter the exact text to engrave",100,true));}
+else if(n.includes("name necklace")||n.includes("name bracelet")){fields.append(customField(unit,"name","Name to customise","Enter name — max 8 characters",8,true));}
+else if(!productTextFields(p).length&&normaliseCustomType(p)!=="photo"){const text=document.createElement("textarea");text.className="wide";text.placeholder="Enter customisation details";text.value=unit.details.instructions||"";text.maxLength=1000;text.oninput=()=>unit.details.instructions=text.value;fields.append(text);}
+const photoControl=photoUploadControl(unit,p.name?p:{...p,name:item.name},unitNumber);if(photoControl)fields.append(photoControl);
 }
 
 function renderCart(){
-  $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0);
-  const root=$("cartItems");
-  root.replaceChildren();
-  if(!cart.length)root.textContent="Your shopping bag is empty.";
-  cart.forEach(item=>{
-    ensureCustomisationUnits(item);
-    const box=document.createElement("div");
-    box.className="cart-item";
-    const row=document.createElement("div");
-    row.className="cart-row";
-    const label=document.createElement("strong");
-    label.textContent=`${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
-    const controls=document.createElement("span");
-    [["−",()=>changeQty(item.id,-1)],["+",()=>changeQty(item.id,1)],["Remove",()=>removeItem(item.id)]].forEach(([textValue,fn])=>{
-      const b=document.createElement("button");
-      b.textContent=textValue;
-      b.onclick=fn;
-      controls.append(b);
-    });
-    row.append(label,controls);
-    box.append(row);
-    if(isCustomisableProduct(item.product||item,item.is_customisable)){
-      item.units.forEach((unit,index)=>{
-        const piece=document.createElement("div");
-        piece.className="custom-unit";
-        piece.style.cssText="border:1px solid #eadfe0;border-radius:10px;padding:12px;margin-top:12px;";
-        const heading=document.createElement("strong");
-        heading.textContent=`Piece ${index+1} customisation`;
-        const fields=document.createElement("div");
-        fields.className="custom-fields";
-        appendUnitCustomisationFields(fields,item,unit,index+1);
-        piece.append(heading,fields);
-        box.append(piece);
-      });
-    }
-    root.append(box);
-  });
-  $("cartTotal").textContent="Subtotal: LKR "+money(total());
-  updateDeliveryDisplay();
+$("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0);
+const root=$("cartItems");root.replaceChildren();
+if(!cart.length)root.textContent="Your shopping bag is empty.";
+cart.forEach(item=>{
+ensureCustomisationUnits(item);
+const box=document.createElement("div");box.className="cart-item";
+const row=document.createElement("div");row.className="cart-row";
+const label=document.createElement("strong");label.textContent=`${item.name} × ${item.quantity} — LKR ${money(item.price*item.quantity)}`;
+const controls=document.createElement("span");
+[["−",()=>changeQty(item.id,-1)],["+",()=>changeQty(item.id,1)],["Remove",()=>removeItem(item.id)]].forEach(([textValue,fn])=>{const b=document.createElement("button");b.textContent=textValue;b.onclick=fn;controls.append(b);});
+row.append(label,controls);box.append(row);
+if(isCustomisableProduct(item.product||item,item.is_customisable)){
+item.units.forEach((unit,index)=>{
+const piece=document.createElement("div");piece.className="custom-unit";
+piece.style.cssText="border:1px solid #eadfe0;border-radius:10px;padding:12px;margin-top:12px;";
+const heading=document.createElement("strong");heading.textContent=`Piece ${index+1} customisation`;
+const fields=document.createElement("div");fields.className="custom-fields";
+appendUnitCustomisationFields(fields,item,unit,index+1);
+piece.append(heading,fields);box.append(piece);
+});
 }
-
-function openCart(){
-  $("cartModal").style.display="block";
+root.append(box);
+});
+$("cartTotal").textContent="Subtotal: LKR "+money(total());updateDeliveryDisplay();
 }
-function closeModal(id){
-  $(id).style.display="none";
-}
+function openCart(){$("cartModal").style.display="block";}
+function closeModal(id){$(id).style.display="none";}
 function showCheckout(){
-  if(!cart.length){
-    alert("Please add a product first.");
-    return;
-  }
-  closeModal("cartModal");
-  $("checkoutModal").style.display="block";
-  updateDeliveryDisplay();
-  updatePaymentOptions();
+if(!cart.length){alert("Please add a product first.");return;}
+closeModal("cartModal");$("checkoutModal").style.display="block";
+updateDeliveryDisplay();updatePaymentOptions();
 }
-function finishOrder(){
-  cart=[];
-  renderCart();
-  closeModal("successModal");
-}
+function finishOrder(){cart=[];renderCart();closeModal("successModal");}
 
 $("checkoutForm").elements.district.addEventListener("change",updateDeliveryDisplay);
 $("checkoutForm").elements.postal_code.addEventListener("input",updateDeliveryDisplay);
 $("checkoutForm").elements.city.addEventListener("change",applyTownAutofill);
 $("checkoutForm").elements.city.addEventListener("blur",applyTownAutofill);
 $("checkoutForm").elements.city.addEventListener("input",()=>{
-  if(TOWN_DATA[$("cityInput").value.trim().toLowerCase()])applyTownAutofill();
-  else updateDeliveryDisplay();
+if(TOWN_DATA[$("cityInput").value.trim().toLowerCase()])applyTownAutofill();
+else updateDeliveryDisplay();
 });
 
 $("paymentMethod").addEventListener("change",()=>{
-  if(cartHasCustomisedItems()&&$("paymentMethod").value!=="Bank Transfer"){
-    alert("Customised orders must be paid by bank transfer.");
-    $("paymentMethod").value="Bank Transfer";
-  }
-  syncPaymentFields();
+if(cartHasCustomisedItems()&&$("paymentMethod").value!=="Bank Transfer"){
+alert("Customised orders must be paid by bank transfer.");
+$("paymentMethod").value="Bank Transfer";
+}
+syncPaymentFields();
 });
 
 $("selectedBank").addEventListener("change",()=>{
-  const v=$("selectedBank").value;
-  const box=$("bankDetails");
-  if(v&&BANK_INFO[v]){
-    const match=BANK_INFO[v].match(/Account Number: ([0-9]+)/);
-    const accountNumber=match?match[1]:"";
-    box.innerHTML="<strong>Transfer details — "+v+"</strong><br>"+BANK_INFO[v]+(accountNumber?'<br><button type="button" class="copy-account" id="copyBankAccount">COPY ACCOUNT NUMBER</button>':"");
-    box.style.display="block";
-    const copyButton=$("copyBankAccount");
-    if(copyButton)copyButton.addEventListener("click",async()=>{
-      try{
-        await navigator.clipboard.writeText(accountNumber);
-        copyButton.textContent="COPIED";
-      }catch(e){
-        const temp=document.createElement("textarea");
-        temp.value=accountNumber;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand("copy");
-        temp.remove();
-        copyButton.textContent="COPIED";
-      }
-    });
-  }else{
-    box.style.display="none";
-    box.innerHTML="";
-  }
+const v=$("selectedBank").value,box=$("bankDetails");
+if(v&&BANK_INFO[v]){
+const match=BANK_INFO[v].match(/Account Number: ([0-9]+)/);
+const accountNumber=match?match[1]:"";
+box.innerHTML="<strong>Transfer details — "+v+"</strong><br>"+BANK_INFO[v]+(accountNumber?'<br><button type="button" class="copy-account" id="copyBankAccount">COPY ACCOUNT NUMBER</button>':"");
+box.style.display="block";
+const copyButton=$("copyBankAccount");
+if(copyButton)copyButton.addEventListener("click",async()=>{
+try{await navigator.clipboard.writeText(accountNumber);copyButton.textContent="COPIED";}
+catch(e){
+const temp=document.createElement("textarea");temp.value=accountNumber;
+document.body.appendChild(temp);temp.select();document.execCommand("copy");temp.remove();
+copyButton.textContent="COPIED";
+}
+});
+}else{box.style.display="none";box.innerHTML="";}
 });
 
 async function uploadItemPhotos(item,unit,unitNumber){
-  const product=item.product||{name:item.name},required=photoCountFor(product);
-  if(!required)return null;
-  const files=unit.photoFiles||[];
-  if(!files.length&&product.customization_photo_required===false)return null;
-  if(files.length!==required)throw new Error(item.name+" — Piece "+unitNumber+": please upload exactly "+required+" photo(s).");
-  const paths=[],names=[];
-  for(let i=0;i<files.length;i++){
-    const file=files[i];
-    if(!["image/jpeg","image/png","image/webp"].includes(file.type))throw new Error("Only JPG, PNG or WEBP photos are accepted.");
-    if(file.size>PHOTO_MAX_BYTES)throw new Error("Each photo must be 5MB or smaller.");
-    const ext=safeFileExt(file);
-    const path=`customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-piece${unitNumber}-${i+1}.${ext}`;
-    const {error}=await db.storage.from(CUSTOMER_PHOTO_BUCKET).upload(path,file,{contentType:file.type,upsert:false});
-    if(error)throw new Error("Photo upload failed for "+file.name+": "+error.message);
-    paths.push(path);
-    names.push(file.name);
-  }
-  return {photo_path:paths[0],photo_paths:paths,photo_count:paths.length,photo_file_names:names};
+const product=item.product||{name:item.name},required=photoCountFor(product);
+if(!required)return null;
+const files=unit.photoFiles||[];
+if(!files.length&&product.customization_photo_required===false)return null;
+if(files.length!==required)throw new Error(item.name+" — Piece "+unitNumber+": please upload exactly "+required+" photo(s).");
+const paths=[],names=[];
+for(let i=0;i<files.length;i++){
+const file=files[i];
+if(!["image/jpeg","image/png","image/webp"].includes(file.type))throw new Error("Only JPG, PNG or WEBP photos are accepted.");
+if(file.size>PHOTO_MAX_BYTES)throw new Error("Each photo must be 5MB or smaller.");
+const ext=safeFileExt(file);
+const path=`customer-orders/${Date.now()}-${Math.random().toString(36).slice(2,10)}-piece${unitNumber}-${i+1}.${ext}`;
+const {error}=await db.storage.from(CUSTOMER_PHOTO_BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+if(error)throw new Error("Photo upload failed for "+file.name+": "+error.message);
+paths.push(path);names.push(file.name);
+}
+return {photo_path:paths[0],photo_paths:paths,photo_count:paths.length,photo_file_names:names};
 }
 
 function validateCustomisationUnit(item,unit,unitNumber){
-  const p=item.product||{},n=item.name.toLowerCase(),d=unit.details||{};
-  if(productHasCustomisation(p)||isCustomisableProduct(item.name,item.is_customisable)){
-    const fields=productTextFields(p),opts=p.customization_options||{};
-    if(fields.length){
-      for(const f of fields){
-        if(f.required!==false&&!String(d[f.key]||"").trim())throw new Error("Please complete "+f.label+" for "+item.name+" — Piece "+unitNumber+".");
-      }
-    }else if(n.includes("initial couple ring")&&(!d.first_box_initial||!d.second_box_initial||d.first_box_initial.length!==1||d.second_box_initial.length!==1)){
-      throw new Error("Piece "+unitNumber+" of "+item.name+" requires one character in each of its two boxes.");
-    }else if(n.includes("customised ring")&&(!d.name||d.name.trim().length>6)){
-      throw new Error("Piece "+unitNumber+": ring name must contain 1 to 6 characters.");
-    }else if(n.includes("double layered name necklace")&&(!d.first_layer_name||!d.second_layer_name)){
-      throw new Error("Complete both layer names for Piece "+unitNumber+".");
-    }else if(n.includes("name necklace with design")||n.includes("infinity")){
-      if(!d.name_one||!d.name_two||!d.special_date)throw new Error("Complete both names and special date for Piece "+unitNumber+".");
-      if(!/^[0-9]{6}$/.test(d.special_date))throw new Error("Enter the special date for Piece "+unitNumber+" as six digits in DDMMYY format.");
-    }else if(n.includes("couple name necklace")&&(!d.first_name||!d.second_name)){
-      throw new Error("Complete both names for Piece "+unitNumber+".");
-    }else if((n.includes("name bracelet & necklace combo")||n.includes("name bracelet and necklace combo"))&&(!d.bracelet_name||!d.necklace_name)){
-      throw new Error("Complete both names for Piece "+unitNumber+".");
-    }else if(n.includes("name necklace with bst")&&(!d.name||!d.birthstone_month)){
-      throw new Error("Complete the name and birthstone month for Piece "+unitNumber+".");
-    }else if((n.includes("engraved bracelet")||n.includes("engraving bracelet")||n.includes("engraved bangle"))&&!d.engraving_text){
-      throw new Error("Enter the engraving text for Piece "+unitNumber+".");
-    }else if(!fields.length&&(n.includes("name necklace")||n.includes("name bracelet"))&&!d.name){
-      throw new Error("Enter the name for Piece "+unitNumber+".");
-    }else if(!fields.length&&!n.includes("photo")&&!legacyPhotoProduct(n)&&!String(d.instructions||"").trim()&&!n.includes("name necklace")&&!n.includes("name bracelet")&&!n.includes("couple name")&&!n.includes("infinity")&&!n.includes("customised ring")&&!n.includes("initial couple ring")&&!n.includes("engraved bracelet")&&!n.includes("engraving bracelet")&&!n.includes("engraved bangle")){
-      throw new Error("Please enter the customisation details for "+item.name+" — Piece "+unitNumber+".");
-    }
-    if(opts.phone_enabled===true&&!String(d.phone_model||"").trim())throw new Error("Select a phone model for Piece "+unitNumber+".");
-  }
-  const photoCount=photoCountFor(p.name?p:{...p,name:item.name});
-  if(photoCount){
-    const required=p.customization_photo_required!==false;
-    const count=(unit.photoFiles||[]).length;
-    if(required&&count!==photoCount)throw new Error(item.name+" — Piece "+unitNumber+": please upload exactly "+photoCount+" photo(s) before checkout.");
-    if(count&&count!==photoCount)throw new Error(item.name+" — Piece "+unitNumber+": please upload exactly "+photoCount+" photo(s).");
-  }
+const p=item.product||{},n=item.name.toLowerCase(),d=unit.details||{};
+if(productHasCustomisation(p)||isCustomisableProduct(item.name,item.is_customisable)){
+const fields=productTextFields(p),opts=p.customization_options||{};
+if(fields.length){
+for(const f of fields){if(f.required!==false&&!String(d[f.key]||"").trim())throw new Error("Please complete "+f.label+" for "+item.name+" — Piece "+unitNumber+".");}
+}else if(n.includes("initial couple ring")&&(!d.first_box_initial||!d.second_box_initial||d.first_box_initial.length!==1||d.second_box_initial.length!==1)){
+throw new Error("Piece "+unitNumber+" of "+item.name+" requires one character in each of its two boxes.");
+}else if(n.includes("customised ring")&&(!d.name||d.name.trim().length>6)){
+throw new Error("Piece "+unitNumber+": ring name must contain 1 to 6 characters.");
+}else if(n.includes("double layered name necklace")&&(!d.first_layer_name||!d.second_layer_name)){
+throw new Error("Complete both layer names for Piece "+unitNumber+".");
+}else if(n.includes("name necklace with design")||n.includes("infinity")){
+if(!d.name_one||!d.name_two||!d.special_date)throw new Error("Complete both names and special date for Piece "+unitNumber+".");
+if(!/^[0-9]{6}$/.test(d.special_date))throw new Error("Enter the special date for Piece "+unitNumber+" as six digits in DDMMYY format.");
+}else if(n.includes("couple name necklace")&&(!d.first_name||!d.second_name)){
+throw new Error("Complete both names for Piece "+unitNumber+".");
+}else if((n.includes("name bracelet & necklace combo")||n.includes("name bracelet and necklace combo"))&&(!d.bracelet_name||!d.necklace_name)){
+throw new Error("Complete both names for Piece "+unitNumber+".");
+}else if(n.includes("name necklace with bst")&&(!d.name||!d.birthstone_month)){
+throw new Error("Complete the name and birthstone month for Piece "+unitNumber+".");
+}else if((n.includes("engraved bracelet")||n.includes("engraving bracelet")||n.includes("engraved bangle"))&&!d.engraving_text){
+throw new Error("Enter the engraving text for Piece "+unitNumber+".");
+}else if(!fields.length&&(n.includes("name necklace")||n.includes("name bracelet"))&&!d.name){
+throw new Error("Enter the name for Piece "+unitNumber+".");
+}else if(!fields.length&&!n.includes("photo")&&!legacyPhotoProduct(n)&&!String(d.instructions||"").trim()&&!n.includes("name necklace")&&!n.includes("name bracelet")&&!n.includes("couple name")&&!n.includes("infinity")&&!n.includes("customised ring")&&!n.includes("initial couple ring")&&!n.includes("engraved bracelet")&&!n.includes("engraving bracelet")&&!n.includes("engraved bangle")){
+throw new Error("Please enter the customisation details for "+item.name+" — Piece "+unitNumber+".");
+}
+if(opts.phone_enabled===true&&!String(d.phone_model||"").trim())throw new Error("Select a phone model for Piece "+unitNumber+".");
+}
+const photoCount=photoCountFor(p.name?p:{...p,name:item.name});
+if(photoCount){
+const required=p.customization_photo_required!==false,count=(unit.photoFiles||[]).length;
+if(required&&count!==photoCount)throw new Error(item.name+" — Piece "+unitNumber+": please upload exactly "+photoCount+" photo(s) before checkout.");
+if(count&&count!==photoCount)throw new Error(item.name+" — Piece "+unitNumber+": please upload exactly "+photoCount+" photo(s).");
+}
 }
 
 $("checkoutForm").addEventListener("submit",async function(e){
-  e.preventDefault();
-  if(!cart.length)return;
-  updatePaymentOptions();
-  const form=new FormData(this);
-  const phone=String(form.get("phone")||"").trim(),postal=String(form.get("postal_code")||"").trim();
-  if(!/^07[0-9]{8}$/.test(phone)){
-    alert("Enter a valid 10-digit Sri Lankan mobile number starting with 07. Example: 0771234567");
-    return;
-  }
-  if(!/^[0-9]{5}$/.test(postal)){
-    alert("Postal code must contain exactly 5 digits.");
-    return;
-  }
-  try{
-    for(const item of cart){
-      ensureCustomisationUnits(item);
-      for(let i=0;i<item.quantity;i++)validateCustomisationUnit(item,item.units[i],i+1);
-    }
-  }catch(validationError){
-    alert(validationError.message);
-    return;
-  }
-  const delivery=deliveryForForm(form),orderSubtotal=total(),grandTotal=orderSubtotal+delivery.fee;
-  const button=$("placeOrderButton"),msg=$("checkoutMessage");
-  button.disabled=true;
-  button.textContent="UPLOADING PHOTOS...";
-  msg.textContent="";
-  try{
-    let selectedPayment=String(form.get("payment_method")||"");
-    if(cartHasCustomisedItems()&&selectedPayment!=="Bank Transfer")throw new Error("Customised products can only be paid by bank transfer. Please select Bank Transfer.");
-    if(selectedPayment==="Cash on Delivery"&&!codAllowedForCart())throw new Error("Cash on Delivery is not available for the products in this bag. Please select Bank Transfer.");
-    if(!["Cash on Delivery","Bank Transfer"].includes(selectedPayment))throw new Error("Please select a valid payment method.");
-    const orderItems=[];
-    for(const item of cart){
-      ensureCustomisationUnits(item);
-      const savedUnits=[],allPhotoPaths=[],allPhotoNames=[];
-      for(let i=0;i<item.quantity;i++){
-        const unit=item.units[i],unitDetails={...(unit.details||{})};
-        if(photoCountFor(item.product||item.name)>0&&(unit.photoFiles||[]).length){
-          button.textContent=`UPLOADING PHOTOS — ${item.name}, PIECE ${i+1}...`;
-          const photoMeta=await uploadItemPhotos(item,unit,i+1);
-          Object.assign(unitDetails,photoMeta||{});
-          if(photoMeta){
-            allPhotoPaths.push(...photoMeta.photo_paths);
-            allPhotoNames.push(...photoMeta.photo_file_names);
-          }
-        }
-        savedUnits.push({unit_number:i+1,...unitDetails});
-      }
-      const customisationDetails={units:savedUnits};
-      if(allPhotoPaths.length){
-        customisationDetails.photo_path=allPhotoPaths[0];
-        customisationDetails.photo_paths=allPhotoPaths;
-        customisationDetails.photo_count=allPhotoPaths.length;
-        customisationDetails.photo_file_names=allPhotoNames;
-      }
-      orderItems.push({
-        product_id:item.id,
-        quantity:item.quantity,
-        is_customised:isCustomisableProduct(item.product||item,item.is_customisable),
-        customisation_details:isCustomisableProduct(item.product||item,item.is_customisable)?customisationDetails:null
-      });
-    }
-    let paymentSlipPath=null;
-    if(selectedPayment==="Bank Transfer"){
-      const slip=$("paymentSlip").files[0];
-      if(!slip)throw new Error("Please upload your bank payment slip.");
-      if(!["image/jpeg","image/png","image/webp","application/pdf"].includes(slip.type))throw new Error("Payment slip must be JPG, PNG, WEBP or PDF.");
-      if(slip.size>5*1024*1024)throw new Error("Payment slip must be 5MB or smaller.");
-      button.textContent="UPLOADING PAYMENT SLIP...";
-      const ext=(slip.name.split(".").pop()||"pdf").toLowerCase().replace(/[^a-z0-9]/g,"");
-      paymentSlipPath=`payment-slips/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
-      const uploaded=await db.storage.from(PAYMENT_SLIP_BUCKET).upload(paymentSlipPath,slip,{contentType:slip.type,upsert:false});
-      if(uploaded.error)throw new Error("Payment slip upload failed: "+uploaded.error.message+". Please check the payment-slips storage upload permission.");
-    }
-    const customer={
-      customer_name:String(form.get("customer_name")||"").trim(),
-      email:String(form.get("email")||"").trim()||null,
-      phone,
-      delivery_address:String(form.get("delivery_address")||"").trim(),
-      city:String(form.get("city")||"").trim(),
-      district:String(form.get("district")||"").trim(),
-      postal_code:postal,
-      payment_method:selectedPayment,
-      selected_bank:String(form.get("selected_bank")||"").trim()||null,
-      bank_transaction_reference:String(form.get("bank_transaction_reference")||"").trim()||null,
-      payment_slip_path:paymentSlipPath,
-      customer_notes:String(form.get("customer_notes")||"").trim()||null
-    };
-    button.textContent="SUBMITTING ORDER...";
-    const payload={customer,items:orderItems};
-    const {data,error}=await db.functions.invoke("place-order",{body:payload});
-    if(error){
-      let detail=error.message||"Order request failed";
-      try{
-        const response=error.context;
-        if(response&&typeof response.json==="function"){
-          const body=await response.json();
-          if(body&&body.error)detail=body.error;
-        }
-      }catch(_){}
-      throw new Error(detail);
-    }
-    if(!data||!data.order_number)throw new Error(data?.error||"The server did not return an order number.");
-    lastInvoice={
-      order_number:data.order_number,
-      date:new Date().toLocaleString("en-LK"),
-      customer_name:String(form.get("customer_name")||"").trim(),
-      email:String(form.get("email")||"").trim(),
-      phone,
-      delivery_address:String(form.get("delivery_address")||"").trim(),
-      city:String(form.get("city")||"").trim(),
-      district:String(form.get("district")||"").trim(),
-      postal_code:postal,
-      payment_method:selectedPayment,
-      selected_bank:String(form.get("selected_bank")||"").trim(),
-      bank_reference:String(form.get("bank_transaction_reference")||"").trim(),
-      items:cart.map((item,index)=>({
-        name:item.name,
-        quantity:item.quantity,
-        price:item.price,
-        details:orderItems[index]?.customisation_details||null
-      })),
-      subtotal:orderSubtotal,
-      delivery_area:delivery.area,
-      delivery_fee:delivery.fee,
-      grand_total:grandTotal
-    };
-    closeModal("checkoutModal");
-    $("trackingNumber").textContent="Your store order number: "+data.order_number;
-    $("successModal").style.display="block";
-    this.reset();
-    $("bankGroup").style.display="none";
-    $("referenceGroup").style.display="none";
-    $("bankDetails").style.display="none";
-    $("slipGroup").style.display="none";
-  }catch(err){
-    console.error(err);
-    msg.textContent=err.message||"We couldn't submit your order. Please try again.";
-  }finally{
-    button.disabled=false;
-    button.textContent="PLACE ORDER";
-  }
-});
+e.preventDefault();
+if(!cart.length)return;
+updatePaymentOptions();
+const form=new FormData(this);
+const phone=String(form.get("phone")||"").trim(),postal=String(form.get("postal_code")||"").trim();
+if(!/^07[0-9]{8}$/.test(phone)){alert("Enter a valid 10-digit Sri Lankan mobile number starting with 07. Example: 0771234567");return;}
+if(!/^[0-9]{5}$/.test(postal)){alert("Postal code must contain exactly 5 digits.");return;}
+try{
+for(const item of cart){
+ensureCustomisationUnits(item);
+for(let i=0;i<item.quantity;i++)validateCustomisationUnit(item,item.units[i],i+1);
+}
+}catch(validationError){alert(validationError.message);return;}
 
-function invoiceEscape(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-  }[c]));
+const delivery=deliveryForForm(form),orderSubtotal=total(),grandTotal=orderSubtotal+delivery.fee;
+const button=$("placeOrderButton"),msg=$("checkoutMessage");
+button.disabled=true;button.textContent="UPLOADING PHOTOS...";msg.textContent="";
+
+try{
+let selectedPayment=String(form.get("payment_method")||"");
+if(cartHasCustomisedItems()&&selectedPayment!=="Bank Transfer")throw new Error("Customised products can only be paid by bank transfer. Please select Bank Transfer.");
+if(selectedPayment==="Cash on Delivery"&&!codAllowedForCart())throw new Error("Cash on Delivery is not available for the products in this bag. Please select Bank Transfer.");
+if(!["Cash on Delivery","Bank Transfer"].includes(selectedPayment))throw new Error("Please select a valid payment method.");
+
+const orderItems=[];
+for(const item of cart){
+ensureCustomisationUnits(item);
+const savedUnits=[],allPhotoPaths=[],allPhotoNames=[];
+for(let i=0;i<item.quantity;i++){
+const unit=item.units[i],unitDetails={...(unit.details||{})};
+if(photoCountFor(item.product||item.name)>0&&(unit.photoFiles||[]).length){
+button.textContent=`UPLOADING PHOTOS — ${item.name}, PIECE ${i+1}...`;
+const photoMeta=await uploadItemPhotos(item,unit,i+1);
+Object.assign(unitDetails,photoMeta||{});
+if(photoMeta){allPhotoPaths.push(...photoMeta.photo_paths);allPhotoNames.push(...photoMeta.photo_file_names);}
+}
+savedUnits.push({unit_number:i+1,...unitDetails});
+}
+const customisationDetails={units:savedUnits};
+if(allPhotoPaths.length){
+customisationDetails.photo_path=allPhotoPaths[0];
+customisationDetails.photo_paths=allPhotoPaths;
+customisationDetails.photo_count=allPhotoPaths.length;
+customisationDetails.photo_file_names=allPhotoNames;
+}
+orderItems.push({
+product_id:item.id,
+quantity:item.quantity,
+is_customised:isCustomisableProduct(item.product||item,item.is_customisable),
+customisation_details:isCustomisableProduct(item.product||item,item.is_customisable)?customisationDetails:null
+});
 }
 
+let paymentSlipPath=null;
+if(selectedPayment==="Bank Transfer"){
+const slip=$("paymentSlip").files[0];
+if(!slip)throw new Error("Please upload your bank payment slip.");
+if(!["image/jpeg","image/png","image/webp","application/pdf"].includes(slip.type))throw new Error("Payment slip must be JPG, PNG, WEBP or PDF.");
+if(slip.size>5*1024*1024)throw new Error("Payment slip must be 5MB or smaller.");
+button.textContent="UPLOADING PAYMENT SLIP...";
+const ext=(slip.name.split(".").pop()||"pdf").toLowerCase().replace(/[^a-z0-9]/g,"");
+paymentSlipPath=`payment-slips/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
+const uploaded=await db.storage.from(PAYMENT_SLIP_BUCKET).upload(paymentSlipPath,slip,{contentType:slip.type,upsert:false});
+if(uploaded.error)throw new Error("Payment slip upload failed: "+uploaded.error.message+". Please check the payment-slips storage upload permission.");
+}
+
+const customer={
+customer_name:String(form.get("customer_name")||"").trim(),
+email:String(form.get("email")||"").trim()||null,
+phone,
+delivery_address:String(form.get("delivery_address")||"").trim(),
+city:String(form.get("city")||"").trim(),
+district:String(form.get("district")||"").trim(),
+postal_code:postal,
+payment_method:selectedPayment,
+selected_bank:String(form.get("selected_bank")||"").trim()||null,
+bank_transaction_reference:String(form.get("bank_transaction_reference")||"").trim()||null,
+payment_slip_path:paymentSlipPath,
+customer_notes:String(form.get("customer_notes")||"").trim()||null
+};
+
+button.textContent="SUBMITTING ORDER...";
+const payload={customer,items:orderItems};
+const {data,error}=await db.functions.invoke("place-order",{body:payload});
+if(error){
+let detail=error.message||"Order request failed";
+try{const response=error.context;if(response&&typeof response.json==="function"){const body=await response.json();if(body&&body.error)detail=body.error;}}catch(_){}
+throw new Error(detail);
+}
+if(!data||!data.order_number)throw new Error(data?.error||"The server did not return an order number.");
+
+lastInvoice={
+order_number:data.order_number,
+date:new Date().toLocaleString("en-LK"),
+customer_name:String(form.get("customer_name")||"").trim(),
+email:String(form.get("email")||"").trim(),
+phone,
+delivery_address:String(form.get("delivery_address")||"").trim(),
+city:String(form.get("city")||"").trim(),
+district:String(form.get("district")||"").trim(),
+postal_code:postal,
+payment_method:selectedPayment,
+selected_bank:String(form.get("selected_bank")||"").trim(),
+bank_reference:String(form.get("bank_transaction_reference")||"").trim(),
+items:cart.map((item,index)=>({name:item.name,quantity:item.quantity,price:item.price,details:orderItems[index]?.customisation_details||null})),
+subtotal:orderSubtotal,
+delivery_area:delivery.area,
+delivery_fee:delivery.fee,
+grand_total:grandTotal
+};
+closeModal("checkoutModal");
+$("trackingNumber").textContent="Your store order number: "+data.order_number;
+$("successModal").style.display="block";
+this.reset();
+$("bankGroup").style.display="none";
+$("referenceGroup").style.display="none";
+$("bankDetails").style.display="none";
+$("slipGroup").style.display="none";
+}catch(err){
+console.error(err);msg.textContent=err.message||"We couldn't submit your order. Please try again.";
+}finally{
+button.disabled=false;button.textContent="PLACE ORDER";
+}
+});
+
+function invoiceEscape(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
 function downloadInvoice(){
-  if(!lastInvoice){
-    alert("Invoice details are not available. Please contact Zyra with your order number.");
-    return;
-  }
+if(!lastInvoice){alert("Invoice details are not available. Please contact Zyra with your order number.");return;}
+const o=lastInvoice;
+const rows=o.items.map(item=>{
+const units=Array.isArray(item.details?.units)?item.details.units:[];
+const details=units.length
+?units.map((unit,index)=>{
+const values=Object.entries(unit).filter(([k,v])=>k!=="unit_number"&&v&&!k.toLowerCase().includes("photo")&&typeof v!=="object");
+return `<div class="detail"><b>Piece ${unit.unit_number||index+1}:</b> ${values.map(([k,v])=>`${invoiceEscape(k.replaceAll("_"," "))}: ${invoiceEscape(v)}`).join(" · ")||"Customised"}</div>`;
+}).join("")
+:(item.details&&Object.keys(item.details).length
+?Object.entries(item.details).filter(([k,v])=>v&&!k.toLowerCase().includes("photo")&&typeof v!=="object").map(([k,v])=>`<div class="detail">${invoiceEscape(k.replaceAll("_"," "))}: ${invoiceEscape(v)}</div>`).join("")
+:"");
+return `<tr><td>${invoiceEscape(item.name)}${details}</td><td>${item.quantity}</td><td>LKR ${money(item.price)}</td><td>LKR ${money(item.price*item.quantity)}</td></tr>`;
+}).join("");
 
-  const o=lastInvoice;
-
-  const rows=o.items.map(item=>{
-    const units=Array.isArray(item.details?.units)?item.details.units:[];
-    const details=units.length
-      ?units.map((unit,index)=>{
-        const values=Object.entries(unit).filter(([k,v])=>
-          k!=="unit_number"&&v&&!k.toLowerCase().includes("photo")&&typeof v!=="object"
-        );
-        return `<div class="detail"><b>Piece ${unit.unit_number||index+1}:</b> ${values.map(([k,v])=>`${invoiceEscape(k.replaceAll("_"," "))}: ${invoiceEscape(v)}`).join(" · ")||"Customised"}</div>`;
-      }).join("")
-      :(item.details&&Object.keys(item.details).length
-        ?Object.entries(item.details)
-          .filter(([k,v])=>v&&!k.toLowerCase().includes("photo")&&typeof v!=="object")
-          .map(([k,v])=>`<div class="detail">${invoiceEscape(k.replaceAll("_"," "))}: ${invoiceEscape(v)}</div>`)
-          .join("")
-        :"");
-
-    return `<tr>
-      <td>${invoiceEscape(item.name)}${details}</td>
-      <td>${item.quantity}</td>
-      <td>LKR ${money(item.price)}</td>
-      <td>LKR ${money(item.price*item.quantity)}</td>
-    </tr>`;
-  }).join("");
-
-  const w=window.open("","_blank");
-
-  if(!w){
-    alert("Please allow pop-ups to open your Zyra invoice.");
-    return;
-  }
-
-  const html=`<!doctype html>
-  <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Zyra Invoice ${invoiceEscape(o.order_number)}</title>
-    <style>
-      body{
-        font-family:Arial,sans-serif;
-        color:#292522;
-        margin:35px auto;
-        max-width:760px;
-        padding:20px
-      }
-      header{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        border-bottom:2px solid #842d40;
-        padding-bottom:18px
-      }
-      header img{
-        max-width:150px;
-        max-height:65px;
-        object-fit:contain
-      }
-      .wine{color:#842d40}
-      h1{font:30px Georgia,serif}
-      .meta,.customer{
-        line-height:1.7;
-        font-size:13px;
-        margin:20px 0
-      }
-      table{
-        width:100%;
-        border-collapse:collapse;
-        font-size:13px
-      }
-      th,td{
-        border-bottom:1px solid #e9e1dc;
-        padding:12px 7px;
-        text-align:left;
-        vertical-align:top
-      }
-      th{background:#faf7f2}
-      .detail{
-        font-size:11px;
-        color:#746963;
-        margin-top:5px
-      }
-      .totals{
-        margin:20px 0 20px auto;
-        max-width:300px
-      }
-      .totals div{
-        display:flex;
-        justify-content:space-between;
-        padding:6px
-      }
-      .grand{
-        font-weight:bold;
-        border-top:2px solid #842d40;
-        color:#842d40;
-        font-size:17px
-      }
-      .actions{margin:25px 0}
-      button{
-        background:#842d40;
-        color:white;
-        border:0;
-        padding:12px 22px;
-        cursor:pointer
-      }
-      .foot{
-        text-align:center;
-        border-top:1px solid #e9e1dc;
-        margin-top:35px;
-        padding-top:18px;
-        color:#82766f;
-        font-size:12px
-      }
-
-      /* Rounded boutique finish + clearer care/delivery panels */
-      :root{
-        --radius-card:22px;
-        --radius-pill:999px
-      }
-      button,.btn,.checkout-button,.add-button,.cart-button,.invoice-button,.copy-account{
-        border-radius:var(--radius-pill)!important
-      }
-      .toolbar input,.toolbar select,.form-group input,.form-group textarea,.form-group select,.tracking input,.custom-fields input,.custom-fields textarea,.custom-fields select{
-        border-radius:14px!important
-      }
-      .product-card{
-        border-radius:22px;
-        overflow:hidden;
-        background:#fff;
-        box-shadow:0 8px 24px #3b21100a
-      }
-      .product-image,.image-placeholder{
-        border-radius:0;
-        overflow:hidden
-      }
-      .product-info{padding:19px}
-      .add-button{
-        padding:14px 18px;
-        font-weight:bold
-      }
-      .modal-content{
-        border-radius:26px!important;
-        padding:27px
-      }
-      .custom-unit,.photo-upload,.delivery-summary,.custom-note,.care-content{
-        border-radius:18px!important
-      }
-      .benefits{
-        border-radius:28px;
-        margin:0 4% 30px
-      }
-      .delivery-section{
-        background:#f2ebe5;
-        padding:55px 7%;
-        text-align:center
-      }
-      .delivery-grid{
-        display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:16px;
-        max-width:1100px;
-        margin:25px auto 0
-      }
-      .delivery-card{
-        background:#fff;
-        border:1px solid #eadfd8;
-        border-radius:20px;
-        padding:22px;
-        line-height:1.7
-      }
-      .delivery-card h3{
-        font:21px Georgia,serif;
-        color:var(--wine);
-        margin:0 0 8px
-      }
-      .delivery-card p{
-        font-size:13px;
-        color:var(--muted);
-        margin:0
-      }
-      .care-grid{
-        display:grid;
-        grid-template-columns:repeat(2,1fr);
-        gap:13px;
-        margin-top:18px
-      }
-      .care-tip{
-        background:#fcfaf8;
-        border:1px solid var(--line);
-        border-radius:16px;
-        padding:16px
-      }
-      .care-tip strong{
-        display:block;
-        color:var(--wine);
-        font:17px Georgia,serif;
-        margin-bottom:5px
-      }
-      .care-tip span{
-        font-size:13px;
-        color:var(--muted);
-        line-height:1.7
-      }
-      .payment-note{
-        background:#f8f1ec;
-        border:1px solid #eadbd2;
-        border-radius:14px;
-        padding:12px;
-        margin:10px 0;
-        font-size:12px;
-        line-height:1.6
-      }
-      @media(max-width:650px){
-        .delivery-grid,.care-grid{grid-template-columns:1fr}
-        .modal-content{padding:18px}
-        .benefits{margin:0 3% 22px}
-      }
-      @media print{
-        .actions{display:none}
-        body{margin:0;padding:10px}
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="wine" style="font:bold 25px Georgia,serif;letter-spacing:3px">
-        ZYRA.LK
-      </div>
-      <div style="text-align:right">
-        <h1 class="wine">INVOICE</h1>
-        <b>Order: ${invoiceEscape(o.order_number)}</b><br>
-        <small>${invoiceEscape(o.date)}</small>
-      </div>
-    </header>
-
-    <section class="customer">
-      <b>Bill to</b><br>
-      ${invoiceEscape(o.customer_name)}<br>
-      ${invoiceEscape(o.phone)}<br>
-      ${invoiceEscape(o.email)}<br>
-      ${invoiceEscape(o.delivery_address)}, ${invoiceEscape(o.city)}, ${invoiceEscape(o.district)} ${invoiceEscape(o.postal_code)}
-    </section>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Qty</th>
-          <th>Unit price</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-
-    <div class="totals">
-      <div>
-        <span>Subtotal</span>
-        <b>LKR ${money(o.subtotal)}</b>
-      </div>
-      <div>
-        <span>Delivery (${invoiceEscape(o.delivery_area)})</span>
-        <b>LKR ${money(o.delivery_fee)}</b>
-      </div>
-      <div class="grand">
-        <span>Total</span>
-        <b>LKR ${money(o.grand_total)}</b>
-      </div>
-    </div>
-
-    <p class="meta">
-      <b>Payment method:</b> ${invoiceEscape(o.payment_method)}<br>
-      <b>Bank:</b> ${invoiceEscape(o.selected_bank||"—")}<br>
-      <b>Reference:</b> ${invoiceEscape(o.bank_reference||"—")}<br>
-      <b>Payment status:</b> ${o.payment_method==="Cash on Delivery"?"Pay on delivery":"Pending verification"}
-    </p>
-
-    <div class="actions">
-      <button onclick="window.print()">PRINT / SAVE AS PDF</button>
-    </div>
-
-    <div class="foot">
-      Thank you for choosing Zyra.lk<br>
-      For assistance: 074 153 9576
-    </div>
-  </body>
-  </html>`;
-
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+const w=window.open("","_blank");
+if(!w){alert("Please allow pop-ups to open your Zyra invoice.");return;}
+const html=`<!doctype html><html><head><meta charset="utf-8"><title>Zyra Invoice ${invoiceEscape(o.order_number)}</title><style>
+body{font-family:Arial,sans-serif;color:#292522;margin:35px auto;max-width:760px;padding:20px}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #842d40;padding-bottom:18px}
+header img{max-width:150px;max-height:65px;object-fit:contain}.wine{color:#842d40}
+h1{font:30px Georgia,serif}.meta,.customer{line-height:1.7;font-size:13px;margin:20px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid #e9e1dc;padding:12px 7px;text-align:left;vertical-align:top}
+th{background:#faf7f2}.detail{font-size:11px;color:#746963;margin-top:5px}
+.totals{margin:20px 0 20px auto;max-width:300px}
+.totals div{display:flex;justify-content:space-between;padding:6px}
+.grand{font-weight:bold;border-top:2px solid #842d40;color:#842d40;font-size:17px}
+.actions{margin:25px 0}button{background:#842d40;color:white;border:0;padding:12px 22px;cursor:pointer}
+.foot{text-align:center;border-top:1px solid #e9e1dc;margin-top:35px;padding-top:18px;color:#82766f;font-size:12px}
+@media print{.actions{display:none}body{margin:0;padding:10px}}
+</style></head><body>
+<header><div class="wine" style="font:bold 25px Georgia,serif;letter-spacing:3px">ZYRA.LK</div><div style="text-align:right"><h1 class="wine">INVOICE</h1><b>Order: ${invoiceEscape(o.order_number)}</b><br><small>${invoiceEscape(o.date)}</small></div></header>
+<section class="customer"><b>Bill to</b><br>${invoiceEscape(o.customer_name)}<br>${invoiceEscape(o.phone)}<br>${invoiceEscape(o.email)}<br>${invoiceEscape(o.delivery_address)}, ${invoiceEscape(o.city)}, ${invoiceEscape(o.district)} ${invoiceEscape(o.postal_code)}</section>
+<table><thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Amount</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="totals"><div><span>Subtotal</span><b>LKR ${money(o.subtotal)}</b></div><div><span>Delivery (${invoiceEscape(o.delivery_area)})</span><b>LKR ${money(o.delivery_fee)}</b></div><div class="grand"><span>Total</span><b>LKR ${money(o.grand_total)}</b></div></div>
+<p class="meta"><b>Payment method:</b> ${invoiceEscape(o.payment_method)}<br><b>Bank:</b> ${invoiceEscape(o.selected_bank||"—")}<br><b>Reference:</b> ${invoiceEscape(o.bank_reference||"—")}<br><b>Payment status:</b> ${o.payment_method==="Cash on Delivery"?"Pay on delivery":"Pending verification"}</p>
+<div class="actions"><button onclick="window.print()">PRINT / SAVE AS PDF</button></div><div class="foot">Thank you for choosing Zyra.lk<br>For assistance: 074 153 9576</div>
+</body></html>`;
+w.document.open();w.document.write(html);w.document.close();
 }
 
 async function trackDelivery(){
-  const id=$("trackingId").value.trim();
-  const box=$("trackingResult");
-  box.hidden=false;
-  box.textContent="Checking...";
+const id=$("trackingId").value.trim(),box=$("trackingResult");
+box.hidden=false;box.textContent="Checking your order...";
+if(!id){box.textContent="Please enter your tracking ID.";return;}
+try{
+const {data,error}=await db.rpc("track_zyra_order",{p_tracking_id:id});
+if(error)throw error;
+let o=Array.isArray(data)?data[0]:data;
+if(o?.track_zyra_order)o=o.track_zyra_order;
+if(!o||o.found!==true||!o.tracking_id){box.textContent=o?.message||"No tracking record found. Please check your tracking ID.";return;}
+const items=Array.isArray(o.items)?o.items:[];
+const itemDetails=items.length?items.map(item=>`${item.product_name||"Product"} × ${item.quantity||1} — LKR ${money(item.line_total||0)}`).join("\n"):"Order items unavailable.";
+box.textContent=
+`ZYRA.LK — ORDER TRACKING
 
-  if(!id){
-    box.textContent="Please enter your tracking ID.";
-    return;
-  }
+Order Number: ${o.order_number||o.tracking_id}
+Tracking ID: ${o.tracking_id}
 
-  const {data,error}=await db.rpc("track_zyra_order",{p_tracking_id:id});
+ORDER STATUS
+${o.status||"Pending"}
 
-  if(error){
-    box.textContent="Unable to check tracking: "+error.message;
-    return;
-  }
+Courier: ${o.courier||"Pending assignment"}
+Courier Reference: ${o.courier_reference||"Not assigned"}
+Current Location: ${o.location||"Not updated"}
+Estimated Delivery: ${o.estimated_delivery||"Not available"}
 
-  const o=Array.isArray(data)?data[0]:data;
+ORDER DETAILS
+${itemDetails}
 
-  if(!o||o.found===false||!o.tracking_id){
-    box.textContent="No tracking record found. Please check your tracking ID.";
-    return;
-  }
+PAYMENT
+Method: ${o.payment_method||"Not available"}
+Payment Status: ${o.payment_status||"Pending"}
+Total: LKR ${money(o.total_amount)}
+Delivery Fee: LKR ${money(o.delivery_fee)}
 
-  box.textContent=`Tracking ID: ${o.tracking_id}
-Status: ${o.status||"Not available"}
-Courier: ${o.courier||"Not assigned"}
-Location: ${o.location||"Not updated"}
-Estimated delivery: ${o.estimated_delivery||"Not available"}
-${o.note||""}`;
+${o.note||"Thank you for shopping with Zyra.lk."}`;
+}catch(error){
+console.error("Tracking error:",error);
+box.textContent="Unable to check tracking: "+(error.message||String(error));
 }
-
-loadProducts();
-renderCart();
-updatePaymentOptions();
+}
+loadProducts();renderCart();updatePaymentOptions();
 </script>
 </body>
 </html>
