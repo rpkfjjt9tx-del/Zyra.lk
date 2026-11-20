@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -598,10 +596,8 @@ async function loadPayments(){
      ?`<p>Transaction reference: ${escapeHtml(o.bank_transaction_reference)}</p>`
      :""}
     <div class="actions">
-     <button onclick="viewPaymentSlip('${o.id}')">View Slip</button>
-     <button onclick="verifyPayment('${o.id}','accepted')">Accept</button>
-     <button class="danger" onclick="verifyPayment('${o.id}','rejected')">Reject</button>
-    </div>
+     <button onclick="verifyPayment('${o.id}','ACCEPT')">Accept</button>
+<button class="danger" onclick="verifyPayment('${o.id}','REJECT')">Reject</button>
    </div>
   `).join("")||"No payment slips found.";
 
@@ -646,32 +642,48 @@ async function viewPaymentSlip(id){
  }
 }
 
-async function verifyPayment(id,decision){
- const reason=decision==="rejected"
-  ?prompt("Enter rejection reason:")
-  :"";
+async function verifyPayment(id, decision) {
+  const normalizedDecision = String(decision || "").trim().toUpperCase();
 
- if(decision==="rejected"&&!reason)return;
+  if (!["ACCEPT", "REJECT"].includes(normalizedDecision)) {
+    alert("Invalid payment decision.");
+    return;
+  }
 
- try{
-  const {error}=await sb.rpc("verify_zyra_payment",{
-   p_order_id:id,
-   p_decision:decision,
-   p_rejection_reason:reason||null
-  });
+  let reason = "";
 
-  if(error)throw error;
+  if (normalizedDecision === "REJECT") {
+    reason = prompt("Enter rejection reason:");
 
-  alert("Payment "+decision+".");
+    if (!reason || !reason.trim()) {
+      alert("A rejection reason is required.");
+      return;
+    }
+  }
 
-  await loadOrders();
-  await loadPayments();
+  try {
+    const { data, error } = await sb.rpc("verify_zyra_payment", {
+      p_order_id: id,
+      p_decision: normalizedDecision,
+      p_rejection_reason: reason.trim() || null
+    });
 
- }catch(error){
-  alert("Payment update failed: "+error.message);
- }
+    if (error) throw error;
+
+    alert(
+      normalizedDecision === "ACCEPT"
+        ? "Payment accepted successfully."
+        : "Payment rejected successfully."
+    );
+
+    await loadOrders();
+    await loadPayments();
+
+  } catch (error) {
+    console.error("Payment verification error:", error);
+    alert("Payment update failed: " + (error.message || String(error)));
+  }
 }
-
 /* INVOICES */
 function invoiceMarkup(o){
  const rows=(o.store_order_items||[]).map(i=>`
