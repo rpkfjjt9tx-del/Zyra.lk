@@ -1126,55 +1126,122 @@ async function deleteProduct(id){
  }
 }
 
-el("productForm").addEventListener("submit",async event=>{
- event.preventDefault();
+el("productForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
- const f=event.currentTarget;
- const button=f.querySelector('[type="submit"]');
+  const f = event.currentTarget;
+  const button = f.querySelector('[type="submit"]');
 
- setButtonLoading(button,true);
+  setButtonLoading(button, true);
 
- try{
-  const id=f.elements.id.value;
+  try {
+    const id = f.elements.id.value;
 
-  const customization=collectProductCustomization();
+    const customization = collectProductCustomization();
+    validateProductCustomization(customization);
 
-  validateProductCustomization(customization);
+    // Keep the existing image URL when editing without a new photo.
+    let productImageUrl = f.elements.image_url.value.trim() || null;
 
-  const payload={
-   name:f.elements.name.value.trim(),
-   category:f.elements.category.value.trim()||null,
-   cost_price:f.elements.cost_price.value===""?null:Number(f.elements.cost_price.value),
-   price:Number(f.elements.price.value),
-   stock_quantity:Number(f.elements.stock_quantity.value||0),
-   image_url:f.elements.image_url.value.trim()||null,
-   description:f.elements.description.value.trim()||null,
-   is_customisable:f.elements.is_customisable.checked,
-   is_active:f.elements.is_active.checked,
-   ...customization
-  };
+    // Get the selected gallery image.
+    const imageFile = f.elements.image_file.files[0];
 
-  const result=id
-   ?await sb.from("store_products").update(payload).eq("id",id)
-   :await sb.from("store_products").insert(payload);
+    if (imageFile) {
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ];
 
-  if(result.error)throw result.error;
+      if (!allowedTypes.includes(imageFile.type)) {
+        throw new Error("Please select a JPG, PNG or WEBP image.");
+      }
 
-  showMessage(
-   "productMessage",
-   id?"Product updated successfully.":"Product added successfully."
-  );
+      if (imageFile.size > 5 * 1024 * 1024) {
+        throw new Error("Product image must be smaller than 5 MB.");
+      }
 
-  resetProductForm();
+      const extension = imageFile.name.split(".").pop().toLowerCase();
 
-  await loadProducts();
+      const filePath =
+        "products/" +
+        Date.now() +
+        "-" +
+        Math.random().toString(36).slice(2, 10) +
+        "." +
+        extension;
 
- }catch(error){
-  showMessage("productMessage","Could not save product: "+error.message,true);
+      // Upload image to Supabase Storage.
+      const { data: uploadData, error: uploadError } =
+        await sb.storage
+          .from("Product -image")
+          .upload(filePath, imageFile, {
+            contentType: imageFile.type,
+            upsert: false
+          });
 
- }finally{
-  setButtonLoading(button,false);
- }
+      if (uploadError) throw uploadError;
+
+      // Generate public image URL.
+      const { data: publicData } = sb.storage
+        .from("Product -image")
+        .getPublicUrl(uploadData.path);
+
+      productImageUrl = publicData.publicUrl;
+
+      if (!productImageUrl) {
+        throw new Error("Could not generate product image URL.");
+      }
+    }
+
+    const payload = {
+      name: f.elements.name.value.trim(),
+      category: f.elements.category.value.trim() || null,
+      cost_price: f.elements.cost_price.value === ""
+        ? null
+        : Number(f.elements.cost_price.value),
+      price: Number(f.elements.price.value),
+      stock_quantity: Number(f.elements.stock_quantity.value || 0),
+
+      // Save the uploaded image URL.
+      image_url: productImageUrl,
+
+      description: f.elements.description.value.trim() || null,
+      is_customisable: f.elements.is_customisable.checked,
+      is_active: f.elements.is_active.checked,
+
+      ...customization
+    };
+
+    const result = id
+      ? await sb.from("store_products").update(payload).eq("id", id)
+      : await sb.from("store_products").insert(payload);
+
+    if (result.error) throw result.error;
+
+    showMessage(
+      "productMessage",
+      id
+        ? "Product updated successfully."
+        : "Product added successfully."
+    );
+
+    resetProductForm();
+
+    await loadProducts();
+
+  } catch (error) {
+    console.error("Product save error:", error);
+
+    showMessage(
+      "productMessage",
+      "Could not save product: " + (error.message || String(error)),
+      true
+    );
+
+  } finally {
+    setButtonLoading(button, false);
+  }
 });
 
 /* =====================================================
