@@ -59,7 +59,11 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-
 <h2>Admin Login</h2>
 <label>Email</label><input id="loginEmail" type="email" autocomplete="username">
 <label>Password</label><input id="loginPassword" type="password" autocomplete="current-password">
-<div class="actions"><button onclick="login()">Login</button></div>
+<div class="actions">
+  <button onclick="document.getElementById('loginMessage').textContent='Login button is responding.'">
+    Login
+  </button>
+</div>
 <p id="loginMessage" class="muted"></p>
 </section>
 
