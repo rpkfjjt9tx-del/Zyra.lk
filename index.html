@@ -1,5 +1,3 @@
-Lnew html
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -338,7 +336,15 @@ return {area:"Outside Colombo",fee:DELIVERY_FEES.outside_colombo};
 }
 
 function deliveryForForm(form){
-return deliveryInfo(form.elements.district?.value,form.elements.city?.value);
+  const district = typeof form.get === "function"
+    ? form.get("district")
+    : form.elements.district?.value;
+
+  const city = typeof form.get === "function"
+    ? form.get("city")
+    : form.elements.city?.value;
+
+  return deliveryInfo(district, city);
 }
 
 function updateDeliveryDisplay(){
