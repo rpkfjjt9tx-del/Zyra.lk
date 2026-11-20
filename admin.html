@@ -1144,8 +1144,16 @@ el("productForm").addEventListener("submit", async event => {
     let productImageUrl = f.elements.image_url.value.trim() || null;
 
     // Get the selected gallery image.
-    const imageFile = f.elements.image_file.files[0];
+   const imageInput = f.querySelector('input[name="image_file"]');
+const imageFile = imageInput?.files?.[0] || null;
 
+console.log("Selected product image:", imageFile);
+
+if (!imageFile && !productImageUrl) {
+  throw new Error(
+    "No product image was received. Please select a photo again."
+  );
+}
     if (imageFile) {
       const allowedTypes = [
         "image/jpeg",
