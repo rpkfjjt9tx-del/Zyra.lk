@@ -1,2020 +1,946 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Zyra.lk | Admin</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zyra.lk | Admin</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--bg:#f7f5f2;--card:#fff;--ink:#282522;--muted:#817b73;--line:#e9e4dd;--accent:#8b604d;--danger:#b83c3c;--green:#397b55}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px Arial,sans-serif}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;background:var(--accent);color:white}
-button:disabled{opacity:.5;cursor:not-allowed}
-button.secondary{background:#e9e3dc;color:#39332d}
-button.danger{background:var(--danger)}
-input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:7px;background:white}
-textarea{min-height:75px;resize:vertical}
-label{display:block;font-weight:600;margin:10px 0 5px}
-small,.muted{color:var(--muted)}
-header{background:#fff;border-bottom:1px solid var(--line);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-header strong{font-size:20px;letter-spacing:1px}
-#loginPanel{max-width:400px;margin:10vh auto;padding:25px;background:white;border:1px solid var(--line);border-radius:12px}
-#dashboard{display:none}
-nav{display:flex;gap:7px;overflow:auto;padding:12px;background:#fff;border-bottom:1px solid var(--line)}
-nav button{white-space:nowrap;background:#eee9e3;color:#403a34}
-nav button.active{background:var(--accent);color:#fff}
-main{padding:18px;max-width:1400px;margin:auto}
-.page{display:none}.page.active{display:block}
-.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:17px;margin-bottom:16px}
-h2{font-size:19px;margin:0 0 15px}
-h3{font-size:15px;margin:15px 0 8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
-.stat{background:white;padding:15px;border:1px solid var(--line);border-radius:9px}
-.stat strong{display:block;font-size:22px;margin-top:8px}
-.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-table{width:100%;border-collapse:collapse;min-width:650px}
-th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
-.table-wrap{overflow:auto}
-.item{border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}
-.hidden{display:none!important}
-.notice{padding:10px;border-radius:7px;background:#f5eee8;margin:10px 0}
-.stat small{display:block}
-.check-label{display:flex;align-items:center;gap:8px}
-.check-label input{width:auto}
-@media(max-width:600px){main{padding:10px}header{padding:12px}nav{padding:8px}.panel{padding:12px}}
-</style>
-</head>
-<body>
-
-<header>
-<strong>ZYRA.LK — ADMIN</strong>
-<button class="secondary" id="logoutBtn" onclick="logout()" style="display:none">Logout</button>
-</header>
-
-<section id="loginPanel">
-<h2>Admin Login</h2>
-<label>Email</label><input id="loginEmail" type="email" autocomplete="username">
-<label>Password</label><input id="loginPassword" type="password" autocomplete="current-password">
-<div class="actions">
-  <button onclick="document.getElementById('loginMessage').textContent='Login button is responding.'">
-    Login
-  </button>
-</div>
-<p id="loginMessage" class="muted"></p>
-</section>
-
-<div id="dashboard">
-<nav>
-<button class="active" onclick="showPage('overview',this)">Overview</button>
-<button onclick="showPage('reports',this)">Sales & Profit</button>
-<button onclick="showPage('banks',this)">Bank Accounts</button>
-<button onclick="showPage('payments',this)">Payments & Slips</button>
-<button onclick="showPage('orders',this)">Orders & Courier</button>
-<button onclick="showPage('manual',this)">Manual Orders</button>
-<button onclick="showPage('expenses',this)">Expenses</button>
-<button onclick="showPage('products',this)">Products</button>
+:root{--wine:#842d40;--cream:#faf7f2;--dark:#292522;--muted:#82766f;--line:#eadfd9;--green:#26734d;--red:#b42318}*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--dark);font-family:Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{max-width:1200px;margin:auto;padding:22px}.brand{color:var(--wine);font:bold 26px Georgia,serif;letter-spacing:2px}.panel{background:#fff;padding:20px;margin:18px 0;border:1px solid var(--line);border-radius:8px}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.btn{border:0;border-radius:4px;background:var(--wine);color:#fff;padding:11px 16px}.btn.secondary{background:var(--dark)}.btn.light{background:#eee;color:var(--dark)}.btn.success{background:var(--green)}.btn.danger{background:var(--red)}button:disabled{opacity:.55;cursor:not-allowed}input,select,textarea{padding:11px;border:1px solid #ddd;border-radius:3px;width:100%;background:white;color:var(--dark)}textarea{min-height:75px}.field{margin:10px 0}.field label{display:block;font-size:13px;margin-bottom:6px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#f7f1ec;padding:16px;border-radius:5px}.stat strong{display:block;font-size:23px;color:var(--wine);margin-top:8px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:850px}th,td{text-align:left;padding:11px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}th{background:#faf7f2}.hidden{display:none!important}.muted{color:var(--muted);font-size:13px}.order-card{border:1px solid #eee;padding:15px;margin:12px 0;border-radius:6px}.itemline{padding:8px 0;border-bottom:1px solid #eee}.status{font-weight:bold;color:var(--wine)}.message{margin:10px 0;color:var(--wine);white-space:pre-wrap}.image-preview{max-width:180px;max-height:180px;object-fit:contain;border:1px solid #eee;padding:6px;margin-top:8px;background:#fff}.section-title{margin:0 0 8px;color:var(--wine)}.subpanel{background:#fcfaf8;border:1px solid #eee;padding:13px;margin-top:12px;border-radius:5px}.slip-preview{max-width:260px;max-height:300px;object-fit:contain;display:block;margin:10px 0;border:1px solid #eee;padding:5px}.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#f3e9e6;color:var(--wine);font-size:12px;font-weight:bold}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions>*{flex:0 0 auto}.checkline{display:flex;align-items:center;gap:8px}.checkline input{width:auto}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.admin-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0;padding:10px;background:#fff;border:1px solid var(--line);border-radius:8px;position:sticky;top:0;z-index:20}.admin-nav button{border:1px solid var(--line);background:#f7f1ec;color:var(--dark);padding:11px 14px;border-radius:5px;font-weight:bold}.admin-nav button.active{background:var(--wine);border-color:var(--wine);color:#fff}.dashboard-page{display:none}.dashboard-page.active{display:block}.dashboard-page.stats.active{display:grid}.expense-grid,.manual-grid,.manual-item-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.manual-item{border:1px solid var(--line);padding:12px;margin:10px 0;border-radius:6px}.manual-item-grid{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:650px){.expense-grid,.manual-grid,.manual-item-grid{grid-template-columns:1fr}}.dashboard-page.panel{margin-top:18px}@media(max-width:650px){.wrap{padding:12px}.stats{grid-template-columns:1fr 1fr}.panel{padding:14px}.row>*{flex-basis:100%}.actions>*{flex:1 1 100%}}
+</style></head>
+<body><div class="wrap">
+<header class="topline"><div class="brand">ZYRA.LK · ADMIN</div><button id="logoutBtn" class="btn secondary hidden" onclick="logout()">LOG OUT</button></header>
+<section id="loginPanel" class="panel"><h2>Admin Login</h2><p class="muted">Sign in with the Supabase Auth account authorised as a Zyra admin.</p><form id="loginForm"><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="username"></div><div class="field"><label>Password</label><input name="password" type="password" required autocomplete="current-password"></div><button class="btn">SIGN IN</button></form><p id="loginMessage" class="message"></p></section>
+<main id="dashboard" class="hidden">
+<nav class="admin-nav" id="adminNav" aria-label="Admin dashboard sections">
+<button type="button" class="active" data-page="overview" aria-selected="true" onclick="showAdminSection('overview',this)">OVERVIEW</button>
+<button type="button" data-page="sales" aria-selected="false" onclick="showAdminSection('sales',this)">SALES &amp; PROFIT</button>
+<button type="button" data-page="banks" aria-selected="false" onclick="showAdminSection('banks',this)">BANK ACCOUNTS</button>
+<button type="button" data-page="payments" aria-selected="false" onclick="showAdminSection('payments',this)">PAYMENTS &amp; SLIPS</button>
+<button type="button" data-page="orders" aria-selected="false" onclick="showAdminSection('orders',this)">ORDERS &amp; COURIER</button>
+<button type="button" data-page="manual" aria-selected="false" onclick="showAdminSection('manual',this)">MANUAL ORDERS</button>
+<button type="button" data-page="expenses" aria-selected="false" onclick="showAdminSection('expenses',this)">EXPENSES</button>
+<button type="button" data-page="products" aria-selected="false" onclick="showAdminSection('products',this)">PRODUCTS</button>
 </nav>
+<!-- Each dashboard section is opened from the navigation tabs. -->
+<section class="stats dashboard-page active" data-page="overview"><div class="stat">Total store orders<strong id="statOrders">0</strong></div><div class="stat">Pending orders<strong id="statPending">0</strong></div><div class="stat">Store sales<strong id="statSales">LKR 0</strong></div><div class="stat">Product cost<strong id="statCost">LKR 0</strong></div><div class="stat">Gross profit<strong id="statProfit">LKR 0</strong></div><div class="stat">Courier costs<strong id="statCourierCost">LKR 0</strong></div><div class="stat">Other expenses<strong id="statExpenses">LKR 0</strong></div><div class="stat">Net profit<strong id="statNetProfit">LKR 0</strong></div><div class="stat">Orders with cost available<strong id="statCostOrders">0</strong></div></section>
+<section class="panel dashboard-page" data-page="sales"><div class="topline"><div><h2 class="section-title">Sales &amp; Profit Report</h2><p class="muted">Non-pending and non-cancelled orders. Delivery fees are excluded. Profit = selling price − cost price. For older order items without a saved cost snapshot, the latest product cost is used as an estimate.</p></div><button id="refreshReportBtn" class="btn light" type="button" onclick="refreshReport()">REFRESH REPORT</button></div><div class="row"><div class="field"><label>From date</label><input id="reportDateFrom" type="date"></div><div class="field"><label>To date</label><input id="reportDateTo" type="date"></div><button class="btn light" type="button" onclick="applyReportDateFilter()">APPLY DATE FILTER</button><button class="btn light" type="button" onclick="clearReportDateFilter()">CLEAR FILTER</button></div><p class="muted">The date range applies to order sales, product costs, courier costs and business expenses. Order-derived figures are based on the latest 300 orders loaded; up to 2,000 expense records are loaded. Net profit uses recorded product and courier costs, so missing cost records can make it appear higher than the actual profit.</p><p id="reportMessage" class="message" aria-live="polite"></p><div id="profitSummary" class="subpanel"></div><div class="tablewrap"><table><thead><tr><th>Product</th><th>Units sold</th><th>Sales</th><th>Cost</th><th>Gross profit</th></tr></thead><tbody id="profitReportBody"><tr><td colspan="5">Sign in to load the report.</td></tr></tbody></table></div></section>
+<section class="panel dashboard-page" data-page="banks"><h2 class="section-title">Customer Payment Bank Accounts</h2><p class="muted">Bank-transfer details shown to customers at checkout.</p><div id="adminBankAccounts"></div></section>
+<section class="panel dashboard-page" data-page="payments"><div class="topline"><div><h2 class="section-title">Customer Payments &amp; Slips</h2><p class="muted">Review uploaded bank-transfer slips and accept or reject payments.</p></div><button class="btn light" type="button" onclick="loadOrders()">REFRESH PAYMENTS</button></div><p id="paymentsMessage" class="message"></p><div id="paymentsList"></div></section>
+<section class="panel dashboard-page" data-page="orders"><div class="topline"><div><h2 class="section-title">Store Orders &amp; Courier Updates</h2><p class="muted">Update order status, pre-order preparation dates, courier handover and tracking, then print invoices. Business-day estimates exclude Saturdays, Sundays and dates recorded in zyra_holidays.</p></div><button class="btn light" type="button" onclick="loadOrders()">REFRESH ORDERS</button></div><p id="ordersMessage" class="message"></p><div id="ordersList"></div></section>
+<section class="panel dashboard-page" data-page="products"><h2 class="section-title">Store Products</h2><p class="muted">Manage products in store_products. Deactivate products instead of deleting them to preserve order history.</p>
+<form id="productForm"><input type="hidden" name="id"><div class="row"><div class="field"><label>Product name *</label><input name="name" required maxlength="200"></div><div class="field"><label>Cost price (LKR) *</label><input name="cost_price" type="number" min="0" step="0.01" required></div><div class="field"><label>Selling price (LKR) *</label><input name="price" type="number" min="0" step="0.01" required></div></div>
+<div class="row"><div class="field"><label>Category</label><input name="category"></div><div class="field"><label>Product image URL (optional)</label><input name="image_url" type="url"></div></div>
+<div class="field"><label>Upload product photo (JPG, PNG or WEBP, max 5 MB)</label><input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp"><img id="productImagePreview" class="image-preview hidden" alt="Product preview"></div>
+<div class="field"><label>Description</label><textarea name="description"></textarea></div><div class="row"><div class="field"><label>Available quantity *</label><input name="stock_quantity" type="number" min="0" step="1" value="0" required><small class="muted">Set the number of pieces currently available. Low stock is 3 pieces or fewer.</small></div><div class="field"><label class="checkline"><input name="is_customisable" type="checkbox"> Customisable</label><label class="checkline"><input name="is_active" type="checkbox" checked> Active</label></div></div>
+<div class="subpanel"><strong>Profit per item preview:</strong> <span id="productProfitPreview">Enter cost and selling prices.</span></div><div class="actions"><button class="btn" type="submit">SAVE PRODUCT</button><button class="btn light" type="button" onclick="resetProductForm()">CLEAR FORM</button></div><p id="productMessage" class="message"></p></form>
+<div class="tablewrap"><table><thead><tr><th>Product</th><th>Cost</th><th>Selling price</th><th>Profit / item</th><th>Category</th><th>Quantity</th><th>Stock status</th><th>Customisable</th><th>Active</th><th>Actions</th></tr></thead><tbody id="productsBody"></tbody></table></div></section>
+<section class="panel dashboard-page" data-page="manual">
+ <h2 class="section-title">Create / Edit Manual Order</h2><p class="muted">Create a store order for a customer. Courier details are saved separately in zyra_orders and linked to the store order.</p>
+ <form id="manualOrderForm">
+  <input type="hidden" name="id">
+  <div class="manual-grid">
+   <div class="field"><label>Order ID *</label><input name="order_number" required></div>
+   <div class="field"><label>Order date *</label><input name="order_date" type="datetime-local" required></div>
+   <div class="field"><label>Customer name *</label><input name="customer_name" required></div>
+   <div class="field"><label>Phone *</label><input name="phone" required></div>
+   <div class="field"><label>Email</label><input name="email" type="email"></div>
+   <div class="field"><label>City *</label><input name="city" required></div>
+   <div class="field"><label>District</label><input name="district"></div>
+   <div class="field"><label>Postal code</label><input name="postal_code"></div>
+   <div class="field"><label>Delivery address *</label><textarea name="delivery_address" required></textarea></div>
+   <div class="field"><label>Payment method *</label><select name="payment_method" required><option value="Bank Transfer">Bank Transfer</option><option value="Cash on Delivery">Cash on Delivery</option><option value="Cash">Cash</option><option value="Other">Other</option></select></div>
+   <div class="field"><label>Payment status</label><select name="payment_status"><option value="pending">Pending</option><option value="paid">Paid</option><option value="failed">Failed</option></select></div>
+   <div class="field"><label>Order status</label><select name="order_status"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+   <div class="field"><label>Discount (LKR)</label><input name="discount_amount" type="number" min="0" step="0.01" value="0"></div>
+   <div class="field"><label>Delivery fee charged to customer (LKR)</label><input name="delivery_fee" type="number" min="0" step="0.01" value="0"></div>
+   <div class="field"><label>Customer notes</label><textarea name="customer_notes"></textarea></div>
+  </div>
 
-<main>
-<section class="page active" id="page-overview">
-<div class="panel">
-<h2>Business Overview</h2>
-<div class="actions"><button onclick="refreshAll()">Refresh Dashboard</button></div>
-<div class="stats" id="overviewStats"></div>
-</div>
-<div class="panel"><h2>Recent Orders</h2><div id="recentOrders">Loading…</div></div>
+<section class="panel dashboard-page" data-page="expenses">
+ <h2 class="section-title">Business Expenses</h2><p class="muted">Record packaging, supplies, advertising, stationery and other expenses. Courier costs are tracked separately in Orders &amp; Courier.</p>
+ <form id="expenseForm"><input type="hidden" name="id"><div class="expense-grid">
+  <div class="field"><label>Date *</label><input name="expense_date" type="date" required></div>
+  <div class="field"><label>Category *</label><select name="category" required><option value="">Select category</option><option>Packaging</option><option>Supplies</option><option>Advertising</option><option>Stationery</option><option>Other</option></select></div>
+  <div class="field"><label>Description *</label><input name="description" required maxlength="250"></div>
+  <div class="field"><label>Amount (LKR) *</label><input name="amount" type="number" min="0.01" step="0.01" required></div>
+  <div class="field"><label>Related order (optional)</label><select name="order_id" id="expenseOrder"><option value="">No linked order</option></select></div>
+ </div><div class="actions"><button class="btn" type="submit" id="saveExpenseBtn">SAVE EXPENSE</button><button class="btn light" type="button" onclick="resetExpenseForm()">CLEAR</button></div><p id="expenseMessage" class="message"></p></form>
+ <div class="tablewrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Order</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="expensesBody"></tbody></table></div>
 </section>
-
-<section class="page" id="page-reports">
-<div class="panel">
-<h2>Sales & Profit Report</h2>
-<div class="grid">
-<div><label>From</label><input type="date" id="reportFrom"></div>
-<div><label>To</label><input type="date" id="reportTo"></div>
-</div>
-<div class="actions"><button onclick="refreshReport()">Generate Report</button></div>
-<div id="reportStats" class="stats"></div>
-<div id="reportTable" class="table-wrap"></div>
-</div>
-</section>
-
-<section class="page" id="page-banks">
-<div class="panel"><h2>Customer Bank Accounts</h2><div id="bankList"></div></div>
-</section>
-
-<section class="page" id="page-payments">
-<div class="panel"><h2>Payments & Slips</h2><div id="paymentList">Loading…</div></div>
-</section>
-
-<section class="page" id="page-orders">
-<div class="panel">
-<h2>Orders & Courier Management</h2>
-<div class="actions"><button onclick="loadOrders()">Refresh Orders</button></div>
-<div id="ordersList">Loading…</div>
-</div>
-</section>
-
-<section class="page" id="page-manual">
-<div class="panel">
-<h2 id="manualFormTitle">Create Manual Order</h2>
-<form id="manualOrderForm">
-<input type="hidden" name="editing_order_id">
-<div class="grid">
-<div><label>Order Number (required for new orders)</label><input name="order_number" placeholder="Enter unique order number"></div>
-<div><label>Order Date</label><input name="order_date" type="datetime-local" required></div>
-<div><label>Customer Name</label><input name="customer_name" required></div>
-<div><label>Phone</label><input name="phone" required></div>
-<div><label>Email</label><input name="email" type="email"></div>
-<div><label>District</label><input name="district"></div>
-<div><label>City</label><input name="city" required></div>
-<div><label>Postal Code</label><input name="postal_code"></div>
-<div><label>Payment Method</label><input name="payment_method" required placeholder="Bank transfer / COD"></div>
-<div><label>Payment Status</label><select name="payment_status"><option value="pending">Pending</option><option value="paid">Paid</option><option value="rejected">Rejected</option></select></div>
-<div><label>Order Status</label><select name="order_status"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
-</div>
-<label>Delivery Address</label><textarea name="delivery_address" required></textarea>
-<label>Customer Notes</label><textarea name="customer_notes"></textarea>
-
-<h3>Order Items</h3>
-<div class="grid">
-<div><label>Product Name</label><input id="manualProductName" placeholder="Product name"></div>
-<div><label>Quantity</label><input id="manualQuantity" type="number" min="1" value="1"></div>
-<div><label>Unit Price (LKR)</label><input id="manualPrice" type="number" min="0" step=".01" placeholder="0.00"></div>
-</div>
-<div class="actions"><button type="button" onclick="addManualItem()">Add Item</button></div>
-<div id="manualItems"></div>
-
-<div class="grid">
-<div><label>Discount</label><input name="discount_amount" type="number" min="0" step=".01" value="0" oninput="calculateManualTotal()"></div>
-<div><label>Delivery Fee</label><input name="delivery_fee" type="number" min="0" step=".01" value="0" oninput="calculateManualTotal()"></div>
-<div><label>Subtotal</label><input id="manualSubtotal" readonly></div>
-<div><label>Total</label><input id="manualTotal" readonly></div>
-</div>
-
-<h3>Pre-order</h3>
-<div class="grid">
-<div><label>Status</label><select name="preorder_status"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="ready">Ready</option></select></div>
-<div><label>Confirmed Date</label><input name="preorder_confirmed_at" type="date"></div>
-<div><label>Estimated Ready From</label><input name="preorder_estimated_ready_from" type="date"></div>
-<div><label>Estimated Ready To</label><input name="preorder_estimated_ready_to" type="date"></div>
-<div><label>Actual Ready Date</label><input name="actual_ready_for_dispatch_date" type="date"></div>
-</div>
-
-<h3>Courier</h3>
-<div class="grid">
-<div><label>Courier</label><input name="courier" value="Not assigned"></div>
-<div><label>Delivery Area</label><input name="delivery_area"></div>
-<div><label>Courier Reference</label><input name="courier_reference"></div>
-<div><label>Tracking ID</label><input name="tracking_id"></div>
-<div><label>Courier Status</label><input name="courier_status" value="Not dispatched"></div>
-<div><label>Courier Cost</label><input name="courier_cost" type="number" min="0" step=".01" value="0"></div>
-<div><label>Handover Date</label><input name="handover_date" type="date"></div>
-<div><label>Estimated Delivery Date</label><input name="courier_estimated_delivery_date" type="date"></div>
-</div>
-<label>Tracking Location</label><input name="tracking_location">
-<label>Courier Note</label><textarea name="courier_note"></textarea>
-
-<div class="actions">
-<button id="createManualOrderBtn" type="submit">Create Manual Order</button>
-<button type="button" class="secondary" id="cancelManualEditBtn" onclick="cancelManualEdit()" style="display:none">Cancel Edit</button>
-</div>
-<p id="manualMessage"></p>
-</form>
-</div>
-<div class="panel"><h2>Manual Orders</h2><div id="manualOrdersList"></div></div>
-</section>
-
-<section class="page" id="page-expenses">
-<div class="panel">
-<h2>Business Expenses</h2>
-<form id="expenseForm">
-<input type="hidden" name="id">
-<div class="grid">
-<div><label>Date</label><input name="expense_date" type="date" required></div>
-<div><label>Category</label><input name="category" required></div>
-<div><label>Description</label><input name="description"></div>
-<div><label>Amount</label><input name="amount" type="number" min="0" step=".01" required></div>
-</div>
-<div class="actions"><button type="submit">Save Expense</button><button type="button" class="secondary" onclick="resetExpenseForm()">Reset</button></div>
-<p id="expenseMessage"></p>
-</form>
-</div>
-<div class="panel"><h2>Expense Records</h2><div id="expensesList"></div></div>
-</section>
-
-<section class="page" id="page-products">
-<div class="panel">
-<h2 id="productFormTitle">Add Product</h2>
-<form id="productForm">
-<input type="hidden" name="id">
-<div class="grid">
-<div><label>Product Name</label><input name="name" required></div>
-<div><label>Category</label><input name="category"></div>
-<div><label>Cost Price</label><input name="cost_price" type="number" min="0" step=".01"></div>
-<div><label>Selling Price</label><input name="price" type="number" min="0" step=".01" required></div>
-<div><label>Stock Quantity</label><input name="stock_quantity" type="number" min="0" value="0"></div>
-<div><label>Product Image</label><input name="image_file" type="file" accept="image/*"></div>
-</div>
-<label>Image URL</label><input name="image_url">
-<label>Description</label><textarea name="description"></textarea>
-<div class="grid">
-<label class="check-label"><input name="is_customisable" type="checkbox"> Customisable (legacy)</label>
-<label class="check-label"><input name="is_active" type="checkbox" checked> Active Product</label>
-</div>
-
-<div class="panel" style="margin-top:15px">
-<h3>Product Customisation Settings</h3>
-<label>Customisation Type</label>
-<select id="zyraCustomizationType" name="customization_type" onchange="updateZyraCustomizationVisibility()">
-<option value="none">No Customisation</option>
-<option value="text">Text Only</option>
-<option value="photo">Photo Only</option>
-<option value="text_photo">Text + Photo</option>
-</select>
-<div id="zyraTextSettings">
-<label>Text Required?</label>
-<select name="customization_required"><option value="false">Optional</option><option value="true">Required</option></select>
-<label>Text Field Labels (one per line)</label>
-<textarea name="customization_fields" placeholder="Name&#10;Special Date&#10;Engraving"></textarea>
-</div>
-<div id="zyraPhotoSettings">
-<label>Photos per individual product unit</label>
-<input name="customization_photo_count" type="number" min="0" value="0">
-<label>Photo Required?</label>
-<select name="customization_photo_required"><option value="false">Optional</option><option value="true">Required</option></select>
-</div>
-<div id="zyraPhoneSettings">
-<label>Enable Phone Model Selection</label>
-<label class="check-label"><input type="checkbox" id="zyraPhoneEnabled"> Enable phone models for this product</label>
-<label>Phone Case Models (one per line)</label>
-<textarea id="zyraPhoneModelsInput" placeholder="iPhone 15&#10;iPhone 15 Pro&#10;iPhone 15 Pro Max&#10;Samsung models"></textarea>
-<p class="muted">Enter one model per line. These are saved in customization_options JSON.</p>
-</div>
-<p class="muted">Photo count is applied separately to each quantity unit.</p>
-</div>
-
-<div class="actions">
-<button type="submit">Save Product</button>
-<button type="button" class="secondary" onclick="resetProductForm()">Reset</button>
-</div>
-<p id="productMessage"></p>
-</form>
-</div>
-<div class="panel"><h2>Product List</h2><div id="productsList"></div></div>
-</section>
-</main>
-</div>
-
+</main></div>
 <script>
-
-"use strict";
-
 const SUPABASE_URL="https://rouysaipjmzmvoegtign.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_XmZ0RqmzN4uAEtAhJcFgMg_CQ-HWv2D";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-
-let orderCache=[];
-let productCache=[];
-let expenseCache=[];
-let trackingCache=new Map();
-let zyraManualItems=[];
-
+let productCache=[],orderCache=[],trackingCache=new Map(),productCostMap=new Map(),loadingOrders=false,expenseCache=[],manualItemCount=0,zyraHolidayDates=new Set(),zyraHolidayLoadError="";
+const money=n=>"LKR "+Number(n||0).toLocaleString("en-LK",{maximumFractionDigits:2});
 const el=id=>document.getElementById(id);
-const money=value=>"LKR "+Number(value||0).toLocaleString("en-LK",{minimumFractionDigits:2,maximumFractionDigits:2});
-const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const parseCustomisationDetails=raw=>{
- if(typeof raw==="string"){try{return JSON.parse(raw)}catch(_){return{instructions:raw}}}
- return raw&&typeof raw==="object"?raw:{};
-};
+const ZYRA_BANKS=[
+ {bank:"Commercial Bank",holder:"Hamrah",number:"8031077367",branch:"Mutwal"},
+ {bank:"Nations Trust Bank",holder:"MF Hamrah",number:"200190100485",branch:"Union Place"},
+ {bank:"Amana Bank PLC",holder:"MOHAMMED ILMY FATHIMA HAMRAH",number:"0290244734002",branch:"Kollupitiya"},
+ {bank:"HNB",holder:"Miss Hilmey F H M",number:"096020094073",branch:"Kotahena"}
+];
+function renderAdminBankAccounts(){const root=el("adminBankAccounts");root.replaceChildren();ZYRA_BANKS.forEach(b=>{const card=document.createElement("div");card.className="order-card";const title=document.createElement("strong");title.textContent=b.bank;const details=document.createElement("p");details.className="muted";details.textContent=`Account name: ${b.holder} · Account number: ${b.number} · Branch: ${b.branch}`;const copy=document.createElement("button");copy.className="btn light";copy.textContent="COPY ACCOUNT NUMBER";copy.onclick=async()=>{try{await navigator.clipboard.writeText(b.number);copy.textContent="COPIED";}catch(e){alert("Copy is unavailable. Account number: "+b.number);}};card.append(title,details,copy);root.append(card);});}
+renderAdminBankAccounts();
+function parseCustomisationDetails(raw){if(typeof raw==="string"){try{return JSON.parse(raw);}catch(_){return {instructions:raw};}}return raw&&typeof raw==="object"?raw:{};}
+function appendCustomisationDetails(parent,raw){const d=parseCustomisationDetails(raw);const photoPaths=Array.isArray(d.photo_paths)?d.photo_paths:(d.photo_path?[d.photo_path]:[]);const textDetails={...d};delete textDetails.photo_path;delete textDetails.photo_paths;delete textDetails.photo_count;delete textDetails.photo_file_names;const detail=document.createElement("div");detail.className="muted";detail.style.marginTop="6px";if(Object.keys(textDetails).length)detail.textContent="Customisation: "+JSON.stringify(textDetails);else if(!photoPaths.length)detail.textContent="Customisation details were not provided.";parent.appendChild(detail);if(photoPaths.length){const photos=document.createElement("div");photos.style.marginTop="8px";const heading=document.createElement("strong");heading.textContent="Customer uploaded reference photo(s): ";photos.appendChild(heading);photoPaths.forEach((path,index)=>{const view=document.createElement("button");view.className="btn light";view.type="button";view.style.margin="4px";view.textContent="VIEW CUSTOMER PHOTO "+(index+1);view.onclick=()=>viewCustomerPhoto(path,view);const download=document.createElement("button");download.className="btn secondary";download.type="button";download.style.margin="4px";download.textContent="DOWNLOAD CUSTOMER PHOTO "+(index+1);download.onclick=()=>downloadCustomerPhoto(path,download,(Array.isArray(d.photo_file_names)?d.photo_file_names[index]:null));photos.append(view,download);});parent.appendChild(photos);if(Array.isArray(d.photo_file_names)&&d.photo_file_names.length){const names=document.createElement("div");names.className="muted";names.textContent="File name(s): "+d.photo_file_names.join(", ");parent.appendChild(names);}}}
+function storageFileName(path,fallback){const clean=String(path||"").split("?")[0],base=clean.split("/").pop()||fallback;return String(base).replace(/[^a-zA-Z0-9._-]/g,"_")||fallback;}
+async function openStorageFile(bucket,path,button,downloadName=null){const win=window.open("about:blank","_blank");if(!win){alert("Please allow pop-ups to open or download files.");return;}const old=button?.textContent;if(button){button.disabled=true;button.textContent=downloadName?"PREPARING DOWNLOAD...":"OPENING...";}try{const options=downloadName?{download:downloadName}:undefined;const {data,error}=await sb.storage.from(bucket).createSignedUrl(path,600,options);if(error)throw error;if(!data?.signedUrl)throw new Error("No secure file link was returned.");win.location.href=data.signedUrl;}catch(e){win.close();alert("Could not "+(downloadName?"download":"open")+" file: "+e.message+". Check the "+bucket+" bucket and admin read permissions.");}finally{if(button){button.disabled=false;button.textContent=old;}}}
+function viewCustomerPhoto(path,button){return openStorageFile("customer-photos",path,button);}
+function downloadCustomerPhoto(path,button,fileName){return openStorageFile("customer-photos",path,button,storageFileName(fileName||path,"customer-photo"));}
+function viewPaymentSlip(path,button){return openStorageFile("payment-slips",path,button);}
+function downloadPaymentSlip(path,button,fileName){return openStorageFile("payment-slips",path,button,storageFileName(fileName||path,"payment-slip"));}
+function showAdminSection(page,button){
+ document.querySelectorAll("#dashboard .dashboard-page").forEach(section=>section.classList.toggle("active",section.dataset.page===page));
+ document.querySelectorAll("#adminNav button").forEach(tab=>{const active=tab.dataset.page===page;tab.classList.toggle("active",active);tab.setAttribute("aria-selected",active?"true":"false");});
+}
+function showDashboard(show){el("loginPanel").classList.toggle("hidden",show);el("dashboard").classList.toggle("hidden",!show);el("logoutBtn").classList.toggle("hidden",!show);if(show)showAdminSection("overview");}
+async function checkSession(){const {data,error}=await sb.auth.getSession();if(error){el("loginMessage").textContent=error.message;return;}if(data.session){showDashboard(true);await refreshAll();}else showDashboard(false);}
+el("loginForm").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.target);el("loginMessage").textContent="Signing in...";const {error}=await sb.auth.signInWithPassword({email:f.get("email"),password:f.get("password")});if(error){el("loginMessage").textContent=error.message;return;}el("loginMessage").textContent="";showDashboard(true);await refreshAll();});
+async function logout(){await sb.auth.signOut();showDashboard(false);}
+async function refreshAll(){await loadZyraHolidays();await Promise.all([loadOrders(),loadProducts(),loadExpenses()]);}
 
-function showMessage(id,message,isError=false){
- const node=el(id);if(!node)return;
- node.textContent=message;
- node.style.color=isError?"#b83c3c":"#397b55";
+// Reports have their own refresh handler and visible error reporting.
+async function refreshReport(){const button=el("refreshReportBtn");button.disabled=true;button.textContent="REFRESHING...";el("reportMessage").textContent="Refreshing sales, saved product costs and profit report...";try{await loadProducts();await loadOrders({quiet:true});await loadExpenses();el("reportMessage").textContent="Report refreshed. Missing historical item costs are estimated from each product's currently saved cost price; run the supplied SQL patch to save cost snapshots to order items.";}catch(e){el("reportMessage").textContent="Report refresh failed: "+e.message;}finally{button.disabled=false;button.textContent="REFRESH REPORT";}}
+async function loadOrders(options={}){
+ if(loadingOrders)return;loadingOrders=true;if(!options.quiet)el("ordersMessage").textContent="Loading orders...";
+ try{
+  const {data,error}=await sb.from("store_orders").select("*,store_order_items(*)").order("created_at",{ascending:false}).limit(300);
+  if(error)throw error;const orders=data||[];orderCache=orders;
+  if(el("expenseOrder")){const selected=el("expenseOrder").value;el("expenseOrder").replaceChildren(new Option("No linked order",""));orders.forEach(o=>el("expenseOrder").add(new Option((o.order_number||o.id)+" · "+(o.customer_name||"Customer"),o.id)));el("expenseOrder").value=selected;}
+  const {data:costRows,error:costError}=await sb.from("zyra_product_costs").select("product_id,cost_price");
+  if(costError)throw new Error("Orders loaded, but saved product costs could not be read: "+costError.message);
+  productCostMap=new Map((costRows||[]).map(x=>[x.product_id,Number(x.cost_price)]));
+  // Tracking is kept in zyra_orders and linked by store_order_id.
+  const ids=orders.map(o=>o.id).filter(Boolean);trackingCache=new Map();
+  if(ids.length){const {data:tracks,error:trackError}=await sb.from("zyra_orders").select("tracking_id,courier,courier_method,courier_reference,status,location,note,estimated_delivery,delivery_area,courier_cost,store_order_id,handover_date,courier_estimated_delivery_date,updated_at").in("store_order_id",ids);if(trackError){console.warn("Courier records could not be loaded:",trackError.message);}else (tracks||[]).forEach(t=>trackingCache.set(t.store_order_id,t));}
+  renderStatsAndReport(orders);renderOrders(orders);renderPayments(orders);renderManualOrders();
+  if(!options.quiet)el("ordersMessage").textContent=orders.length?"Orders loaded.":"No store orders have been placed yet.";
+  return orders;
+ }catch(error){const msg="Could not load orders/report: "+(error.message||String(error));el("ordersMessage").textContent=msg;el("reportMessage").textContent=msg;el("paymentsMessage").textContent=msg;throw error;}finally{loadingOrders=false;}
+}
+function dateInRange(value){const from=el("reportDateFrom")?.value||"",to=el("reportDateTo")?.value||"",d=String(value||"").slice(0,10);return (!from||d>=from)&&(!to||d<=to);}
+function applyReportDateFilter(){renderStatsAndReport(orderCache);}
+function clearReportDateFilter(){el("reportDateFrom").value="";el("reportDateTo").value="";renderStatsAndReport(orderCache);}
+function renderStatsAndReport(orders){
+ const filtered=(orders||[]).filter(o=>dateInRange(o.created_at)),valid=filtered.filter(o=>!["pending","cancelled"].includes((o.order_status||"pending").toLowerCase()));
+ el("statOrders").textContent=filtered.length;el("statPending").textContent=filtered.filter(o=>(o.order_status||"pending").toLowerCase()==="pending").length;
+ const sales=valid.reduce((sum,o)=>sum+Number(o.subtotal_amount??(Number(o.total_amount||0)-Number(o.delivery_fee||0))),0);el("statSales").textContent=money(sales);
+ const rows=new Map();let totalCost=0,totalGross=0,ordersWithCost=0,courierTotal=0;
+ valid.forEach(o=>{let hasCost=(o.store_order_items||[]).length>0;(o.store_order_items||[]).forEach(i=>{const qty=Number(i.quantity||0),lineSales=Number(i.unit_price||0)*qty,key=i.product_id||i.product_name,stored=i.unit_cost_price!==null&&i.unit_cost_price!==undefined?Number(i.unit_cost_price):null,fallback=i.product_id&&productCostMap.has(i.product_id)?productCostMap.get(i.product_id):null,cost=stored!==null?stored:fallback,estimated=stored===null&&fallback!==null,r=rows.get(key)||{name:i.product_name||"Product",qty:0,sales:0,cost:0,profit:0,hasCost:true,hasEstimate:false};r.qty+=qty;r.sales+=lineSales;if(cost===null){r.hasCost=false;hasCost=false;}else{const c=cost*qty;r.cost+=c;r.profit+=lineSales-c;totalCost+=c;totalGross+=lineSales-c;if(estimated)r.hasEstimate=true;}rows.set(key,r);});if(hasCost)ordersWithCost++;courierTotal+=Number((trackingCache.get(o.id)||{}).courier_cost||0);});
+ const otherExpenses=expenseCache.filter(x=>dateInRange(x.expense_date)).reduce((a,x)=>a+Number(x.amount||0),0),net=totalGross-courierTotal-otherExpenses;
+ el("statCost").textContent=money(totalCost);el("statProfit").textContent=money(totalGross);el("statCourierCost").textContent=money(courierTotal);el("statExpenses").textContent=money(otherExpenses);el("statNetProfit").textContent=money(net);el("statNetProfit").style.color=net>=0?"var(--green)":"var(--red)";el("statCostOrders").textContent=ordersWithCost+" / "+valid.length;
+ const summary=el("profitSummary");summary.replaceChildren();[["Product sales",sales],["Product costs",totalCost],["Gross profit",totalGross],["Courier costs",courierTotal],["Other expenses",otherExpenses],["NET PROFIT",net]].forEach(([k,v])=>{const p=document.createElement("p");p.textContent=k+": "+money(v);if(k==="NET PROFIT")p.style.fontWeight="bold";summary.append(p);});
+ const body=el("profitReportBody");body.replaceChildren();if(!rows.size){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No qualifying sales in this date range.";tr.append(td);body.append(tr);}else rows.forEach(r=>{const tr=document.createElement("tr");[r.name,r.qty,money(r.sales),r.hasCost?money(r.cost)+(r.hasEstimate?" (estimated)":""):"Cost not saved for all orders",r.hasCost?money(r.profit)+(r.hasEstimate?" (estimated)":""):"Incomplete cost history"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td);});body.append(tr);});
 }
 
-function setButtonLoading(button,loading,label){
- if(!button)return;
- if(loading){
-  if(!button.dataset.originalText)button.dataset.originalText=button.textContent;
-  button.disabled=true;
-  button.textContent="Please wait…";
- }else{
-  button.disabled=false;
-  button.textContent=button.dataset.originalText||label||"Save";
- }
-}
+function renderOrders(orders){
+ const root=el("ordersList");
+ root.replaceChildren();
 
-function showPage(page,button){
- document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
- document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
- el("page-"+page)?.classList.add("active");
- if(button)button.classList.add("active");
- if(page==="orders")loadOrders();
- if(page==="payments")loadPayments();
- if(page==="products")loadProducts();
- if(page==="expenses")loadExpenses();
- if(page==="manual")renderManualOrders();
- if(page==="banks")renderAdminBankAccounts();
- if(page==="reports")refreshReport();
-}
-
-window.login = async function login() {
-  const email = el("loginEmail").value.trim();
-  const password = el("loginPassword").value;
-
-  if (!email || !password) {
-    showMessage("loginMessage", "Enter your email and password.", true);
-    return;
-  }
-
-  const button = document.querySelector('#loginPanel button');
-
-  try {
-    if (button) button.disabled = true;
-
-    showMessage("loginMessage", "Signing in…");
-
-    const { error } = await sb.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) throw error;
-
-    await checkSession();
-
-  } catch (error) {
-    console.error("Admin login error:", error);
-    showMessage("loginMessage", error.message || "Login failed.", true);
-
-  } finally {
-    if (button) button.disabled = false;
-  }
-};async function logout(){
- await sb.auth.signOut();
- showDashboard(false);
-}
-
-function showDashboard(show){
- el("loginPanel").style.display=show?"none":"block";
- el("dashboard").style.display=show?"block":"none";
- el("logoutBtn").style.display=show?"inline-block":"none";
-}
-
-async function checkSession(){
- const {data,error}=await sb.auth.getSession();
- if(error||!data.session){
-  showDashboard(false);
+ if(!orders.length){
+  root.textContent="No store orders have been placed yet.";
   return;
  }
- showDashboard(true);
- await refreshAll();
+
+ orders.forEach(order=>{
+  const card=document.createElement("article");
+  card.className="order-card";
+
+  const h=document.createElement("div");
+  h.className="topline";
+
+  const title=document.createElement("h3");
+  title.textContent=(order.order_number||order.id)+" · "+(order.customer_name||"Customer");
+
+  const total=document.createElement("strong");
+  total.textContent=money(order.total_amount);
+  h.append(title,total);
+  card.append(h);
+
+  const info=document.createElement("p");
+  info.className="muted";
+  info.textContent=`${order.phone||""} · ${order.email||"No email"} · ${order.city||""} · ${order.payment_method||""} · ${order.created_at?new Date(order.created_at).toLocaleString():""}`;
+  card.append(info);
+
+  const address=document.createElement("p");
+  address.textContent="Delivery: "+(order.delivery_address||"Not provided");
+  card.append(address);
+
+  if(order.customer_notes){
+   const note=document.createElement("p");
+   note.textContent="Order notes: "+order.customer_notes;
+   card.append(note);
+  }
+
+  const items=order.store_order_items||[];
+  const itemBox=document.createElement("div");
+  itemBox.style.margin="12px 0";
+
+  if(!items.length){
+   itemBox.textContent="No product items linked to this order.";
+  }else{
+   items.forEach(it=>{
+    const line=document.createElement("div");
+    line.className="itemline";
+
+    const savedCost=it.unit_cost_price!==null&&it.unit_cost_price!==undefined?Number(it.unit_cost_price):null;
+    const fallbackCost=it.product_id&&productCostMap.has(it.product_id)?productCostMap.get(it.product_id):null;
+    const unitCost=savedCost!==null?savedCost:fallbackCost;
+    const estimated=savedCost===null&&fallbackCost!==null;
+
+    line.textContent=`${it.product_name} × ${it.quantity} — Selling: ${money(Number(it.unit_price)*Number(it.quantity))} · Cost: ${unitCost===null?"Not recorded":money(unitCost*Number(it.quantity))+(estimated?" (current estimate)":"")} · Profit: ${unitCost===null?"Pending cost history":money((Number(it.unit_price)-unitCost)*Number(it.quantity))+(estimated?" (estimated)":"")}`;
+
+    if(it.is_customised&&it.customisation_details){
+     appendCustomisationDetails(line,it.customisation_details);
+    }
+
+    itemBox.append(line);
+   });
+  }
+  card.append(itemBox);
+
+  const attachmentBox=document.createElement("div");
+  attachmentBox.className="subpanel";
+
+  const attachmentTitle=document.createElement("strong");
+  attachmentTitle.textContent="Customer payment slip";
+  attachmentBox.append(attachmentTitle);
+
+  if(order.payment_slip_path){
+   const fileInfo=document.createElement("p");
+   fileInfo.className="muted";
+   fileInfo.textContent=order.payment_slip_file_name||"Payment slip uploaded";
+   attachmentBox.append(fileInfo);
+
+   const fileActions=document.createElement("div");
+   fileActions.className="actions";
+
+   const viewSlip=document.createElement("button");
+   viewSlip.className="btn light";
+   viewSlip.type="button";
+   viewSlip.textContent="VIEW PAYMENT SLIP";
+   viewSlip.onclick=()=>viewPaymentSlip(order.payment_slip_path,viewSlip);
+
+   const downloadSlip=document.createElement("button");
+   downloadSlip.className="btn secondary";
+   downloadSlip.type="button";
+   downloadSlip.textContent="DOWNLOAD PAYMENT SLIP";
+   downloadSlip.onclick=()=>downloadPaymentSlip(order.payment_slip_path,downloadSlip,order.payment_slip_file_name);
+
+   fileActions.append(viewSlip,downloadSlip);
+   attachmentBox.append(fileActions);
+  }else{
+   const noSlip=document.createElement("p");
+   noSlip.className="muted";
+   noSlip.textContent=String(order.payment_method||"").toLowerCase().includes("cod")
+    ?"Cash on delivery — no payment slip expected."
+    :"No customer payment slip is attached to this order.";
+   attachmentBox.append(noSlip);
+  }
+
+  card.append(attachmentBox);
+
+  const track=trackingCache.get(order.id)||{};
+  const courierBox=document.createElement("div");
+  courierBox.className="subpanel";
+
+  const ct=document.createElement("strong");
+  ct.textContent="Courier / Tracking Details";
+  courierBox.append(ct);
+
+  const grid=document.createElement("div");
+  grid.className="row";
+
+  const courier=makeSelect("Courier company",["Not selected","Straightway Couriers","Royal Express","Speed Post","Self pickup"],track.courier||"Not selected");
+  const area=makeSelect("Delivery area",["Not selected","Colombo 1–15","Colombo suburbs","Outside Colombo"],track.delivery_area||"Not selected");
+  const ref=makeInput("Courier reference",track.courier_reference||"");
+  const tracking=makeInput("Tracking ID",track.tracking_id||"");
+  const trackStatus=makeSelect("Courier status",["Pending","Processing","Picked up","In transit","Out for delivery","Delivered","Delivery failed","Returned"],track.status||"Pending");
+  const location=makeInput("Current tracking location",track.location||"");
+  const estimated=makeInput("Estimated delivery (date / note)",track.estimated_delivery||"");
+  const note=makeInput("Courier update / note",track.note||"");
+
+  const actualCost=makeInput("Actual courier cost paid by Zyra (LKR)",track.courier_cost??0);
+  actualCost.input.type="number";
+  actualCost.input.min="0";
+  actualCost.input.step="0.01";
+
+  const customerFee=makeInput("Delivery fee charged to customer (LKR)",order.delivery_fee??0);
+  customerFee.input.type="number";
+  customerFee.input.min="0";
+  customerFee.input.step="0.01";
+
+  const rateBtn=document.createElement("button");
+  rateBtn.type="button";
+  rateBtn.className="btn light";
+  rateBtn.textContent="APPLY SUGGESTED CUSTOMER RATE";
+  rateBtn.onclick=()=>{
+   const rate=deliveryRate(courier.input.value,area.input.value);
+   if(rate===null){
+    alert("No automatic rate is set for this courier and area. Enter the customer delivery fee manually.");
+    return;
+   }
+   customerFee.input.value=rate;
+  };
+
+  [courier,area,ref,tracking,trackStatus,location,estimated,note,actualCost,customerFee].forEach(x=>grid.append(x.wrap));
+  courierBox.append(grid,rateBtn);
+
+  const saveTrack=document.createElement("button");
+  saveTrack.className="btn";
+  saveTrack.type="button";
+  saveTrack.textContent="SAVE COURIER DETAILS";
+  saveTrack.onclick=()=>saveCourierDetails(order.id,{
+   courier:courier.input.value==="Not selected"?"":courier.input.value,
+   delivery_area:area.input.value,
+   courier_reference:ref.input.value.trim(),
+   tracking_id:tracking.input.value.trim(),
+   status:trackStatus.input.value,
+   location:location.input.value.trim(),
+   estimated_delivery:estimated.input.value.trim(),
+   note:note.input.value.trim(),
+   courier_cost:Number(actualCost.input.value||0),
+   customer_delivery_fee:Number(customerFee.input.value||0)
+  },saveTrack);
+
+  courierBox.append(saveTrack);
+  const trackMsg=document.createElement("p");
+  trackMsg.className="message";
+  courierBox.append(trackMsg);
+  card.append(courierBox);
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  const status=makeSelect("Order status",["pending","confirmed","processing","shipped","completed","cancelled"],order.order_status||"pending");
+
+  const save=document.createElement("button");
+  save.className="btn";
+  save.type="button";
+  save.textContent="UPDATE ORDER STATUS";
+  save.onclick=()=>updateOrderStatus(order.id,status.input.value,save);
+
+  const invoice=document.createElement("button");
+  invoice.className="btn secondary";
+  invoice.type="button";
+  invoice.textContent="PRINT INVOICE";
+  invoice.onclick=()=>printInvoice(order,trackingCache.get(order.id)||{});
+
+  const del=document.createElement("button");
+  del.className="btn danger";
+  del.type="button";
+  del.textContent="DELETE ORDER";
+  del.onclick=()=>deleteOrder(order.id,order.order_number||order.id,del);
+
+  actions.append(status.wrap,save,invoice,del);
+  card.append(actions);
+  root.append(card);
+ });
 }
 
-sb.auth.onAuthStateChange((_event,session)=>{
- if(!session)showDashboard(false);
-});
-
-async function refreshAll(){
- await Promise.allSettled([
-  loadOrders(),
-  loadProducts(),
-  loadExpenses(),
-  loadPayments()
- ]);
- renderStatsAndReport();
- renderManualOrders();
+function makeInput(label,value){
+ const wrap=document.createElement("div");
+ wrap.className="field";
+ const l=document.createElement("label");
+ l.textContent=label;
+ const input=document.createElement("input");
+ input.value=value||"";
+ input.placeholder=label;
+ wrap.append(l,input);
+ return {wrap,input};
 }
 
-function makeStat(label,value){
- return `<div class="stat"><small>${escapeHtml(label)}</small><strong>${value}</strong></div>`;
+function makeSelect(label,values,value){
+ const wrap=document.createElement("div");
+ wrap.className="field";
+ const l=document.createElement("label");
+ l.textContent=label;
+ const input=document.createElement("select");
+
+ values.forEach(v=>{
+  const o=document.createElement("option");
+  o.value=v;
+  o.textContent=v;
+  input.append(o);
+ });
+
+ input.value=value||values[0];
+ wrap.append(l,input);
+ return {wrap,input};
 }
 
-/* BANK ACCOUNTS
-   Add your real account details here.
-   No account numbers are invented. */
-const ZYRA_BANKS=[
- {bank:"Commercial Bank",name:"Zyra.lk",branch:""},
- {bank:"Bank of Ceylon",name:"Zyra.lk",branch:""}
-];
+async function deleteOrder(id,displayName,button){
+ if(!confirm("Delete order "+displayName+" permanently? This will delete its order items and courier record too. This action cannot be undone."))return;
 
-function renderAdminBankAccounts(){
- const target=el("bankList");
- if(!target)return;
- target.innerHTML=ZYRA_BANKS.map(b=>`
-  <div class="item">
-   <strong>${escapeHtml(b.bank)}</strong>
-   <p>${escapeHtml(b.name)}</p>
-   <small>${escapeHtml(b.branch)}</small>
-  </div>
- `).join("");
-}
-
-/* ORDERS */
-async function loadOrders(){
- const target=el("ordersList");
- if(target)target.textContent="Loading orders…";
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="DELETING...";
 
  try{
-  const {data:orders,error}=await sb.from("store_orders")
-   .select("*,store_order_items(*)")
-   .order("created_at",{ascending:false})
-   .limit(300);
+  const {error:courierError}=await sb.from("zyra_orders").delete().eq("store_order_id",id);
+  if(courierError)throw new Error("Could not remove courier record: "+courierError.message);
 
+  const {error:itemError}=await sb.from("store_order_items").delete().eq("order_id",id);
+  if(itemError)throw new Error("Could not remove order items: "+itemError.message);
+
+  const {data,error}=await sb.from("store_orders").delete().eq("id",id).select("id");
   if(error)throw error;
 
-  orderCache=orders||[];
-  trackingCache.clear();
-
-  const ids=orderCache.map(o=>o.id).filter(Boolean);
-
-  if(ids.length){
-   const {data:tracks,error:trackError}=await sb.from("zyra_orders")
-    .select("*")
-    .in("store_order_id",ids);
-
-   if(!trackError){
-    (tracks||[]).forEach(t=>trackingCache.set(t.store_order_id,t));
-   }
+  if(!data||!data.length){
+   throw new Error("No order was deleted. Check the admin DELETE policy on store_orders, store_order_items and zyra_orders.");
   }
 
-await renderOrders(orderCache);  renderStatsAndReport();
-  renderManualOrders();
+  alert("Order deleted successfully.");
+  await loadOrders();
 
- }catch(error){
-  if(target)target.textContent="Could not load orders: "+error.message;
+ }catch(e){
+  alert("Order deletion failed: "+e.message+"\nCheck the Supabase DELETE permissions for the related tables.");
+  await loadOrders().catch(()=>{});
+
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
  }
 }
-function getCustomerPhotoPaths(details) {
-  if (typeof details === "string") {
-    try {
-      details = JSON.parse(details);
-    } catch {
-      return [];
-    }
-  }
 
-  if (!details || typeof details !== "object") return [];
-
-  const paths = [];
-
-  if (Array.isArray(details.photo_paths)) {
-    paths.push(...details.photo_paths);
-  }
-
-  if (details.photo_path) {
-    paths.push(details.photo_path);
-  }
-
-  if (Array.isArray(details.units)) {
-    details.units.forEach(unit => {
-      if (unit.photo_path) paths.push(unit.photo_path);
-
-      if (Array.isArray(unit.photo_paths)) {
-        paths.push(...unit.photo_paths);
-      }
-    });
-  }
-
-  return [...new Set(paths.filter(path =>
-    typeof path === "string" &&
-    path.startsWith("customer-orders/")
-  ))];
-}
-
-async function renderOrders(orders) {
-  const target = el("ordersList");
-  if (!target) return;
-
-  if (!orders.length) {
-    target.textContent = "No orders found.";
-    return;
-  }
-
-  target.textContent = "Loading customer photos…";
-
-  try {
-    const orderCards = await Promise.all(orders.map(async o => {
-      const track = trackingCache.get(o.id) || {};
-
-      const items = await Promise.all(
-        (o.store_order_items || []).map(async i => {
-          const paths = getCustomerPhotoPaths(i.customisation_details);
-
-          const photoHtml = await Promise.all(paths.map(async path => {
-            const { data, error } = await sb.storage
-              .from("customer-photos")
-              .createSignedUrl(path, 3600);
-
-            if (error || !data?.signedUrl) {
-              return `<p>Customer photo unavailable: ${escapeHtml(path)}</p>`;
-            }
-
-            return `
-              <div style="margin:12px 0">
-                <img
-                  src="${escapeHtml(data.signedUrl)}"
-                  alt="Customer customised product photo"
-                  loading="lazy"
-                  style="width:100%;max-width:240px;height:auto;object-fit:contain;border-radius:10px;border:1px solid #ddd"
-                >
-                <p>${escapeHtml(path.split("/").pop())}</p>
-              </div>
-            `;
-          }));
-
-          return `
-            <div class="item">
-              <strong>${escapeHtml(i.product_name || "Product")}</strong>
-              × ${Number(i.quantity || 1)} — ${money(i.unit_price)}
-
-              ${i.customisation_details
-                ? `<p>${escapeHtml(JSON.stringify(parseCustomisationDetails(i.customisation_details)))}</p>`
-                : ""}
-
-              ${photoHtml.join("")}
-            </div>
-          `;
-        })
-      );
-
-      return `
-        <div class="panel">
-          <h3>Order ${escapeHtml(o.order_number || o.id)}</h3>
-
-          <p>
-            <strong>${escapeHtml(o.customer_name || "")}</strong>
-            · ${escapeHtml(o.phone || "")}
-          </p>
-
-          <p>
-            ${escapeHtml(o.delivery_address || "")}
-            ${escapeHtml(o.city || "")}
-            ${escapeHtml(o.district || "")}
-          </p>
-
-          <p>
-            Payment: ${escapeHtml(o.payment_status || "pending")}
-            · Status: ${escapeHtml(o.order_status || "pending")}
-          </p>
-
-          <p>Total: <strong>${money(o.total_amount)}</strong></p>
-
-          ${items.join("")}
-
-          <div class="grid">
-            <div>
-              <label>Courier</label>
-              <input id="courier-${o.id}" value="${escapeHtml(track.courier || "Not assigned")}">
-            </div>
-
-            <div>
-              <label>Delivery Area</label>
-              <input id="area-${o.id}" value="${escapeHtml(track.delivery_area || "")}">
-            </div>
-
-            <div>
-              <label>Courier Reference</label>
-              <input id="reference-${o.id}" value="${escapeHtml(track.courier_reference || "")}">
-            </div>
-
-            <div>
-              <label>Tracking ID</label>
-              <input id="tracking-${o.id}" value="${escapeHtml(track.tracking_id || "")}">
-            </div>
-
-            <div>
-              <label>Courier Status</label>
-              <input id="courierstatus-${o.id}" value="${escapeHtml(track.status || "Not dispatched")}">
-            </div>
-
-            <div>
-              <label>Courier Cost</label>
-              <input id="cost-${o.id}" type="number" min="0" step=".01" value="${Number(track.courier_cost || 0)}">
-            </div>
-
-            <div>
-              <label>Handover Date</label>
-              <input id="handover-${o.id}" type="date" value="${escapeHtml(track.handover_date || "")}">
-            </div>
-
-            <div>
-              <label>Estimated Delivery</label>
-              <input id="estimate-${o.id}" type="date" value="${escapeHtml(track.courier_estimated_delivery_date || "")}">
-            </div>
-          </div>
-
-          <label>Tracking Location</label>
-          <input id="location-${o.id}" value="${escapeHtml(track.location || "")}">
-
-          <label>Courier Note</label>
-          <textarea id="note-${o.id}">${escapeHtml(track.note || "")}</textarea>
-
-          <div class="actions">
-            <button onclick="saveCourierDetails('${o.id}')">Save Courier Details</button>
-            <button class="secondary" onclick="printInvoice('${o.id}')">Print Invoice</button>
-            <button class="secondary" onclick="downloadInvoicePDF('${o.id}')">Download PDF</button>
-            <button class="danger" onclick="deleteOrder('${o.id}')">Delete Order</button>
-          </div>
-        </div>
-      `;
-    }));
-
-    target.innerHTML = orderCards.join("");
-
-  } catch (error) {
-    console.error("Customer photo display error:", error);
-    target.textContent = "Could not display orders: " + error.message;
-  }
-} 
-
-async function saveCourierDetails(id){
- const value=key=>el(key+"-"+id)?.value||"";
-
- const payload={
-  store_order_id:id,
-  courier:value("courier"),
-  delivery_area:value("area"),
-  courier_reference:value("reference"),
-  tracking_id:value("tracking"),
-  status:value("courierstatus"),
-  courier_cost:Number(value("cost")||0),
-  handover_date:value("handover")||null,
-  courier_estimated_delivery_date:value("estimate")||null,
-  location:value("location"),
-  note:value("note"),
-  updated_at:new Date().toISOString()
- };
+async function updateOrderStatus(id,status,button){
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="UPDATING...";
 
  try{
+  const {data,error}=await sb.from("store_orders").update({order_status:status}).eq("id",id).select("id");
+  if(error)throw error;
+  if(!data||!data.length)throw new Error("No order was updated. Check the admin UPDATE policy on store_orders.");
+  await loadOrders();
+
+ }catch(e){
+  alert("Order status update failed: "+e.message);
+
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
+}
+
+function deliveryRate(courier,area){
+ if(courier==="Straightway Couriers"&&area==="Colombo 1–15")return 350;
+ if(courier==="Straightway Couriers"&&area==="Colombo suburbs")return 400;
+ if(courier==="Straightway Couriers"&&area==="Outside Colombo")return null;
+ if(courier==="Royal Express")return 450;
+ if(courier==="Speed Post")return 250;
+ if(courier==="Customer Pickup"||courier==="Self pickup")return 0;
+ return null;
+}
+
+async function saveCourierDetails(storeOrderId,details,button){
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="SAVING...";
+
+ try{
+  const actual=Number(details.courier_cost||0);
+  const fee=Number(details.customer_delivery_fee||0);
+
+  if(!Number.isFinite(actual)||actual<0||!Number.isFinite(fee)||fee<0){
+   throw new Error("Enter valid non-negative courier cost and customer delivery fee.");
+  }
+
+  const {customer_delivery_fee,...track}=details;
   const {data:existing,error:findError}=await sb.from("zyra_orders")
-   .select("id")
-   .eq("store_order_id",id)
+   .select("tracking_id,store_order_id")
+   .eq("store_order_id",storeOrderId)
    .maybeSingle();
 
   if(findError)throw findError;
 
+  const payload={...track,store_order_id:storeOrderId,updated_at:new Date().toISOString()};
+  if(!payload.tracking_id){
+   payload.tracking_id=existing?.tracking_id||("ZYRA-"+String(storeOrderId).slice(0,8).toUpperCase());
+  }
+
   const result=existing
-   ?await sb.from("zyra_orders").update(payload).eq("store_order_id",id)
-   :await sb.from("zyra_orders").insert(payload);
+   ?await sb.from("zyra_orders").update(payload).eq("store_order_id",storeOrderId).select("store_order_id")
+   :await sb.from("zyra_orders").insert({...payload,customer_name:orderCache.find(o=>o.id===storeOrderId)?.customer_name||"Customer"}).select("store_order_id");
 
   if(result.error)throw result.error;
+  if(!result.data?.length)throw new Error("No courier record was saved. Check zyra_orders permissions.");
 
-  alert("Courier details saved.");
-  await loadOrders();
+  const order=orderCache.find(o=>o.id===storeOrderId)||{};
+  const subtotal=Number(order.subtotal_amount??(Number(order.total_amount||0)-Number(order.delivery_fee||0)+Number(order.discount_amount||0)));
+  const discount=Number(order.discount_amount||0);
 
- }catch(error){
-  alert("Could not save courier details: "+error.message);
- }
-}
+  const upd=await sb.from("store_orders").update({
+   delivery_fee:fee,
+   total_amount:subtotal-discount+fee
+  }).eq("id",storeOrderId).select("id");
 
-async function updateOrderStatus(id,status){
- const {error}=await sb.from("store_orders")
-  .update({order_status:status})
-  .eq("id",id);
-
- if(error)alert(error.message);
- else await loadOrders();
-}
-
-async function deleteOrder(id){
- if(!confirm("Delete this order? This action cannot be undone."))return;
-
- try{
-  const courier=await sb.from("zyra_orders").delete().eq("store_order_id",id);
-  if(courier.error)throw courier.error;
-
-  const items=await sb.from("store_order_items").delete().eq("order_id",id);
-  if(items.error)throw items.error;
-
-  const result=await sb.from("store_orders").delete().eq("id",id);
-  if(result.error)throw result.error;
+  if(upd.error)throw new Error("Courier details saved, but customer delivery fee update failed: "+upd.error.message);
+  if(!upd.data?.length)throw new Error("No customer delivery fee was updated.");
 
   await loadOrders();
+  alert("Courier details saved. Actual courier cost and customer delivery fee are stored separately.");
 
- }catch(error){
-  alert("Could not delete order: "+error.message);
- }
-}
-
-/* PAYMENT SLIPS
-   Correct database column: payment_slip_path
-   Original file name: payment_slip_file_name
-   MIME type: payment_slip_content_type */
-async function loadPayments(){
- const target=el("paymentList");
- if(!target)return;
-
- target.textContent="Loading payment slips…";
-
- try{
-  const {data,error}=await sb.from("store_orders")
-   .select("*")
-   .not("payment_slip_path","is",null)
-   .order("created_at",{ascending:false})
-   .limit(200);
-
-  if(error)throw error;
-
-  const payments=data||[];
-
-  target.innerHTML=payments.map(o=>`
-   <div class="item">
-    <strong>${escapeHtml(o.order_number||o.id)}</strong>
-    <p>${escapeHtml(o.customer_name||"")} — ${money(o.total_amount)}</p>
-    <p>Payment status: ${escapeHtml(o.payment_status||"pending")}</p>
-    ${o.payment_slip_file_name
-     ?`<p class="muted">File: ${escapeHtml(o.payment_slip_file_name)}</p>`
-     :""}
-    ${o.payment_slip_content_type
-     ?`<p class="muted">File type: ${escapeHtml(o.payment_slip_content_type)}</p>`
-     :""}
-    ${o.selected_bank
-     ?`<p>Selected bank: ${escapeHtml(o.selected_bank)}</p>`
-     :""}
-    ${o.bank_transaction_reference
-     ?`<p>Transaction reference: ${escapeHtml(o.bank_transaction_reference)}</p>`
-     :""}
-    <div class="actions">
-  <button class="secondary" onclick="viewPaymentSlip('${o.id}')">
-    View Payment Slip
-  </button>
-  <button onclick="verifyPayment('${o.id}','ACCEPT')">Accept</button>
-  <button class="danger" onclick="verifyPayment('${o.id}','REJECT')">Reject</button>
-</div>
-  </div>
-  `).join("")||"No payment slips found.";
-
- }catch(error){
-  target.textContent="Could not load payment slips: "+error.message;
- }
-}
-
-async function viewPaymentSlip(id){
- try{
-  let order=orderCache.find(o=>String(o.id)===String(id));
-
-  if(!order){
-   const {data,error}=await sb.from("store_orders")
-    .select("*")
-    .eq("id",id)
-    .maybeSingle();
-
-   if(error)throw error;
-   if(!data)throw new Error("Order not found.");
-
-   order=data;
-  }
-
-  const path=order.payment_slip_path;
-
-  if(!path){
-   throw new Error("Payment slip not found for this order.");
-  }
-
-  const {data,error}=await sb.storage
-   .from("payment-slips")
-   .createSignedUrl(path,300);
-
-  if(error)throw error;
-  if(!data?.signedUrl)throw new Error("Could not create payment slip link.");
-
-  window.open(data.signedUrl,"_blank","noopener");
-
- }catch(error){
-  alert("Could not open payment slip: "+error.message);
- }
-}
-
-async function verifyPayment(id, decision) {
-  const normalizedDecision = String(decision || "").trim().toUpperCase();
-
-  if (!["ACCEPT", "REJECT"].includes(normalizedDecision)) {
-    alert("Invalid payment decision.");
-    return;
-  }
-
-  let reason = "";
-
-  if (normalizedDecision === "REJECT") {
-    reason = prompt("Enter rejection reason:");
-
-    if (!reason || !reason.trim()) {
-      alert("A rejection reason is required.");
-      return;
-    }
-  }
-
-  try {
-    const { data, error } = await sb.rpc("verify_zyra_payment", {
-      p_order_id: id,
-      p_decision: normalizedDecision,
-      p_rejection_reason: reason.trim() || null
-    });
-
-    if (error) throw error;
-
-    alert(
-      normalizedDecision === "ACCEPT"
-        ? "Payment accepted successfully."
-        : "Payment rejected successfully."
-    );
-
-    await loadOrders();
-    await loadPayments();
-
-  } catch (error) {
-    console.error("Payment verification error:", error);
-    alert("Payment update failed: " + (error.message || String(error)));
-  }
-}
-/* INVOICES */
-function invoiceMarkup(o){
- const rows=(o.store_order_items||[]).map(i=>`
-  <tr>
-   <td>${escapeHtml(i.product_name||"Product")}</td>
-   <td>${Number(i.quantity||1)}</td>
-   <td>${money(i.unit_price)}</td>
-   <td>${money(Number(i.quantity||1)*Number(i.unit_price||0))}</td>
-  </tr>
- `).join("");
-
- return `<html>
- <head>
-  <title>Invoice ${escapeHtml(o.order_number||"")}</title>
-  <style>
-   body{font:14px Arial;padding:30px}
-   table{width:100%;border-collapse:collapse}
-   td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
-  </style>
- </head>
- <body>
-  <h1>ZYRA.LK</h1>
-  <h2>INVOICE</h2>
-  <p>Order: ${escapeHtml(o.order_number||o.id)}</p>
-  <p>Date: ${new Date(o.created_at||Date.now()).toLocaleDateString()}</p>
-  <p>Customer: ${escapeHtml(o.customer_name||"")}</p>
-  <p>Phone: ${escapeHtml(o.phone||"")}</p>
-  <p>Address: ${escapeHtml(o.delivery_address||"")}</p>
-  <table>
-   <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-   <tbody>${rows}</tbody>
-  </table>
-  <p>Subtotal: ${money(o.subtotal_amount)}</p>
-  <p>Discount: ${money(o.discount_amount)}</p>
-  <p>Delivery: ${money(o.delivery_fee)}</p>
-  <h3>Grand Total: ${money(o.total_amount)}</h3>
-  <p>Thank you for shopping with Zyra.lk</p>
- </body>
- </html>`;
-}
-
-function printInvoice(id){
- const o=orderCache.find(x=>x.id===id);
- if(!o)return alert("Order not found.");
-
- const w=window.open("","_blank");
- if(!w)return alert("Please allow pop-ups to print the invoice.");
-
- w.document.write(invoiceMarkup(o));
- w.document.close();
- w.focus();
- w.print();
-}
-
-function downloadInvoicePDF(id){
- const o=orderCache.find(x=>x.id===id);
- if(!o)return alert("Order not found.");
-
- if(!window.jspdf?.jsPDF)return printInvoice(id);
-
- const doc=new window.jspdf.jsPDF();
-
- doc.setFontSize(20);
- doc.text("ZYRA.LK - INVOICE",15,20);
-
- doc.setFontSize(11);
-
- let y=32;
-
- const lines=[
-  "Order: "+(o.order_number||o.id),
-  "Date: "+new Date(o.created_at||Date.now()).toLocaleDateString(),
-  "Customer: "+(o.customer_name||""),
-  "Phone: "+(o.phone||""),
-  "Address: "+(o.delivery_address||"")
- ];
-
- lines.forEach(line=>{
-  doc.text(line.substring(0,95),15,y);
-  y+=8;
- });
-
- y+=5;
-
- (o.store_order_items||[]).forEach(i=>{
-  const line=(i.product_name||"Product")+" x "+i.quantity+" - "+money(i.unit_price);
-
-  if(y>275){
-   doc.addPage();
-   y=20;
-  }
-
-  doc.text(line.substring(0,95),15,y);
-  y+=8;
- });
-
- y+=5;
-
- if(y>275){
-  doc.addPage();
-  y=20;
- }
-
- doc.text("Subtotal: "+money(o.subtotal_amount),15,y);
- y+=8;
- doc.text("Discount: "+money(o.discount_amount),15,y);
- y+=8;
- doc.text("Delivery: "+money(o.delivery_fee),15,y);
- y+=8;
- doc.text("Total: "+money(o.total_amount),15,y);
-
- doc.save("Zyra-Invoice-"+(o.order_number||id)+".pdf");
-}
-
-/* EXPENSES */
-function resetExpenseForm(){
- const f=el("expenseForm");
- if(!f)return;
-
- f.reset();
- f.elements.id.value="";
- f.elements.expense_date.value=new Date().toISOString().slice(0,10);
-}
-
-async function loadExpenses(){
- try{
-  const {data,error}=await sb.from("zyra_business_expenses")
-   .select("*")
-   .order("expense_date",{ascending:false});
-
-  if(error)throw error;
-
-  expenseCache=data||[];
-
-  const target=el("expensesList");
-  if(!target)return;
-
-  target.innerHTML=expenseCache.map(x=>`
-   <div class="item">
-    <strong>${escapeHtml(x.category)}</strong>
-    <p>${escapeHtml(x.description||"")} · ${money(x.amount)}</p>
-    <small>${escapeHtml(x.expense_date||"")}</small>
-    <div class="actions">
-     <button class="secondary" onclick="editExpense('${x.id}')">Edit</button>
-     <button class="danger" onclick="deleteExpense('${x.id}')">Delete</button>
-    </div>
-   </div>
-  `).join("")||"No expenses recorded.";
-
- }catch(error){
-  showMessage("expenseMessage","Could not load expenses: "+error.message,true);
- }
-}
-
-function editExpense(id){
- const x=expenseCache.find(a=>a.id===id);
- if(!x)return;
-
- const f=el("expenseForm");
-
- Object.keys(x).forEach(k=>{
-  if(f.elements[k])f.elements[k].value=x[k]??"";
- });
-}
-
-el("expenseForm").addEventListener("submit",async event=>{
- event.preventDefault();
-
- const f=event.currentTarget;
-
- const payload={
-  expense_date:f.elements.expense_date.value,
-  category:f.elements.category.value.trim(),
-  description:f.elements.description.value.trim(),
-  amount:Number(f.elements.amount.value)
- };
-
- try{
-  const id=f.elements.id.value;
-
-  const result=id
-   ?await sb.from("zyra_business_expenses").update(payload).eq("id",id)
-   :await sb.from("zyra_business_expenses").insert(payload);
-
-  if(result.error)throw result.error;
-
-  showMessage("expenseMessage","Expense saved successfully.");
-
-  resetExpenseForm();
-  await loadExpenses();
-
- }catch(error){
-  showMessage("expenseMessage",error.message,true);
- }
-});
-
-async function deleteExpense(id){
- if(!confirm("Delete this expense?"))return;
-
- const {error}=await sb.from("zyra_business_expenses")
-  .delete()
-  .eq("id",id);
-
- if(error)alert(error.message);
- else await loadExpenses();
-}
-
-/* PRODUCT CUSTOMISATION HELPERS */
-function getCustomizationOptions(product){
- try{
-  return typeof product.customization_options==="string"
-   ?JSON.parse(product.customization_options||"{}")
-   :(product.customization_options||{});
- }catch(_){
-  return{};
- }
-}
-
-function getCustomizationFields(product){
- try{
-  return typeof product.customization_fields==="string"
-   ?JSON.parse(product.customization_fields||"{}")
-   :(product.customization_fields||{});
- }catch(_){
-  return{};
- }
-}
-
-function getCustomizationType(product){
- if(product.customization_type)return product.customization_type;
- return product.is_customisable?"text":"none";
-}
-
-function getPhoneModelsFromProduct(product){
- const options=getCustomizationOptions(product);
- return Array.isArray(options.phone_models)?options.phone_models:[];
-}
-
-function updateZyraCustomizationVisibility(){
- const type=el("zyraCustomizationType")?.value||"none";
-
- el("zyraTextSettings")?.classList.toggle(
-  "hidden",
-  !["text","text_photo"].includes(type)
- );
-
- el("zyraPhotoSettings")?.classList.toggle(
-  "hidden",
-  !["photo","text_photo"].includes(type)
- );
-}
-
-function loadProductCustomization(product){
- const f=el("productForm");
- if(!product)return;
-
- f.elements.customization_type.value=getCustomizationType(product);
-
- f.elements.customization_required.value=
-  String(!!product.customization_required);
-
- f.elements.customization_photo_count.value=
-  Number(product.customization_photo_count||0);
-
- f.elements.customization_photo_required.value=
-  String(!!product.customization_photo_required);
-
- const fields=getCustomizationFields(product);
-
- f.elements.customization_fields.value=
-  Array.isArray(fields.text_fields)
-   ?fields.text_fields.join("\n")
-   :typeof fields==="string"?fields:"";
-
- const options=getCustomizationOptions(product);
-
- el("zyraPhoneEnabled").checked=!!options.phone_enabled;
-
- el("zyraPhoneModelsInput").value=
-  getPhoneModelsFromProduct(product).join("\n");
-
- updateZyraCustomizationVisibility();
-}
-
-function collectProductCustomization(){
- const f=el("productForm");
-
- const type=f.elements.customization_type.value||"none";
-
- const models=el("zyraPhoneModelsInput").value
-  .split("\n")
-  .map(x=>x.trim())
-  .filter(Boolean);
-
- const uniqueModels=[
-  ...new Map(models.map(x=>[x.toLowerCase(),x])).values()
- ];
-
- return{
-  customization_type:type,
-
-  customization_required:
-   f.elements.customization_required.value==="true",
-
-  customization_photo_count:
-   Math.max(0,Number(f.elements.customization_photo_count.value||0)),
-
-  customization_photo_required:
-   f.elements.customization_photo_required.value==="true",
-
-  customization_fields:{
-   text_fields:f.elements.customization_fields.value
-    .split("\n")
-    .map(x=>x.trim())
-    .filter(Boolean)
-  },
-
-  customization_options:{
-   phone_enabled:el("zyraPhoneEnabled").checked,
-   phone_models:el("zyraPhoneEnabled").checked?uniqueModels:[]
-  }
- };
-}
-
-function validateProductCustomization(settings){
- if(!["none","text","photo","text_photo"].includes(settings.customization_type)){
-  throw new Error("Invalid customisation type.");
- }
-
- if(settings.customization_photo_count<0){
-  throw new Error("Photo count cannot be negative.");
- }
-
- if(settings.customization_options.phone_enabled&&
-    !settings.customization_options.phone_models.length){
-  throw new Error("Please add at least one phone model.");
- }
-}
-
-/* PRODUCT MANAGEMENT */
-async function loadProducts(){
- const container=el("productsList");
- if(!container)return;
-
- container.innerHTML="Loading products…";
-
- try{
-  const {data,error}=await sb.from("store_products")
-   .select("*")
-   .order("created_at",{ascending:false});
-
-  if(error)throw error;
-
-  productCache=data||[];
-
-  container.innerHTML=productCache.map(p=>`
-   <div class="item">
-    <strong>${escapeHtml(p.name||"Unnamed product")}</strong>
-    <p>Category: ${escapeHtml(p.category||"—")}</p>
-    <p>Price: ${money(p.price)} · Stock: ${Number(p.stock_quantity||0)}</p>
-    <p>Customisation: ${escapeHtml(getCustomizationType(p))}</p>
-    <p>Phone models: ${getPhoneModelsFromProduct(p).map(escapeHtml).join(", ")||"None"}</p>
-    <div class="actions">
-     <button onclick="editProduct('${p.id}')">Edit</button>
-     <button class="danger" onclick="deleteProduct('${p.id}')">Delete</button>
-    </div>
-   </div>
-  `).join("")||"No products found.";
-
- }catch(error){
-  container.textContent="Could not load products: "+error.message;
- }
-}
-
-function editProduct(id){
- const p=productCache.find(x=>String(x.id)===String(id));
- if(!p)return;
-
- const f=el("productForm");
-
- f.elements.id.value=p.id||"";
- f.elements.name.value=p.name||"";
- f.elements.category.value=p.category||"";
- f.elements.cost_price.value=p.cost_price??"";
- f.elements.price.value=p.price??"";
- f.elements.stock_quantity.value=p.stock_quantity??0;
- f.elements.image_url.value=p.image_url||"";
- f.elements.description.value=p.description||"";
- f.elements.is_customisable.checked=!!p.is_customisable;
- f.elements.is_active.checked=p.is_active!==false;
- f.elements.image_file.value="";
-
- loadProductCustomization(p);
-
- el("productFormTitle").textContent="Edit Product";
-
- showMessage("productMessage","");
-
- window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function resetProductForm(){
- const f=el("productForm");
-
- f.reset();
-
- f.elements.id.value="";
- f.elements.is_active.checked=true;
- f.elements.customization_type.value="none";
- f.elements.customization_photo_count.value=0;
-
- el("zyraPhoneEnabled").checked=false;
- el("zyraPhoneModelsInput").value="";
-
- el("productFormTitle").textContent="Add Product";
-
- updateZyraCustomizationVisibility();
-}
-
-async function deleteProduct(id){
- if(!confirm("Delete this product?"))return;
-
- try{
-  const {error}=await sb.from("store_products")
-   .delete()
-   .eq("id",id);
-
-  if(error)throw error;
-
-  showMessage("productMessage","Product deleted.");
-
-  await loadProducts();
-
- }catch(error){
-  alert("Could not delete product: "+error.message);
- }
-}
-
-el("productForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const f = event.currentTarget;
-  const button = f.querySelector('[type="submit"]');
-
-  setButtonLoading(button, true);
-
-  try {
-    const id = f.elements.id.value;
-
-    const customization = collectProductCustomization();
-    validateProductCustomization(customization);
-
-    // Keep the existing image URL when editing without a new photo.
-    let productImageUrl = f.elements.image_url.value.trim() || null;
-
-    // Get the selected gallery image.
-   const imageInput = f.querySelector('input[name="image_file"]');
-const imageFile = imageInput?.files?.[0] || null;
-
-console.log("Selected product image:", imageFile);
-
-if (!imageFile && !productImageUrl) {
-  throw new Error(
-    "No product image was received. Please select a photo again."
-  );
-}
-    if (imageFile) {
-      const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-      ];
-
-      if (!allowedTypes.includes(imageFile.type)) {
-        throw new Error("Please select a JPG, PNG or WEBP image.");
-      }
-
-      if (imageFile.size > 5 * 1024 * 1024) {
-        throw new Error("Product image must be smaller than 5 MB.");
-      }
-
-      const extension = imageFile.name.split(".").pop().toLowerCase();
-
-      const filePath =
-        "products/" +
-        Date.now() +
-        "-" +
-        Math.random().toString(36).slice(2, 10) +
-        "." +
-        extension;
-
-      // Upload image to Supabase Storage.
-      const { data: uploadData, error: uploadError } =
-        await sb.storage
-          .from("Product -image")
-          .upload(filePath, imageFile, {
-            contentType: imageFile.type,
-            upsert: false
-          });
-
-      if (uploadError) throw uploadError;
-
-      // Generate public image URL.
-      const { data: publicData } = sb.storage
-        .from("Product -image")
-        .getPublicUrl(uploadData.path);
-
-      productImageUrl = publicData.publicUrl;
-
-      if (!productImageUrl) {
-        throw new Error("Could not generate product image URL.");
-      }
-    }
-
-    const payload = {
-      name: f.elements.name.value.trim(),
-      category: f.elements.category.value.trim() || null,
-      cost_price: f.elements.cost_price.value === ""
-        ? null
-        : Number(f.elements.cost_price.value),
-      price: Number(f.elements.price.value),
-      stock_quantity: Number(f.elements.stock_quantity.value || 0),
-
-      // Save the uploaded image URL.
-      image_url: productImageUrl,
-
-      description: f.elements.description.value.trim() || null,
-      is_customisable: f.elements.is_customisable.checked,
-      is_active: f.elements.is_active.checked,
-
-      ...customization
-    };
-
-    const result = id
-      ? await sb.from("store_products").update(payload).eq("id", id)
-      : await sb.from("store_products").insert(payload);
-
-    if (result.error) throw result.error;
-
-    showMessage(
-      "productMessage",
-      id
-        ? "Product updated successfully."
-        : "Product added successfully."
-    );
-
-    resetProductForm();
-
-    await loadProducts();
-
-  } catch (error) {
-    console.error("Product save error:", error);
-
-    showMessage(
-      "productMessage",
-      "Could not save product: " + (error.message || String(error)),
-      true
-    );
-
-  } finally {
-    setButtonLoading(button, false);
-  }
-});
-
-/* =====================================================
-   MANUAL ORDER ITEMS
-===================================================== */
-function resetManualItems(){
- zyraManualItems=[];
- renderManualItems();
-}
-
-function addManualItem(){
- const name=el("manualProductName").value.trim();
- const quantity=Number(el("manualQuantity").value||1);
- const price=Number(el("manualPrice").value||0);
-
- if(!name){
-  alert("Enter a product name.");
-  return;
- }
-
- if(!Number.isInteger(quantity)||quantity<1){
-  alert("Enter a valid quantity.");
-  return;
- }
-
- if(!Number.isFinite(price)||price<0){
-  alert("Enter a valid unit price.");
-  return;
- }
-
- const product=productCache.find(
-  p=>String(p.name||"").toLowerCase()===name.toLowerCase()
- );
-
- zyraManualItems.push({
-  product_id:product?.id||null,
-  product_name:name,
-  quantity,
-  unit_price:price,
-  unit_cost_price:product?.cost_price!=null
-   ?Number(product.cost_price):null,
-  is_customised:false,
-  customisation_details:null
- });
-
- el("manualProductName").value="";
- el("manualQuantity").value=1;
- el("manualPrice").value="";
-
- renderManualItems();
-}
-
-function removeManualItem(index){
- zyraManualItems.splice(index,1);
- renderManualItems();
-}
-
-function renderManualItems(){
- const container=el("manualItems");
- if(!container)return;
-
- container.innerHTML=zyraManualItems.map((item,index)=>`
-  <div class="item">
-   <strong>${escapeHtml(item.product_name)}</strong>
-   <p>
-    ${Number(item.quantity)} × ${money(item.unit_price)}
-    = ${money(Number(item.quantity)*Number(item.unit_price))}
-   </p>
-   <button type="button" class="danger" onclick="removeManualItem(${index})">Remove</button>
-  </div>
- `).join("")||"No products added yet.";
-
- calculateManualTotal();
-}
-
-function calculateManualTotal(){
- const f=el("manualOrderForm");
-
- const subtotal=zyraManualItems.reduce(
-  (sum,item)=>sum+Number(item.quantity)*Number(item.unit_price),0
- );
-
- const discount=Math.max(0,Number(f.elements.discount_amount.value||0));
- const delivery=Math.max(0,Number(f.elements.delivery_fee.value||0));
-
- el("manualSubtotal").value=money(subtotal);
- el("manualTotal").value=money(Math.max(0,subtotal-discount+delivery));
-}
-
-/* =====================================================
-   MANUAL ORDER FORM HELPERS
-===================================================== */
-function setManualFormDefaults(){
- const f=el("manualOrderForm");
-
- if(!f.elements.order_date.value){
-  const now=new Date();
-
-  now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
-
-  f.elements.order_date.value=now.toISOString().slice(0,16);
- }
-}
-
-function resetManualForm(){
- const f=el("manualOrderForm");
-
- f.reset();
-
- f.elements.editing_order_id.value="";
- f.elements.discount_amount.value=0;
- f.elements.delivery_fee.value=0;
- f.elements.courier.value="Not assigned";
- f.elements.courier_status.value="Not dispatched";
- f.elements.courier_cost.value=0;
- f.elements.order_status.value="pending";
- f.elements.payment_status.value="pending";
- f.elements.preorder_status.value="pending";
-
- resetManualItems();
- setManualFormDefaults();
- calculateManualTotal();
-
- el("manualFormTitle").textContent="Create Manual Order";
- el("createManualOrderBtn").textContent="Create Manual Order";
- el("cancelManualEditBtn").style.display="none";
-}
-
-function cancelManualEdit(){
- resetManualForm();
- showMessage("manualMessage","Edit cancelled.");
-}
-
-
-function getManualOrderPayload(){
- const f=el("manualOrderForm");
-
- const selectedPayment=f.elements.payment_method.value.trim();
-
- const paymentMethod=
-  selectedPayment==="Cash on Delivery"
-   ?"COD"
-   :selectedPayment;
-
- return{
-  order_number:f.elements.order_number.value.trim(),
-  customer_name:f.elements.customer_name.value.trim(),
-  phone:f.elements.phone.value.trim(),
-  email:f.elements.email.value.trim()||null,
-  district:f.elements.district.value.trim()||null,
-  city:f.elements.city.value.trim(),
-  postal_code:f.elements.postal_code.value.trim()||null,
-  delivery_address:f.elements.delivery_address.value.trim(),
-  payment_method:paymentMethod,
-  payment_status:f.elements.payment_status.value,
-  order_status:f.elements.order_status.value,
-  customer_notes:f.elements.customer_notes.value.trim()||null,
-  discount_amount:Number(f.elements.discount_amount.value||0),
-  delivery_fee:Number(f.elements.delivery_fee.value||0),
-  has_customised_items:zyraManualItems.some(item=>item.is_customised),
-  created_at:f.elements.order_date.value
-   ?new Date(f.elements.order_date.value).toISOString()
-   :new Date().toISOString()
- };
-}
-
-
-function getManualItemPayload(){
- return zyraManualItems.map(item=>({
-  product_id:item.product_id||null,
-  product_name:item.product_name,
-  quantity:Number(item.quantity),
-  unit_price:Number(item.unit_price),
-  is_customised:!!item.is_customised,
-  customisation_details:item.customisation_details||null,
-  unit_cost_price:item.unit_cost_price==null
-   ?null:Number(item.unit_cost_price)
- }));
-}
-
-function getManualCourierPayload(orderId){
- const f=el("manualOrderForm");
-
- return{
-  store_order_id:orderId,
-  courier:f.elements.courier.value.trim()||"Not assigned",
-  delivery_area:f.elements.delivery_area.value.trim()||null,
-  courier_reference:f.elements.courier_reference.value.trim()||null,
-  tracking_id:f.elements.tracking_id.value.trim()||null,
-  status:f.elements.courier_status.value.trim()||"Not dispatched",
-  courier_cost:Number(f.elements.courier_cost.value||0),
-  handover_date:f.elements.handover_date.value||null,
-  courier_estimated_delivery_date:f.elements.courier_estimated_delivery_date.value||null,
-  location:f.elements.tracking_location.value.trim()||null,
-  note:f.elements.courier_note.value.trim()||null,
-  updated_at:new Date().toISOString()
- };
-}
-
-async function saveManualCourier(orderId){
- const payload=getManualCourierPayload(orderId);
-
- const {data:existing,error:findError}=await sb.from("zyra_orders")
-  .select("id")
-  .eq("store_order_id",orderId)
-  .maybeSingle();
-
- if(findError)throw findError;
-
- const result=existing
-  ?await sb.from("zyra_orders").update(payload).eq("store_order_id",orderId)
-  :await sb.from("zyra_orders").insert(payload);
-
- if(result.error)throw result.error;
-}
-
-/* =====================================================
-   EDIT MANUAL ORDER
-===================================================== */
-async function editManualOrder(id){
- const order=orderCache.find(item=>String(item.id)===String(id));
-
- if(!order)return;
-
- if(String(order.order_source||"").toLowerCase()!=="manual"){
-  alert("This is not a manual order.");
-  return;
- }
-
- try{
-  const {data:items,error}=await sb.from("store_order_items")
-   .select("*")
-   .eq("order_id",id);
-
-  if(error)throw error;
-
-  const f=el("manualOrderForm");
-  const track=trackingCache.get(id)||{};
-
-  f.elements.editing_order_id.value=order.id;
-  f.elements.order_number.value=order.order_number||"";
-
-  const dateValue=order.created_at?new Date(order.created_at):new Date();
-
-  dateValue.setMinutes(dateValue.getMinutes()-dateValue.getTimezoneOffset());
-
-  f.elements.order_date.value=dateValue.toISOString().slice(0,16);
-  f.elements.customer_name.value=order.customer_name||"";
-  f.elements.phone.value=order.phone||"";
-  f.elements.email.value=order.email||"";
-  f.elements.district.value=order.district||"";
-  f.elements.city.value=order.city||"";
-  f.elements.postal_code.value=order.postal_code||"";
-  f.elements.payment_method.value=order.payment_method||"";
-  f.elements.payment_status.value=order.payment_status||"pending";
-  f.elements.order_status.value=order.order_status||"pending";
-  f.elements.delivery_address.value=order.delivery_address||"";
-  f.elements.customer_notes.value=order.customer_notes||"";
-  f.elements.discount_amount.value=Number(order.discount_amount||0);
-  f.elements.delivery_fee.value=Number(order.delivery_fee||0);
-
-  f.elements.courier.value=track.courier||"Not assigned";
-  f.elements.delivery_area.value=track.delivery_area||"";
-  f.elements.courier_reference.value=track.courier_reference||"";
-  f.elements.tracking_id.value=track.tracking_id||"";
-  f.elements.courier_status.value=track.status||"Not dispatched";
-  f.elements.courier_cost.value=Number(track.courier_cost||0);
-  f.elements.handover_date.value=track.handover_date||"";
-  f.elements.courier_estimated_delivery_date.value=track.courier_estimated_delivery_date||"";
-  f.elements.tracking_location.value=track.location||"";
-  f.elements.courier_note.value=track.note||"";
-
-  zyraManualItems=(items||[]).map(item=>({
-   product_id:item.product_id||null,
-   product_name:item.product_name||"",
-   quantity:Number(item.quantity||1),
-   unit_price:Number(item.unit_price||0),
-   unit_cost_price:item.unit_cost_price==null
-    ?null:Number(item.unit_cost_price),
-   is_customised:!!item.is_customised,
-   customisation_details:parseCustomisationDetails(item.customisation_details)
-  }));
-
-  renderManualItems();
-
-  el("manualFormTitle").textContent="Edit Manual Order";
-  el("createManualOrderBtn").textContent="Update Manual Order";
-  el("cancelManualEditBtn").style.display="inline-block";
-
-  showPage("manual",document.querySelector('nav button[onclick*="manual"]'));
-
-  window.scrollTo({top:0,behavior:"smooth"});
-
-  showMessage("manualMessage","Editing "+(order.order_number||order.id));
-
- }catch(error){
-  alert("Could not load manual order: "+error.message);
- }
-}
-
-/* =====================================================
-   MANUAL ORDER LIST
-===================================================== */
-function renderManualOrders(){
- const target=el("manualOrdersList");
- if(!target)return;
-
- const list=orderCache.filter(
-  order=>String(order.order_source||"").toLowerCase()==="manual"
- );
-
- target.innerHTML=list.map(order=>`
-  <div class="item">
-   <strong>${escapeHtml(order.order_number||order.id)}</strong>
-   <p>${escapeHtml(order.customer_name||"")} · ${escapeHtml(order.phone||"")}</p>
-   <p>${money(order.total_amount)} · ${escapeHtml(order.order_status||"pending")}</p>
-   <div class="actions">
-    <button onclick="editManualOrder('${order.id}')">Edit</button>
-    <button class="secondary" onclick="printInvoice('${order.id}')">Print Invoice</button>
-    <button class="secondary" onclick="downloadInvoicePDF('${order.id}')">Download PDF</button>
-    <button class="danger" onclick="deleteManualOrder('${order.id}')">Delete Order</button>
-   </div>
-  </div>
- `).join("")||"No manual orders yet.";
-}
-
-/* =====================================================
-   DELETE MANUAL ORDER
-===================================================== */
-async function deleteManualOrder(id){
- const order=orderCache.find(item=>String(item.id)===String(id));
-
- if(!order){
-  alert("Manual order not found.");
-  return;
- }
-
- if(String(order.order_source||"").toLowerCase()!=="manual"){
-  alert("This is not a manual order.");
-  return;
- }
-
- if(!confirm("Permanently delete manual order "+(order.order_number||id)+"?"))return;
-
- try{
-  const courier=await sb.from("zyra_orders")
-   .delete()
-   .eq("store_order_id",id);
-
-  if(courier.error)throw courier.error;
-
-  const items=await sb.from("store_order_items")
-   .delete()
-   .eq("order_id",id);
-
-  if(items.error)throw items.error;
-
-  const result=await sb.from("store_orders")
-   .delete()
-   .eq("id",id);
-
-  if(result.error)throw result.error;
-
-  showMessage("manualMessage","Manual order deleted.");
-
-  await loadOrders();
-
- }catch(error){
-  alert("Could not delete manual order: "+error.message);
- }
-}
-
-/* =====================================================
-   CREATE / UPDATE MANUAL ORDER
-   Exact RPC arguments:
-   CREATE: p_order, p_items
-   UPDATE: p_order_id, p_order, p_items
-===================================================== */
-el("manualOrderForm").addEventListener("submit",async event=>{
- event.preventDefault();
-
- const f=event.currentTarget;
- const button=el("createManualOrderBtn");
-
- setButtonLoading(button,true);
-
- try{
-  if(!zyraManualItems.length){
-   throw new Error("Add at least one order item.");
-  }
-
-  const id=f.elements.editing_order_id.value;
-  const orderPayload=getManualOrderPayload();
-  const itemPayload=getManualItemPayload();
-
-  if(!orderPayload.customer_name||
-     !orderPayload.phone||
-     !orderPayload.delivery_address||
-     !orderPayload.city||
-     !orderPayload.payment_method){
-   throw new Error("Customer name, phone, delivery address, city and payment method are required.");
-  }
-
-  if(orderPayload.discount_amount<0||orderPayload.delivery_fee<0){
-   throw new Error("Discount and delivery fee cannot be negative.");
-  }
-
-  if(!id&&!orderPayload.order_number){
-   throw new Error("Enter an order number before creating a manual order.");
-  }
-
-  if(id){
-   const {error}=await sb.rpc("update_zyra_manual_order",{
-    p_order_id:id,
-    p_order:orderPayload,
-    p_items:itemPayload
-   });
-
-   if(error)throw error;
-
-   await saveManualCourier(id);
-
-   showMessage("manualMessage","Manual order updated successfully.");
-
-  }else{
-   const {data,error}=await sb.rpc("create_zyra_manual_order_with_number",{
-    p_order:orderPayload,
-    p_items:itemPayload
-   });
-
-   if(error)throw error;
-
-   const createdId=data?.id||data?.[0]?.id;
-
-   if(!createdId){
-    throw new Error("The order was submitted, but the RPC did not return an order ID. Refresh the order list before trying again.");
-   }
-
-   await saveManualCourier(createdId);
-
-   showMessage(
-    "manualMessage",
-    "Manual order created successfully. Order number: "+
-    (data.order_number||orderPayload.order_number)
-   );
-  }
-
-  resetManualForm();
-
-  await loadOrders();
-
- }catch(error){
-  showMessage(
-   "manualMessage",
-   "Could not save manual order: "+(error.message||String(error)),
-   true
-  );
+ }catch(e){
+  alert("Could not save courier details: "+e.message);
 
  }finally{
-  setButtonLoading(button,false);
+  button.disabled=false;
+  button.textContent=old;
  }
-});
+}
 
-/* =====================================================
-   REPORTS AND DASHBOARD
-===================================================== */
-function getReportOrders(){
- const from=el("reportFrom")?.value;
- const to=el("reportTo")?.value;
+function renderPayments(orders){
+ const root=el("paymentsList");
+ root.replaceChildren();
 
- return orderCache.filter(order=>{
-  const date=(order.created_at||"").slice(0,10);
+ const relevant=orders.filter(o=>
+  String(o.payment_method||"").toLowerCase().includes("bank")||
+  o.payment_slip_path||
+  o.payment_status
+ );
 
-  if(from&&date<from)return false;
-  if(to&&date>to)return false;
+ if(!relevant.length){
+  root.textContent="No bank-transfer payments or uploaded slips found.";
+  el("paymentsMessage").textContent="";
+  return;
+ }
 
-  return true;
+ el("paymentsMessage").textContent="Showing bank-transfer orders and orders with payment records.";
+
+ relevant.forEach(o=>{
+  const card=document.createElement("div");
+  card.className="order-card";
+
+  const h=document.createElement("div");
+  h.className="topline";
+
+  const name=document.createElement("strong");
+  name.textContent=(o.order_number||o.id)+" · "+(o.customer_name||"Customer");
+
+  const badge=document.createElement("span");
+  badge.className="pill";
+  badge.textContent="Payment: "+(o.payment_status||"PENDING");
+
+  h.append(name,badge);
+  card.append(h);
+
+  const details=document.createElement("p");
+  details.className="muted";
+  details.textContent=`${o.payment_method||""} · ${money(o.total_amount)} · ${o.payment_slip_file_name||"No slip filename saved"}`;
+  card.append(details);
+
+  if(o.payment_rejection_reason){
+   const reason=document.createElement("p");
+   reason.textContent="Rejection reason: "+o.payment_rejection_reason;
+   card.append(reason);
+  }
+
+  const actions=document.createElement("div");
+  actions.className="actions";
+
+  if(o.payment_slip_path){
+   const view=document.createElement("button");
+   view.className="btn light";
+   view.textContent="VIEW PAYMENT SLIP";
+   view.onclick=()=>viewPaymentSlip(o.payment_slip_path,view);
+
+   const download=document.createElement("button");
+   download.className="btn secondary";
+   download.textContent="DOWNLOAD PAYMENT SLIP";
+   download.onclick=()=>downloadPaymentSlip(o.payment_slip_path,download,o.payment_slip_file_name);
+
+   actions.append(view,download);
+  }else{
+   const missing=document.createElement("span");
+   missing.className="muted";
+   missing.textContent="No payment slip uploaded for this order.";
+   actions.append(missing);
+  }
+
+  const accept=document.createElement("button");
+  accept.className="btn success";
+  accept.textContent="ACCEPT PAYMENT";
+  accept.disabled=String(o.payment_status||"").toUpperCase()==="PAID";
+  accept.onclick=()=>verifyPayment(o.id,"ACCEPT",accept);
+
+  const reject=document.createElement("button");
+  reject.className="btn danger";
+  reject.textContent="REJECT PAYMENT";
+  reject.disabled=["REJECTED","PAID"].includes(String(o.payment_status||"").toUpperCase());
+  reject.onclick=()=>verifyPayment(o.id,"REJECT",reject);
+
+  actions.append(accept,reject);
+  card.append(actions);
+  root.append(card);
  });
 }
 
-function calculateZyraReport(){
- const orders=getReportOrders();
+async function viewPaymentSlip(path,button){
+ const win=window.open("about:blank","_blank");
 
- const totalOrders=orders.length;
-
- const pendingOrders=orders.filter(
-  o=>String(o.order_status||"").toLowerCase()==="pending"
- ).length;
-
- const totalSales=orders.reduce(
-  (sum,o)=>sum+Number(o.total_amount||0),0
- );
-
- const paidSales=orders.filter(
-  o=>String(o.payment_status||"").toLowerCase()==="paid"
- ).reduce(
-  (sum,o)=>sum+Number(o.total_amount||0),0
- );
-
- const productCost=orders.reduce(
-  (sum,o)=>sum+(o.store_order_items||[]).reduce(
-   (s,i)=>s+Number(i.unit_cost_price||0)*Number(i.quantity||0),0
-  ),0
- );
-
- const expenses=expenseCache.reduce(
-  (sum,x)=>sum+Number(x.amount||0),0
- );
-
- const estimatedProfit=paidSales-productCost-expenses;
-
- return{
-  orders,
-  totalOrders,
-  pendingOrders,
-  totalSales,
-  paidSales,
-  productCost,
-  expenses,
-  estimatedProfit
- };
-}
-
-function renderStatsAndReport(){
- const r=calculateZyraReport();
-
- if(el("overviewStats")){
-  el("overviewStats").innerHTML=
-   makeStat("Total Orders",r.totalOrders)+
-   makeStat("Pending Orders",r.pendingOrders)+
-   makeStat("Total Sales",money(r.totalSales))+
-   makeStat("Paid Sales",money(r.paidSales))+
-   makeStat(
-    "Business Expenses",
-    money(expenseCache.reduce((s,x)=>s+Number(x.amount||0),0))
-   );
+ if(!win){
+  alert("Please allow pop-ups to view payment slips.");
+  return;
  }
 
- if(el("recentOrders")){
-  const recent=[...orderCache]
-   .sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))
-   .slice(0,8);
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="OPENING...";
 
-  el("recentOrders").innerHTML=recent.map(o=>`
-   <div class="item">
-    <strong>${escapeHtml(o.order_number||o.id)}</strong>
-    <p>${escapeHtml(o.customer_name||"")} · ${money(o.total_amount)}</p>
-    <small>
-     ${escapeHtml(o.order_status||"pending")} ·
-     ${escapeHtml(o.payment_status||"pending")}
-    </small>
-   </div>
-  `).join("")||"No orders yet.";
- }
+ try{
+  const {data,error}=await sb.storage.from("payment-slips").createSignedUrl(path,300);
+  if(error)throw error;
+  win.location.href=data.signedUrl;
 
- renderZyraReport();
-}
+ }catch(e){
+  win.close();
+  alert("Could not open payment slip: "+e.message+"\nCheck the payment-slips bucket and admin read permissions.");
 
-function renderZyraReport(){
- const r=calculateZyraReport();
-
- const stats=el("reportStats");
-
- if(stats){
-  stats.innerHTML=
-   makeStat("Orders",r.totalOrders)+
-   makeStat("Pending",r.pendingOrders)+
-   makeStat("Total Sales",money(r.totalSales))+
-   makeStat("Paid Sales",money(r.paidSales))+
-   makeStat("Product Costs",money(r.productCost))+
-   makeStat("Expenses",money(r.expenses))+
-   makeStat("Estimated Profit",money(r.estimatedProfit));
- }
-
- const table=el("reportTable");
-
- if(table){
-  table.innerHTML=`<table>
-   <thead>
-    <tr>
-     <th>Order</th>
-     <th>Date</th>
-     <th>Customer</th>
-     <th>Payment</th>
-     <th>Status</th>
-     <th>Total</th>
-    </tr>
-   </thead>
-   <tbody>
-    ${r.orders.map(o=>`
-     <tr>
-      <td>${escapeHtml(o.order_number||o.id)}</td>
-      <td>${escapeHtml((o.created_at||"").slice(0,10))}</td>
-      <td>${escapeHtml(o.customer_name||"")}</td>
-      <td>${escapeHtml(o.payment_status||"")}</td>
-      <td>${escapeHtml(o.order_status||"")}</td>
-      <td>${money(o.total_amount)}</td>
-     </tr>
-    `).join("")}
-   </tbody>
-  </table>`;
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
  }
 }
 
-function refreshReport(){
- renderZyraReport();
+async function verifyPayment(orderId,decision,button){
+ let reason=null;
+
+ if(decision==="REJECT"){
+  reason=prompt("Please enter the reason for rejecting this payment:");
+  if(reason===null)return;
+  reason=reason.trim();
+
+  if(!reason){
+   alert("A rejection reason is required.");
+   return;
+  }
+ }
+
+ button.disabled=true;
+ const old=button.textContent;
+ button.textContent="PROCESSING...";
+
+ try{
+  const {error}=await sb.rpc("verify_zyra_payment",{
+   p_order_id:orderId,
+   p_decision:decision,
+   p_rejection_reason:reason
+  });
+
+  if(error)throw error;
+
+  alert(decision==="ACCEPT"?"Payment accepted successfully.":"Payment rejected.");
+  await loadOrders();
+
+ }catch(e){
+  alert("Payment verification failed: "+e.message+"\nConfirm verify_zyra_payment exists and your admin account is authorised.");
+
+ }finally{
+  button.disabled=false;
+  button.textContent=old;
+ }
 }
 
-/* =====================================================
-   STARTUP
-===================================================== */
-document.addEventListener("DOMContentLoaded",()=>{
- setManualFormDefaults();
- resetExpenseForm();
- updateZyraCustomizationVisibility();
- renderAdminBankAccounts();
- renderManualItems();
- checkSession();
+function printInvoice(o,track={}){
+ const rows=(o.store_order_items||[]).map(i=>
+  `<tr><td>${escapeHtml(i.product_name)}</td><td>${i.quantity}</td><td>${money(i.unit_price)}</td><td>${money(Number(i.quantity)*Number(i.unit_price))}</td></tr>`
+ ).join("");
+
+ const w=window.open("","_blank");
+ if(!w){
+  alert("Please allow pop-ups to print invoices.");
+  return;
+ }
+
+ w.document.write(`<!doctype html>
+ <html>
+ <head>
+ <title>Invoice ${escapeHtml(o.order_number)}</title>
+ <style>
+ body{font-family:Arial;padding:30px;color:#292522}
+ h1{color:#842d40}
+ table{width:100%;border-collapse:collapse;margin-top:25px}
+ td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+ .total{text-align:right;font-weight:bold;margin-top:20px}
+ </style>
+ </head>
+ <body>
+ <h1>ZYRA.LK</h1>
+ <h2>Order Invoice</h2>
+ <p>
+ <b>Order:</b> ${escapeHtml(o.order_number)}<br>
+ <b>Date:</b> ${o.created_at?new Date(o.created_at).toLocaleString():""}<br>
+ <b>Customer:</b> ${escapeHtml(o.customer_name)}<br>
+ <b>Phone:</b> ${escapeHtml(o.phone)}<br>
+ <b>Address:</b> ${escapeHtml(o.delivery_address)}, ${escapeHtml(o.city)}<br>
+ <b>Payment:</b> ${escapeHtml(o.payment_method)}<br>
+ <b>Payment status:</b> ${escapeHtml(o.payment_status||"Pending")}
+ </p>
+ <table>
+ <thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead>
+ <tbody>${rows}</tbody>
+ </table>
+ <p class="total">Order total: ${money(o.total_amount)}</p>
+ <h3>Pre-order preparation</h3>
+ <p>
+ Pre-order status: ${escapeHtml(o.preorder_status||"Pending")}<br>
+ Estimated ready: ${escapeHtml(o.preorder_estimated_ready_from||"Not set")} to ${escapeHtml(o.preorder_estimated_ready_to||"Not set")}<br>
+ Actual ready date: ${escapeHtml(o.actual_ready_for_dispatch_date||"Not set")}
+ </p>
+ <h3>Courier / Tracking</h3>
+ <p>
+ Courier: ${escapeHtml(track.courier_method||track.courier||"Not assigned")}<br>
+ Tracking ID: ${escapeHtml(track.tracking_id||"Not assigned")}<br>
+ Courier reference: ${escapeHtml(track.courier_reference||"Not provided")}<br>
+ Status: ${escapeHtml(track.status||"Pending")}<br>
+ Location: ${escapeHtml(track.location||"Not updated")}<br>
+ Handover date: ${escapeHtml(track.handover_date||"Not set")}<br>
+ Estimated courier arrival: ${escapeHtml(track.courier_estimated_delivery_date||track.estimated_delivery||"Not provided")}<br>
+ Customer delivery charge: ${money(o.delivery_fee)}<br>
+ Actual courier cost: ${money(track.courier_cost)}
+ </p>
+ <p>Thank you for shopping with Zyra.lk.</p>
+ <script>window.onload=()=>window.print()<\/script>
+ </body>
+ </html>`);
+
+ w.document.close();
+}
+
+function downloadInvoicePDF(order,track={}){
+ if(!window.jspdf||!window.jspdf.jsPDF){
+  alert("The PDF library is unavailable. Check your internet connection and reload the Admin page.");
+  return;
+ }
+
+ try{
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF();
+  let y=20;
+
+  function line(text,size=10,bold=false){
+   pdf.setFont("helvetica",bold?"bold":"normal");
+   pdf.setFontSize(size);
+
+   pdf.splitTextToSize(String(text??""),175).forEach(t=>{
+    if(y>275){
+     pdf.addPage();
+     y=20;
+    }
+    pdf.text(t,18,y);
+    y+=6;
+   });
+  }
+
+  pdf.setTextColor(132,45,64);
+  line("ZYRA.LK",22,true);
+  pdf.setTextColor(41,37,34);
+
+  line("ORDER INVOICE",15,true);
+  line("Order: "+(order.order_number||order.id),11,true);
+  line("Date: "+(order.created_at?new Date(order.created_at).toLocaleString():""));
+
+  line("CUSTOMER DETAILS",12,true);
+  line("Customer: "+order.customer_name);
+  line("Phone: "+order.phone);
+  line("Email: "+(order.email||"Not provided"));
+  line("Address: "+order.delivery_address);
+  line("District: "+(order.district||""));
+  line("City: "+order.city);
+  line("Postal code: "+(order.postal_code||""));
+
+  line("ORDER ITEMS",12,true);
+
+  (order.store_order_items||[]).forEach(i=>{
+   line(i.product_name,10,true);
+   line("Quantity: "+i.quantity);
+   line("Unit price: "+money(i.unit_price));
+   line("Line total: "+money(Number(i.unit_price)*Number(i.quantity)));
+
+   const d=parseCustomisationDetails(i.customisation_details);
+   if(d.instructions)line("Customisation: "+d.instructions);
+  });
+
+  line("Subtotal: "+money(order.subtotal_amount??order.total_amount),11,true);
+  line("Discount: - "+money(order.discount_amount));
+  line("Delivery fee: "+money(order.delivery_fee));
+  line("GRAND TOTAL: "+money(order.total_amount),15,true);
+
+  line("Payment: "+order.payment_method+" · "+order.payment_status);
+  line("Order status: "+order.order_status);
+
+  line("COURIER DETAILS",12,true);
+  line("Courier: "+(track.courier||"Not assigned"));
+  line("Tracking ID: "+(track.tracking_id||"Not assigned"));
+  line("Courier reference: "+(track.courier_reference||""));
+  line("Status: "+(track.status||"Pending"));
+  line("Tracking location: "+(track.location||""));
+  line("Handover date: "+(track.handover_date||"Not set"));
+  line("Estimated courier arrival: "+(track.courier_estimated_delivery_date||track.estimated_delivery||"Not set"));
+  line("Actual courier cost (internal): "+money(track.courier_cost));
+
+  line("Pre-order status: "+(order.preorder_status||"Pending"));
+  line("Estimated ready: "+(order.preorder_estimated_ready_from||"Not set")+" to "+(order.preorder_estimated_ready_to||"Not set"));
+  line("Actual ready-for-dispatch date: "+(order.actual_ready_for_dispatch_date||"Not set"));
+
+  line("Thank you for shopping with Zyra.lk.",11,true);
+
+  const safe=String(order.order_number||order.id).replace(/[^a-zA-Z0-9_-]/g,"_");
+  pdf.save("Zyra-Invoice-"+safe+".pdf");
+
+ }catch(e){
+  console.error(e);
+  alert("Could not generate PDF invoice: "+e.message);
+ }
+}
+
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* MANUAL ORDERS */
+function setManualOrderDate(){const f=el("manualOrderForm");const d=new Date(),local=new Date(d.getTime()-d.getTimezoneOffset()*60000);f.elements.order_date.value=local.toISOString().slice(0,16);}
+function refreshManualProductOptions(){document.querySelectorAll(".manual-item select[data-product]").forEach(sel=>{const current=sel.value;sel.replaceChildren(new Option("Select product",""));productCache.filter(p=>p.is_active).forEach(p=>sel.add(new Option(p.name+" — "+money(p.price),p.id)));if(current)sel.value=current;});}
+function addManualItem(){
+ const root=el("manualItems"),box=document.createElement("div");box.className="manual-item";const grid=document.createElement("div");grid.className="manual-item-grid";
+ function field(label,node){const wrap=document.createElement("div"),l=document.createElement("label");wrap.className="field";l.textContent=label;wrap.append(l,node);grid.append(wrap);return wrap;}
+ const type=document.createElement("select");type.add(new Option("Existing product","existing"),new Option("Custom item","custom"));const product=document.createElement("select");product.dataset.product="1";
+ const customName=document.createElement("input");customName.placeholder="Custom item name";const price=document.createElement("input");price.type="number";price.min="0";price.step=".01";
+ const quantity=document.createElement("input");quantity.type="number";quantity.min="1";quantity.step="1";quantity.value="1";const cost=document.createElement("input");cost.type="number";cost.min="0";cost.step=".01";cost.placeholder="Optional cost price";
+ const customDetails=document.createElement("textarea");customDetails.placeholder="Customisation details";const typeWrap=field("Item type",type),productWrap=field("Website product",product),customNameWrap=field("Custom product name",customName);field("Selling price (LKR)",price);field("Quantity",quantity);field("Unit cost price (LKR)",cost);field("Customisation details",customDetails);
+ const subtotal=document.createElement("p");subtotal.className="muted";subtotal.textContent="Line total: LKR 0";const remove=document.createElement("button");remove.type="button";remove.className="btn danger";remove.textContent="REMOVE ITEM";remove.onclick=()=>{box.remove();calculateManualTotal();};
+ box.append(grid,subtotal,remove);box._manual={type,product,customName,price,quantity,cost,customDetails,subtotal};root.append(box);
+ function updateProduct(){const p=productCache.find(x=>x.id===product.value);if(p){price.value=p.price;cost.value=p.cost_price??"";}calculateManualTotal();}
+ type.addEventListener("change",()=>{const custom=type.value==="custom";productWrap.style.display=custom?"none":"block";customNameWrap.style.display=custom?"block":"none";if(!custom)updateProduct();});
+ product.addEventListener("change",updateProduct);[price,quantity,cost,customName,customDetails].forEach(x=>x.addEventListener("input",calculateManualTotal));
+ refreshManualProductOptions();type.dispatchEvent(new Event("change"));manualItemCount++;calculateManualTotal();
+}
+function calculateManualTotal(){let subtotal=0;document.querySelectorAll(".manual-item").forEach(box=>{const d=box._manual;if(!d)return;const line=Math.max(0,Number(d.price.value||0))*Math.max(0,Number(d.quantity.value||0));subtotal+=line;d.subtotal.textContent="Line total: "+money(line);});const f=el("manualOrderForm"),delivery=Math.max(0,Number(f.elements.delivery_fee.value||0)),discount=Math.max(0,Number(f.elements.discount_amount.value||0)),after=subtotal-discount,grand=after+delivery;el("manualSubtotal").textContent=money(subtotal);el("manualDiscount").textContent="− "+money(discount);el("manualAfterDiscount").textContent=money(after);el("manualDelivery").textContent=money(delivery);el("manualGrandTotal").textContent=money(grand);}
+el("manualOrderForm").elements.delivery_fee.addEventListener("input",calculateManualTotal);el("manualOrderForm").elements.discount_amount.addEventListener("input",calculateManualTotal);
+function getManualItems(){const items=[];document.querySelectorAll(".manual-item").forEach(box=>{const d=box._manual,qty=Number(d.quantity.value),price=Number(d.price.value);if(!Number.isInteger(qty)||qty<1)throw new Error("Quantity must be a whole number of at least 1.");if(!Number.isFinite(price)||price<0)throw new Error("Enter a valid selling price.");let productId=null,name="",unitCost=d.cost.value===""?null:Number(d.cost.value);if(d.type.value==="existing"){const p=productCache.find(x=>x.id===d.product.value);if(!p)throw new Error("Select a valid website product.");productId=p.id;name=p.name;}else{name=d.customName.value.trim();if(!name)throw new Error("Enter the custom product name.");}if(unitCost!==null&&(!Number.isFinite(unitCost)||unitCost<0))throw new Error("Enter a valid cost price.");const details=d.customDetails.value.trim();items.push({product_id:productId,product_name:name,unit_price:price,quantity:qty,unit_cost_price:unitCost,is_customised:!!details,customisation_details:details?{instructions:details}:null});});if(!items.length)throw new Error("Add at least one item.");return items;}
+function cancelManualEdit(){const f=el("manualOrderForm");f.reset();f.elements.editing_order_id.value="";el("manualItems").replaceChildren();manualItemCount=0;el("createManualOrderBtn").textContent="CREATE MANUAL ORDER";el("manualFormTitle").textContent="Create Manual Order";el("cancelManualEditBtn").style.display="none";el("manualOrderMessage").textContent="";setManualOrderDate();addManualItem();calculateManualTotal();showAdminSection("manual");}
+function editManualOrder(id){
+ const o=orderCache.find(x=>x.id===id);
+ if(!o||String(o.order_source||"").toLowerCase()!=="manual"){alert("Manual order not found.");return;}
+ const f=el("manualOrderForm"),track=trackingCache.get(id)||{};
+ f.reset();f.elements.editing_order_id.value=o.id;f.elements.order_number.value=o.order_number||"";
+ ["customer_name","phone","email","delivery_address","district","city","postal_code","payment_method","payment_status","order_status","customer_notes"].forEach(k=>f.elements[k].value=o[k]||"");
+ const dt=new Date(o.created_at||Date.now()),local=new Date(dt.getTime()-dt.getTimezoneOffset()*60000);f.elements.order_date.value=local.toISOString().slice(0,16);
+
+ f.elements.discount_amount.value=Number(o.discount_amount||0);f.elements.delivery_fee.value=Number(o.delivery_fee||0);
+ f.elements.preorder_status.value=o.preorder_status||"pending";f.elements.preorder_confirmed_at.value=o.preorder_confirmed_at?String(o.preorder_confirmed_at).slice(0,10):"";
+ f.elements.preorder_estimated_ready_from.value=o.preorder_estimated_ready_from||"";f.elements.preorder_estimated_ready_to.value=o.preorder_estimated_ready_to||"";f.elements.actual_ready_for_dispatch_date.value=o.actual_ready_for_dispatch_date||"";
+ f.elements.courier.value=track.courier||"Not assigned";f.elements.delivery_area.value=track.delivery_area||"";f.elements.courier_reference.value=track.courier_reference||"";f.elements.tracking_id.value=track.tracking_id||"";f.elements.courier_status.value=track.status||"Not dispatched";f.elements.courier_cost.value=Number(track.courier_cost||0);f.elements.handover_date.value=track.handover_date||"";f.elements.courier_estimated_delivery_date.value=track.courier_estimated_delivery_date||"";f.elements.estimated_delivery.value=track.estimated_delivery||"";f.elements.tracking_location.value=track.location||"";f.elements.courier_note.value=track.note||"";
+ el("manualItems").replaceChildren();manualItemCount=0;
+ (o.store_order_items||[]).forEach(item=>{addManualItem();const d=el("manualItems").lastElementChild._manual;if(item.product_id){d.type.value="existing";d.type.dispatchEvent(new Event("change"));let opt=[...d.product.options].find(x=>x.value===item.product_id);if(!opt){opt=new Option((item.product_name||"Historical item")+" (historical)",item.product_id);d.product.add(opt);}d.product.value=item.product_id;}else{d.type.value="custom";d.type.dispatchEvent(new Event("change"));d.customName.value=item.product_name||"";}d.price.value=item.unit_price;d.cost.value=item.unit_cost_price??"";d.quantity.value=item.quantity;d.customDetails.value=parseCustomisationDetails(item.customisation_details).instructions||"";});
+ calculateManualTotal();el("createManualOrderBtn").textContent="SAVE MANUAL ORDER CHANGES";el("manualFormTitle").textContent="Edit Manual Order";el("cancelManualEditBtn").style.display="inline-block";showAdminSection("manual");
+}
+function applyManualCourierRate(){const f=el("manualOrderForm"),courier=f.elements.courier.value,area=f.elements.delivery_area.value;if(courier==="Straightway Couriers"&&area==="Outside Colombo"){alert("Straightway Couriers does not deliver outside Colombo. Choose Royal Express or Speed Post.");return;}const rate=deliveryRate(courier,area);if(rate===null){alert("Select a supported courier and delivery area first.");return;}f.elements.delivery_fee.value=rate;calculateManualTotal();}
+function calculateManualPreorderAndCourier(){const f=el("manualOrderForm");if(f.elements.preorder_status.value==="confirmed"&&!f.elements.preorder_confirmed_at.value)f.elements.preorder_confirmed_at.value=zyraDateString(new Date());const confirmed=f.elements.preorder_confirmed_at.value;if(confirmed){const e=preorderEstimate(confirmed);if(e){f.elements.preorder_estimated_ready_from.value=e.from;f.elements.preorder_estimated_ready_to.value=e.to;}else alert("Preparation dates unavailable. Check zyra_holidays access.");}const handover=f.elements.handover_date.value;if(handover){const e=courierEstimate(f.elements.courier.value,handover);if(e){f.elements.courier_estimated_delivery_date.value=e.to;f.elements.estimated_delivery.value=e.label+(e.from!==e.to?": "+e.from+" to "+e.to:" — "+e.to);}else if(f.elements.courier.value==="Customer Pickup")f.elements.estimated_delivery.value="Customer pickup — no courier estimate";else alert("Courier estimate unavailable. Check holiday dates for Speed Post.");}}
+
+function renderManualOrders(){
+ const root=el("manualOrdersList");root.replaceChildren();const list=orderCache.filter(o=>String(o.order_source||"").toLowerCase()==="manual");if(!list.length){root.textContent="No manual orders yet.";return;}
+ list.forEach(o=>{const track=trackingCache.get(o.id)||{},card=document.createElement("article");card.className="order-card";const title=document.createElement("h3");title.textContent=(o.order_number||o.id)+" · "+(o.customer_name||"Customer");const meta=document.createElement("p");meta.className="muted";meta.textContent=[o.created_at?new Date(o.created_at).toLocaleString():"",money(o.total_amount),o.payment_status||"Payment pending",o.order_status||"Order pending"].filter(Boolean).join(" · ");const address=document.createElement("p");address.textContent="Delivery: "+[o.delivery_address,o.city,o.district,o.postal_code].filter(Boolean).join(", ");const prep=document.createElement("p");prep.className="muted";prep.textContent="Pre-order: "+(o.preorder_status||"pending")+" · Ready estimate: "+(o.preorder_estimated_ready_from||"Not set")+" to "+(o.preorder_estimated_ready_to||"Not set");const courier=document.createElement("p");courier.className="muted";courier.textContent="Courier: "+(track.courier||"Not assigned")+" · Tracking: "+(track.tracking_id||"Not assigned")+" · Status: "+(track.status||"Not dispatched");const actions=document.createElement("div");actions.className="actions";const edit=document.createElement("button");edit.className="btn light";edit.textContent="EDIT";edit.onclick=()=>editManualOrder(o.id);const print=document.createElement("button");print.className="btn secondary";print.textContent="PRINT INVOICE";print.onclick=()=>printInvoice(o,track);const pdf=document.createElement("button");pdf.className="btn secondary";pdf.textContent="DOWNLOAD PDF INVOICE";pdf.onclick=()=>downloadInvoicePDF(o,track);const del=document.createElement("button");del.className="btn danger";del.textContent="DELETE";del.onclick=()=>deleteOrder(o.id,o.order_number||o.id,del);actions.append(edit,print,pdf,del);card.append(title,meta,address,prep,courier,actions);root.append(card);});
+}
+el("manualOrderForm").addEventListener("submit",async e=>{
+ e.preventDefault();const f=e.target,button=el("createManualOrderBtn"),message=el("manualOrderMessage"),editing=f.elements.editing_order_id.value;button.disabled=true;button.textContent=editing?"SAVING CHANGES...":"CREATING ORDER...";
+ try{
+  const data=new FormData(f),items=getManualItems(),orderNumber=String(data.get("order_number")||"").trim();if(!orderNumber)throw new Error("Enter an Order ID.");
+  const subtotal=items.reduce((a,x)=>a+x.unit_price*x.quantity,0),delivery=Number(data.get("delivery_fee")||0),discount=Number(data.get("discount_amount")||0);if(!Number.isFinite(delivery)||delivery<0||!Number.isFinite(discount)||discount<0||discount>subtotal)throw new Error("Check delivery fee and discount; discount cannot exceed subtotal.");
+  const date=new Date(data.get("order_date"));if(Number.isNaN(date.getTime()))throw new Error("Select a valid order date.");
+  const order={order_number:orderNumber,customer_name:String(data.get("customer_name")||"").trim(),phone:String(data.get("phone")||"").trim(),email:String(data.get("email")||"").trim()||null,delivery_address:String(data.get("delivery_address")||"").trim(),district:String(data.get("district")||"").trim()||null,city:String(data.get("city")||"").trim(),postal_code:String(data.get("postal_code")||"").trim()||null,payment_method:String(data.get("payment_method")||""),payment_status:String(data.get("payment_status")||"pending"),order_status:String(data.get("order_status")||"pending"),customer_notes:String(data.get("customer_notes")||"").trim()||null,subtotal_amount:subtotal,discount_amount:discount,delivery_fee:delivery,total_amount:subtotal-discount+delivery,has_customised_items:items.some(i=>i.is_customised),order_source:"manual",created_at:date.toISOString()};
+  if(!order.customer_name||!order.phone||!order.delivery_address||!order.city||!order.payment_method)throw new Error("Complete required customer details.");
+  const result=editing?await sb.rpc("update_zyra_manual_order",{p_order_id:editing,p_order:order,p_items:items}):await sb.rpc("create_zyra_manual_order_with_number",{p_order:order,p_items:items});if(result.error)throw result.error;if(!result.data?.id)throw new Error("Database did not return the saved order.");
+  const savedId=result.data.id;await loadOrders();const courier=String(data.get("courier")||"Not assigned"),area=String(data.get("delivery_area")||"")||null;if(courier==="Straightway Couriers"&&area==="Outside Colombo")throw new Error("Straightway Couriers does not deliver outside Colombo. Select Royal Express or Speed Post.");
+  const courierDetails={preorder_status:String(data.get("preorder_status")||"pending"),preorder_confirmed_at:String(data.get("preorder_confirmed_at")||"")||null,preorder_estimated_ready_from:String(data.get("preorder_estimated_ready_from")||"")||null,preorder_estimated_ready_to:String(data.get("preorder_estimated_ready_to")||"")||null,actual_ready_for_dispatch_date:String(data.get("actual_ready_for_dispatch_date")||"")||null,courier,delivery_area:area,courier_reference:String(data.get("courier_reference")||"").trim()||null,tracking_id:String(data.get("tracking_id")||"").trim(),status:String(data.get("courier_status")||"Not dispatched"),courier_cost:Number(data.get("courier_cost")||0),customer_delivery_fee:delivery,handover_date:String(data.get("handover_date")||"")||null,courier_estimated_delivery_date:String(data.get("courier_estimated_delivery_date")||"")||null,estimated_delivery:String(data.get("estimated_delivery")||"").trim()||null,location:String(data.get("tracking_location")||"").trim()||null,note:String(data.get("courier_note")||"").trim()||null};
+  const saved=await saveZyraOrderDetails(savedId,courierDetails,button);if(!saved)throw new Error("Order saved, but pre-order/courier details were not saved. Edit the order and retry.");
+  message.textContent=(editing?"Manual order updated: ":"Manual order created: ")+(result.data.order_number||orderNumber);await loadOrders();
+  if(editing)cancelManualEdit();else{f.reset();f.elements.editing_order_id.value="";el("manualItems").replaceChildren();setManualOrderDate();addManualItem();calculateManualTotal();}
+ }catch(err){message.textContent="Could not fully save manual order: "+err.message;}finally{button.disabled=false;button.textContent=f.elements.editing_order_id.value?"SAVE MANUAL ORDER CHANGES":"CREATE MANUAL ORDER";}
 });
 
-</script>
-</body>
-</html>
+/* BUSINESS EXPENSES */
+function resetExpenseForm(){const f=el("expenseForm");f.reset();f.elements.id.value="";f.elements.expense_date.value=new Date().toISOString().slice(0,10);el("saveExpenseBtn").textContent="SAVE EXPENSE";}
+async function loadExpenses(){const {data,error}=await sb.from("zyra_business_expenses").select("id,expense_date,category,description,amount,order_id,created_at").order("expense_date",{ascending:false}).limit(2000);if(error){el("expenseMessage").textContent="Could not load expenses: "+error.message;return;}expenseCache=data||[];const body=el("expensesBody");body.replaceChildren();expenseCache.forEach(x=>{const tr=document.createElement("tr");[x.expense_date,x.category,x.description||"—",x.order_id?(orderCache.find(o=>o.id===x.order_id)?.order_number||x.order_id):"—",money(x.amount)].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td);});const td=document.createElement("td"),edit=document.createElement("button"),del=document.createElement("button");edit.className="btn light";edit.textContent="EDIT";edit.onclick=()=>editExpense(x.id);del.className="btn danger";del.textContent="DELETE";del.style.marginLeft="5px";del.onclick=()=>deleteExpense(x.id,del);td.append(edit,del);tr.append(td);body.append(tr);});const sel=el("expenseOrder"),keep=sel.value;sel.replaceChildren(new Option("No linked order",""));orderCache.forEach(o=>sel.add(new Option((o.order_number||o.id)+" · "+o.customer_name,o.id)));sel.value=keep;renderStatsAndReport(orderCache);}
+function editExpense(id){const x=expenseCache.find(v=>String(v.id)===String(id));if(!x)return;const f=el("expenseForm");f.elements.id.value=x.id;f.elements.expense_date.value=x.expense_date;f.elements.category.value=x.category;f.elements.description.value=x.description||"";f.elements.amount.value=x.amount;f.elements.order_id.value=x.order_id||"";el("saveExpenseBtn").textContent="UPDATE EXPENSE";showAdminSection("expenses");}
+el("expenseForm").addEventListener("submit",async e=>{e.preventDefault();const f=e.target,id=f.elements.id.value,button=el("saveExpenseBtn");button.disabled=true;try{const payload={expense_date:f.elements.expense_date.value,category:f.elements.category.value,description:f.elements.description.value.trim(),amount:Number(f.elements.amount.value),order_id:f.elements.order_id.value||null};if(!payload.expense_date||!payload.category||!payload.description||!Number.isFinite(payload.amount)||payload.amount<=0)throw new Error("Enter a valid date, category, description and amount.");const result=id?await sb.from("zyra_business_expenses").update(payload).eq("id",id):await sb.from("zyra_business_expenses").insert(payload);if(result.error)throw result.error;el("expenseMessage").textContent=id?"Expense updated.":"Expense saved.";resetExpenseForm();await loadExpenses();}catch(err){el("expenseMessage").textContent="Could not save expense: "+err.message;}finally{button.disabled=false;}});
+async function deleteExpense(id,button){if(!confirm("Delete this expense permanently?"))return;button.disabled=true;try{const {error}=await sb.from("zyra_business_expenses").delete().eq("id",id);if(error)throw error;await loadExpenses();}catch(e){alert("Could not delete expense: "+e.message);}finally{button.disabled=false;}}
+
+async function loadProducts(){const {data,error}=await sb.from("store_products").select("id,name,price,category,image_url,description,stock_quantity,is_customisable,is_active,created_at").order("created_at",{ascending:false});if(error){el("productMessage").textContent="Could not load products: "+error.message;return;}const {data:costRows,error:costError}=await sb.from("zyra_product_costs").select("product_id,cost_price");if(costError)console.warn("Product costs unavailable:",costError.message);const costMap=new Map((costRows||[]).map(x=>[x.product_id,Number(x.cost_price)]));productCache=(data||[]).map(p=>({...p,cost_price:costMap.has(p.id)?costMap.get(p.id):null}));if(costError)el("productMessage").textContent="Products loaded; cost prices unavailable: "+costError.message;refreshManualProductOptions();const body=el("productsBody");body.replaceChildren();productCache.forEach(p=>{const tr=document.createElement("tr"),cost=Number(p.cost_price||0),selling=Number(p.price||0);[p.name,p.cost_price==null?"Not set":money(cost),money(selling),p.cost_price==null?"—":money(selling-cost),p.category||"—",p.stock_quantity].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td);});const stockCell=document.createElement("td"),stockBadge=document.createElement("span"),qty=Number(p.stock_quantity||0);stockBadge.className="pill";stockBadge.textContent=qty<=0?"OUT OF STOCK":qty<=3?"LOW STOCK":"IN STOCK";if(qty<=0){stockBadge.style.background="#fde8e7";stockBadge.style.color="#b42318";}else if(qty<=3){stockBadge.style.background="#fff2d8";stockBadge.style.color="#8a5700";}stockCell.append(stockBadge);tr.append(stockCell);[p.is_customisable?"Yes":"No",p.is_active?"Yes":"No"].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td);});const action=document.createElement("td"),edit=document.createElement("button");edit.className="btn light";edit.textContent="EDIT";edit.onclick=()=>editProduct(p.id);action.append(edit);tr.append(action);body.append(tr);});}
+function editProduct(id){const p=productCache.find(x=>x.id===id);if(!p)return;const f=el("productForm");["id","name","cost_price","price","category","image_url","description","stock_quantity"].forEach(k=>f.elements[k].value=p[k]??"");el("productImageFile").value="";if(p.image_url){el("productImagePreview").src=p.image_url;el("productImagePreview").classList.remove("hidden");}else{el("productImagePreview").src="";el("productImagePreview").classList.add("hidden");}updateProductProfitPreview();f.elements.is_customisable.checked=!!p.is_customisable;f.elements.is_active.checked=!!p.is_active;f.scrollIntoView({behavior:"smooth",block:"start"});}
+function resetProductForm(){el("productForm").reset();el("productForm").elements.id.value="";el("productForm").elements.stock_quantity.value=0;el("productForm").elements.is_active.checked=true;el("productImageFile").value="";el("productImagePreview").src="";el("productImagePreview").classList.add("hidden");el("productMessage").textContent="";updateProductProfitPreview();}
+function updateProductProfitPreview(){const f=el("productForm"),profit=Number(f.elements.price.value||0)-Number(f.elements.cost_price.value||0),box=el("productProfitPreview");box.replaceChildren();const strong=document.createElement("strong");strong.textContent=money(profit);strong.style.color=profit>=0?"#28784b":"#b42318";const note=document.createElement("span");note.className="muted";note.textContent=profit>=0?"Estimated profit per item":"Selling price is below cost price";box.append(strong,note);}
+el("productForm").elements.cost_price.addEventListener("input",updateProductProfitPreview);el("productForm").elements.price.addEventListener("input",updateProductProfitPreview);
+el("productImageFile").addEventListener("change",()=>{const file=el("productImageFile").files[0],preview=el("productImagePreview");if(!file){preview.src="";preview.classList.add("hidden");return;}if(!["image/jpeg","image/png","image/webp"].includes(file.type)){alert("Please choose a JPG, PNG or WEBP image.");el("productImageFile").value="";preview.src="";preview.classList.add("hidden");return;}if(file.size>5*1024*1024){alert("Please choose an image smaller than 5 MB.");el("productImageFile").value="";preview.src="";preview.classList.add("hidden");return;}preview.src=URL.createObjectURL(file);preview.classList.remove("hidden");});
+async function uploadProductPhoto(file){const extension=(file.name.split(".").pop()||"jpg").toLowerCase(),safeExtension=["jpg","jpeg","png","webp"].includes(extension)?extension:"jpg",path="products/"+crypto.randomUUID()+"."+safeExtension;const {error}=await sb.storage.from("Product -image").upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});if(error)throw new Error("Photo upload failed: "+error.message+". Check Product -image bucket and admin upload permission.");const {data}=sb.storage.from("Product -image").getPublicUrl(path);if(!data?.publicUrl)throw new Error("Photo uploaded, but public URL could not be generated. Check that Product -image is Public.");return data.publicUrl;}
+el("productForm").addEventListener("submit",async e=>{e.preventDefault();const f=e.target,id=f.elements.id.value,saveButton=f.querySelector('button[type="submit"]');saveButton.disabled=true;el("productMessage").textContent="Saving product...";try{let imageUrl=f.elements.image_url.value.trim()||null;const selectedPhoto=el("productImageFile").files[0];if(selectedPhoto){el("productMessage").textContent="Uploading product photo...";imageUrl=await uploadProductPhoto(selectedPhoto);}const payload={name:f.elements.name.value.trim(),price:Number(f.elements.price.value),category:f.elements.category.value.trim()||null,image_url:imageUrl,description:f.elements.description.value.trim()||null,stock_quantity:Number(f.elements.stock_quantity.value),is_customisable:f.elements.is_customisable.checked,is_active:f.elements.is_active.checked};const result=id?await sb.from("store_products").update(payload).eq("id",id).select("id").single():await sb.from("store_products").insert(payload).select("id").single();if(result.error)throw result.error;const productId=id||result.data.id;const {error:costError}=await sb.from("zyra_product_costs").upsert({product_id:productId,cost_price:Number(f.elements.cost_price.value)},{onConflict:"product_id"});if(costError)throw new Error("Product saved, but cost price could not be saved: "+costError.message);el("productMessage").textContent="Product, cost price, selling price and profit per item saved successfully. Refreshing the Sales & Profit report...";resetProductForm();await loadProducts();await loadOrders({quiet:true});el("productMessage").textContent="Saved successfully. Product profit per item and the Sales & Profit report have been refreshed using the latest saved cost price.";}catch(error){el("productMessage").textContent=error.message||String(error);}finally{saveButton.disabled=false;}});
+
+/* ZYRA PRE-ORDER, HOLIDAY AND COURIER MANAGEMENT (2026 UPDATE) */
+function zyraDateString(date){const d=new Date(date);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
+function zyraParseDate(value){if(!value)return null;const parts=String(value).slice(0,10).split("-").map(Number);if(parts.length!==3||parts.some(x=>!x))return null;return new Date(parts[0],parts[1]-1,parts[2],12,0,0);}
+function zyraAddBusinessDays(start,count){let d=zyraParseDate(start);if(!d)return null;let added=0;while(added<count){d.setDate(d.getDate()+1);const day=d.getDay(),key=zyraDateString(d);if(day!==0&&day!==6&&!zyraHolidayDates.has(key))added++;}return zyraDateString(d);}
+function zyraAddCalendarDays(start,count){const d=zyraParseDate(start);if(!d)return null;d.setDate(d.getDate()+count);return zyraDateString(d);}
+async function loadZyraHolidays(){zyraHolidayLoadError="";const {data,error}=await sb.from("zyra_holidays").select("holiday_date,holiday_name");if(error){zyraHolidayLoadError=error.message;zyraHolidayDates=new Set();console.warn("Holiday dates unavailable:",error.message);return false;}zyraHolidayDates=new Set((data||[]).map(x=>String(x.holiday_date).slice(0,10)));return true;}
+function preorderEstimate(confirmedAt){if(!confirmedAt)return null;if(zyraHolidayLoadError)return null;const start=zyraDateString(confirmedAt);return {from:zyraAddBusinessDays(start,15),to:zyraAddBusinessDays(start,21)};}
+function courierEstimate(method,handover){if(!handover)return null;const start=String(handover).slice(0,10);if(method==="Straightway Couriers")return {from:zyraAddCalendarDays(start,1),to:zyraAddCalendarDays(start,1),label:"1 calendar day"};if(method==="Royal Express")return {from:zyraAddCalendarDays(start,2),to:zyraAddCalendarDays(start,2),label:"2 calendar days"};if(method==="Speed Post"){if(zyraHolidayLoadError)return null;return {from:zyraAddBusinessDays(start,4),to:zyraAddBusinessDays(start,5),label:"4–5 working days"};}return null;}
+function displayDate(value){if(!value)return "Not set";const d=zyraParseDate(value);return d?d.toLocaleDateString("en-LK",{year:"numeric",month:"short",day:"numeric"}):String(value);}
+function createField(label,node){const wrap=document.createElement("div"),l=document.createElement("label");wrap.className="field";l.textContent=label;wrap.append(l,node);return wrap;}
+
+function renderOrders(orders){
+ const root=el("ordersList");root.replaceChildren();if(!orders.length){root.textContent="No store orders have been placed yet.";return;}
+ orders.forEach(order=>{
+  const card=document.createElement("article");card.className="order-card";const head=document.createElement("div");head.className="topline";const title=document.createElement("h3");title.textContent=(order.order_number||order.id)+" · "+(order.customer_name||"Customer");const total=document.createElement("strong");total.textContent=money(order.total_amount);head.append(title,total);card.append(head);
+  const info=document.createElement("p");info.className="muted";info.textContent=[order.phone||"",order.email||"No email",order.district||"",order.city||"",order.postal_code||"",order.payment_method||"",order.created_at?new Date(order.created_at).toLocaleString():""].filter(Boolean).join(" · ");card.append(info);
+  const address=document.createElement("p");address.textContent="Delivery address: "+[order.delivery_address,order.city,order.district,order.postal_code].filter(Boolean).join(", ");card.append(address);if(order.customer_notes){const note=document.createElement("p");note.textContent="Order notes: "+order.customer_notes;card.append(note);}
+  const items=order.store_order_items||[],itemBox=document.createElement("div");itemBox.style.margin="12px 0";if(!items.length)itemBox.textContent="No product items linked to this order.";else items.forEach(it=>{const line=document.createElement("div");line.className="itemline";line.textContent=`${it.product_name} × ${it.quantity} — ${money(Number(it.unit_price)*Number(it.quantity))}`;if(it.is_customised&&it.customisation_details)appendCustomisationDetails(line,it.customisation_details);itemBox.append(line);});card.append(itemBox);
+  const paymentBox=document.createElement("div");paymentBox.className="subpanel";const payTitle=document.createElement("strong");payTitle.textContent="Customer payment slip";paymentBox.append(payTitle);if(order.payment_slip_path){const p=document.createElement("p");p.className="muted";p.textContent=order.payment_slip_file_name||"Payment slip uploaded";paymentBox.append(p);const a=document.createElement("div");a.className="actions";const v=document.createElement("button");v.className="btn light";v.textContent="VIEW PAYMENT SLIP";v.onclick=()=>viewPaymentSlip(order.payment_slip_path,v);const d=document.createElement("button");d.className="btn secondary";d.textContent="DOWNLOAD PAYMENT SLIP";d.onclick=()=>downloadPaymentSlip(order.payment_slip_path,d,order.payment_slip_file_name);a.append(v,d);paymentBox.append(a);}else{const p=document.createElement("p");p.className="muted";p.textContent="No customer payment slip attached.";paymentBox.append(p);}card.append(paymentBox);
+  const track=trackingCache.get(order.id)||{};const box=document.createElement("div");box.className="subpanel";const heading=document.createElement("h3");heading.textContent="Pre-order preparation & courier management";box.append(heading);
+  const preGrid=document.createElement("div");preGrid.className="manual-grid";
+  const preStatus=makeSelect("Pre-order status",["pending","confirmed","processing","ready_for_dispatch","cancelled"],order.preorder_status||"pending");
+  const confirmDate=makeInput("Confirmation date (starts preparation estimate)",order.preorder_confirmed_at?String(order.preorder_confirmed_at).slice(0,10):"");confirmDate.input.type="date";
+  const readyFrom=makeInput("Estimated ready date — from",order.preorder_estimated_ready_from||"");readyFrom.input.type="date";
+  const readyTo=makeInput("Estimated ready date — to",order.preorder_estimated_ready_to||"");readyTo.input.type="date";
+  const actualReady=makeInput("Actual ready-for-dispatch date",order.actual_ready_for_dispatch_date||"");actualReady.input.type="date";
+  const prepInfo=document.createElement("p");prepInfo.className="muted";prepInfo.textContent=zyraHolidayLoadError?"Holiday calendar could not be loaded. Add/restore zyra_holidays access before generating estimates.":"Default preparation: 15–21 business days after confirmation, excluding weekends and dates in zyra_holidays. Estimated dates can be edited manually.";
+  [preStatus,confirmDate,readyFrom,readyTo,actualReady].forEach(x=>preGrid.append(x.wrap));box.append(preGrid,prepInfo);
+  const courierTitle=document.createElement("h3");courierTitle.textContent="Courier / delivery details";box.append(courierTitle);const grid=document.createElement("div");grid.className="manual-grid";
+  const method=makeSelect("Courier method / company",["Not selected","Straightway Couriers","Royal Express","Speed Post","Customer Pickup"],track.courier||track.courier_method||"Not selected");
+  const area=makeSelect("Delivery area",["Not selected","Colombo 1–15","Colombo suburbs","Outside Colombo"],track.delivery_area||"Not selected");
+  const reference=makeInput("Courier reference",track.courier_reference||"");const tracking=makeInput("Tracking number / ID",track.tracking_id||"");
+  const courierStatus=makeSelect("Courier delivery status",["Not dispatched","Handed over to courier","Dispatched","In transit","Delivered","Returned"],track.status||"Not dispatched");
+  const courierCost=makeInput("Actual courier cost paid by Zyra (LKR)",track.courier_cost??0);courierCost.input.type="number";courierCost.input.min="0";courierCost.input.step="0.01";
+  const customerFee=makeInput("Delivery charge to customer (LKR)",order.delivery_fee??0);customerFee.input.type="number";customerFee.input.min="0";customerFee.input.step="0.01";
+  const handover=makeInput("Courier handover date",track.handover_date||"");handover.input.type="date";
+  const courierEstimateDate=makeInput("Estimated courier delivery date (manual override)",track.courier_estimated_delivery_date||"");courierEstimateDate.input.type="date";
+  const estimatedText=makeInput("Estimated delivery note / range",track.estimated_delivery||"");
+  const location=makeInput("Current tracking location",track.location||"");const note=makeInput("Courier update / note",track.note||"");
+  [method,area,reference,tracking,courierStatus,courierCost,customerFee,handover,courierEstimateDate,estimatedText,location,note].forEach(x=>grid.append(x.wrap));box.append(grid);
+  const rate=document.createElement("button");rate.type="button";rate.className="btn light";rate.textContent="APPLY SUGGESTED CUSTOMER DELIVERY RATE";rate.onclick=()=>{const m=method.input.value,a=area.input.value;if(m==="Straightway Couriers"&&a==="Outside Colombo"){alert("Straightway Couriers does not deliver outside Colombo. Choose Royal Express or Speed Post.");return;}const n=deliveryRate(m,a);if(n===null){alert("Select a supported courier and delivery area first.");return;}customerFee.input.value=n;};
+  const estimateBtn=document.createElement("button");estimateBtn.type="button";estimateBtn.className="btn light";estimateBtn.textContent="CALCULATE DEFAULT ESTIMATES";estimateBtn.onclick=()=>{if(preStatus.input.value==="confirmed"&&!confirmDate.input.value)confirmDate.input.value=zyraDateString(new Date());if(confirmDate.input.value){const e=preorderEstimate(confirmDate.input.value);if(e){readyFrom.input.value=e.from;readyTo.input.value=e.to;}else alert("Could not calculate preparation dates. Check zyra_holidays access.");}if(handover.input.value){const e=courierEstimate(method.input.value,handover.input.value);if(e){courierEstimateDate.input.value=e.to;estimatedText.input.value=e.label+(e.from!==e.to?": "+e.from+" to "+e.to:" — "+e.to);}else if(method.input.value==="Customer Pickup")estimatedText.input.value="Customer pickup — no courier estimate";else alert("Could not calculate courier estimate. Check holiday dates for Speed Post.");}};
+  const save=document.createElement("button");save.type="button";save.className="btn";save.textContent="SAVE PRE-ORDER & COURIER DETAILS";save.onclick=()=>saveZyraOrderDetails(order.id,{preorder_status:preStatus.input.value,preorder_confirmed_at:confirmDate.input.value||null,preorder_estimated_ready_from:readyFrom.input.value||null,preorder_estimated_ready_to:readyTo.input.value||null,actual_ready_for_dispatch_date:actualReady.input.value||null,courier:method.input.value==="Not selected"?"Not assigned":method.input.value,delivery_area:area.input.value==="Not selected"?null:area.input.value,courier_reference:reference.input.value.trim()||null,tracking_id:tracking.input.value.trim(),status:courierStatus.input.value,courier_cost:Number(courierCost.input.value||0),customer_delivery_fee:Number(customerFee.input.value||0),handover_date:handover.input.value||null,courier_estimated_delivery_date:courierEstimateDate.input.value||null,estimated_delivery:estimatedText.input.value.trim()||null,location:location.input.value.trim()||null,note:note.input.value.trim()||null},save);
+  box.append(rate,estimateBtn,save);const msg=document.createElement("p");msg.className="message";box.append(msg);card.append(box);
+  const actions=document.createElement("div");actions.className="actions";const orderStatus=makeSelect("Order status",["pending","confirmed","processing","shipped","dispatched","in_transit","out_for_delivery","delivered","cancelled"],order.order_status||"pending");const update=document.createElement("button");update.className="btn";update.textContent="UPDATE ORDER STATUS";update.onclick=()=>updateOrderStatus(order.id,orderStatus.input.value,update);const invoice=document.createElement("button");invoice.className="btn secondary";invoice.textContent="PRINT INVOICE";invoice.onclick=()=>printInvoice(order,track);const pdf=document.createElement("button");pdf.className="btn secondary";pdf.textContent="DOWNLOAD PDF INVOICE";pdf.onclick=()=>downloadInvoicePDF(order,track);const del=document.createElement("button");del.className="btn danger";del.textContent="DELETE ORDER";del.onclick=()=>deleteOrder(order.id,order.order_number||order.id,del);actions.append(orderStatus.wrap,update,invoice,pdf,del);card.append(actions);root.append(card);
+ });
+}
+async function saveZyraOrderDetails(id,d,button){
+ button.disabled=true;const old=button.textContent;button.textContent="SAVING...";
+ try{
+  if(d.courier==="Straightway Couriers"&&d.delivery_area==="Outside Colombo")throw new Error("Straightway Couriers is only available for Colombo 1–15 and Colombo suburbs.");
+  for(const k of ["courier_cost","customer_delivery_fee"])if(!Number.isFinite(d[k])||d[k]<0)throw new Error("Courier cost and customer delivery fee must be valid non-negative amounts.");
+  const current=orderCache.find(x=>x.id===id);if(!current)throw new Error("Order is no longer in the loaded order list.");
+  let confirmed=d.preorder_confirmed_at;if(d.preorder_status==="confirmed"&&!confirmed)confirmed=zyraDateString(new Date());
+  if(d.preorder_status==="confirmed"&&!d.preorder_estimated_ready_from&&!d.preorder_estimated_ready_to){const est=preorderEstimate(confirmed);if(est){d.preorder_estimated_ready_from=est.from;d.preorder_estimated_ready_to=est.to;}}
+  const preorder={preorder_status:d.preorder_status,preorder_confirmed_at:confirmed?new Date(confirmed+"T12:00:00").toISOString():null,preorder_estimated_ready_from:d.preorder_estimated_ready_from,preorder_estimated_ready_to:d.preorder_estimated_ready_to,actual_ready_for_dispatch_date:d.actual_ready_for_dispatch_date};
+  const upd=await sb.from("store_orders").update(preorder).eq("id",id).select("id");if(upd.error)throw new Error("Pre-order details could not be saved: "+upd.error.message);if(!upd.data?.length)throw new Error("No pre-order fields were updated. Check store_orders UPDATE permissions.");
+  const {data:oldTrack,error:findError}=await sb.from("zyra_orders").select("tracking_id,store_order_id").eq("store_order_id",id).maybeSingle();if(findError)throw findError;
+  const payload={store_order_id:id,tracking_id:d.tracking_id||oldTrack?.tracking_id||("ZYRA-"+String(id).slice(0,8).toUpperCase()),courier:d.courier||"Not assigned",courier_reference:d.courier_reference,status:d.status||"Not dispatched",location:d.location,note:d.note,estimated_delivery:d.estimated_delivery,delivery_area:d.delivery_area,courier_cost:d.courier_cost,handover_date:d.handover_date,courier_estimated_delivery_date:d.courier_estimated_delivery_date,updated_at:new Date().toISOString()};
+  const tr=oldTrack?await sb.from("zyra_orders").update(payload).eq("store_order_id",id).select("store_order_id"):await sb.from("zyra_orders").insert({...payload,customer_name:current.customer_name||"Customer"}).select("store_order_id");if(tr.error)throw new Error("Courier details could not be saved: "+tr.error.message);if(!tr.data?.length)throw new Error("No courier record was saved.");
+  const subtotal=Number(current.subtotal_amount??(Number(current.total_amount||0)-Number(current.delivery_fee||0)+Number(current.discount_amount||0))),discount=Number(current.discount_amount||0),fee=d.customer_delivery_fee;const feeUpdate=await sb.from("store_orders").update({delivery_fee:fee,total_amount:subtotal-discount+fee}).eq("id",id).select("id");if(feeUpdate.error)throw new Error("Courier saved, but customer delivery charge was not updated: "+feeUpdate.error.message);
+  await loadOrders();alert("Pre-order and courier details saved successfully.");return true;
+ }catch(e){alert("Could not save order details: "+(e.message||String(e)));return false;}finally{button.disabled=false;button.textContent=old;}
+}
+
+setManualOrderDate();addManualItem();resetExpenseForm();
+sb.auth.onAuthStateChange((_event,session)=>{if(!session)showDashboard(false);});checkSession();
+</script></body></html>
