@@ -1528,8 +1528,16 @@ function cancelManualEdit(){
  showMessage("manualMessage","Edit cancelled.");
 }
 
+
 function getManualOrderPayload(){
  const f=el("manualOrderForm");
+
+ const selectedPayment=f.elements.payment_method.value.trim();
+
+ const paymentMethod=
+  selectedPayment==="Cash on Delivery"
+   ?"COD"
+   :selectedPayment;
 
  return{
   order_number:f.elements.order_number.value.trim(),
@@ -1540,7 +1548,7 @@ function getManualOrderPayload(){
   city:f.elements.city.value.trim(),
   postal_code:f.elements.postal_code.value.trim()||null,
   delivery_address:f.elements.delivery_address.value.trim(),
-  payment_method:f.elements.payment_method.value.trim(),
+  payment_method:paymentMethod,
   payment_status:f.elements.payment_status.value,
   order_status:f.elements.order_status.value,
   customer_notes:f.elements.customer_notes.value.trim()||null,
@@ -1552,6 +1560,7 @@ function getManualOrderPayload(){
    :new Date().toISOString()
  };
 }
+
 
 function getManualItemPayload(){
  return zyraManualItems.map(item=>({
