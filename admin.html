@@ -261,13 +261,123 @@ function showAdminSection(page,button){
 
 }
 
-function showDashboard(show){el("loginPanel").classList.toggle("hidden",show);el("dashboard").classList.toggle("hidden",!show);el("logoutBtn").classList.toggle("hidden",!show);if(show)showAdminSection("overview");}
 
-async function checkSession(){const {data,error}=await sb.auth.getSession();if(error){el("loginMessage").textContent=error.message;return;}if(data.session){showDashboard(true);await refreshAll();}else showDashboard(false);}
+function showDashboard(show){
+  el("loginPanel").classList.toggle("hidden",show);
+  el("dashboard").classList.toggle("hidden",!show);
+  el("logoutBtn").classList.toggle("hidden",!show);
 
-el("loginForm").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.target);el("loginMessage").textContent="Signing in...";const {error}=await sb.auth.signInWithPassword({email:f.get("email"),password:f.get("password")});if(error){el("loginMessage").textContent=error.message;return;}el("loginMessage").textContent="";showDashboard(true);await refreshAll();});
+  if(show){
+    showAdminSection("overview");
+  }
+}
 
-async function logout(){await sb.auth.signOut();showDashboard(false);}
+async function checkSession(){
+  try{
+    const {data,error}=await sb.auth.getSession();
+
+    if(error) throw error;
+
+    if(data.session){
+      showDashboard(true);
+      await refreshAll();
+    }else{
+      showDashboard(false);
+    }
+  }catch(error){
+    console.error("Session check failed:",error);
+    showDashboard(false);
+    el("loginMessage").textContent=
+      "Could not check login session: "+error.message;
+  }
+}
+
+el("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+
+  const form=e.target;
+  const button=form.querySelector('button[type="submit"]');
+  const values=new FormData(form);
+
+  button.disabled=true;
+  button.textContent="SIGNING IN...";
+  el("loginMessage").textContent="Verifying your account...";
+
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({
+      email:values.get("email"),
+      password:values.get("password")
+    });
+
+    if(error) throw error;
+    if(!data.session) throw new Error("No active login session was returned.");
+
+    el("loginMessage").textContent="Login successful. Loading dashboard...";
+    showDashboard(true);
+
+    await refreshAll();
+
+    el("loginMessage").textContent="";
+  }catch(error){
+    console.error("Zyra login/dashboard error:",error);
+
+    showDashboard(false);
+
+    el("loginMessage").textContent=
+      "Login or dashboard loading failed: "+error.message;
+  }finally{
+    button.disabled=false;
+    button.textContent="SIGN IN";
+  }
+});
+
+async function logout(){
+  try{
+    const {error}=await sb.auth.signOut();
+    if(error) throw error;
+
+    showDashboard(false);
+    el("loginMessage").textContent="You have signed out.";
+  }catch(error){
+    console.error("Logout failed:",error);
+    alert("Logout failed: "+error.message);
+  }
+}
+
+async function refreshAll(){
+  const results=await Promise.allSettled([
+    loadZyraHolidays(),
+    loadOrders(),
+    loadProducts(),
+    loadExpenses()
+  ]);
+
+  const names=[
+    "Holiday calendar",
+    "Orders",
+    "Products",
+    "Expenses"
+  ];
+
+  const failures=results
+    .map((result,index)=>({
+      result,
+      name:names[index]
+    }))
+    .filter(item=>item.result.status==="rejected");
+
+  if(failures.length){
+    const message=failures.map(item=>
+      item.name+": "+item.result.reason.message
+    ).join("\n");
+
+    console.error("Dashboard loading errors:",message);
+
+    el("ordersMessage").textContent=
+      "Some dashboard information could not load:\n"+message;
+  }
+}
+
 
 async function refreshAll(){await loadZyraHolidays();await Promise.all([loadOrders(),loadProducts(),loadExpenses()]);}
 
